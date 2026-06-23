@@ -31,6 +31,11 @@ Here are the goals that are now defined for this project in order:
 
 [-] Make a basic working skeleton (Define core project structure, add the essential types
    for simply booting the server project)
+   [-] Implement proper 'Collection' layer
+   [-] Implement basic metrics computations
+   [-] Add logging
+   [-] Add exception handling for background services
+   [-] Prepare 'Commands' layer for the second goal
    
 [-] Add a cli client (Create a separate C# Console App for interacting with the server
    in a simpler way)
