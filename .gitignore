@@ -1,2 +1,2 @@
-Source/ProcessMonitor.Backend/bin
-Source/ProcessMonitor.Backend/obj
+Source/*/bin
+Source/*/obj
