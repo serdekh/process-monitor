@@ -25,6 +25,8 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher
         if (!ct.IsCancellationRequested)
         {
             var bytes = _serializer.Serialize<ProcessMetricsSnapshot>(snapshot);
+            
+            Console.WriteLine(bytes);
 
             await _transport.SendAsync(bytes, ct);
         }
