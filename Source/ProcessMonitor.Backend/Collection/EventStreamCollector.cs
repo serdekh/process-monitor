@@ -3,12 +3,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Channels;
 
+using Microsoft.Diagnostics.Tracing.Parsers;
+using Microsoft.Diagnostics.Tracing.Session;
+
 using ProcessMonitor.Backend.Models;
 
 namespace ProcessMonitor.Backend.Collection;
 
 public sealed class EventStreamCollector : IEventCollector
 {
+    public static string SessionName { get; } = "ProcessMonitor.Backend.TraceEventSession";
+
     private ChannelWriter<RawKernelEvent> _writer;
 
     public EventStreamCollector(Channel<RawKernelEvent> input)
@@ -16,22 +21,62 @@ public sealed class EventStreamCollector : IEventCollector
         _writer = input.Writer;
     }
 
-    // TODO: Replace hardcoded raw kernel event creation with
-    // real ETW session that subscribes to kernel provider
+    // TODO: Add proper logging
     public async Task RunAsync(CancellationToken ct)
     {
-        while (!ct.IsCancellationRequested)
+        if (TraceEventSession.IsElevated() != true)
         {
-            await _writer.WriteAsync(new RawKernelEvent
-            {
-                ProcessId = 1234,
-                EventName = "Temp",
-                Timestamp = DateTime.UtcNow 
-            });
-
-            await Task.Delay(1000, ct);
+            Console.WriteLine("error: could only run as administrator.");
+            return;
         }
 
-        // TODO: log exiting when cancellation is requested.
+        using (var oldSession = new TraceEventSession(SessionName))
+        {
+            oldSession.Stop();
+        }
+
+        using (var session = new TraceEventSession(SessionName))
+        {
+            session.EnableKernelProvider(KernelTraceEventParser.Keywords.Process);
+
+            session.Source.Kernel.ProcessStart += data => 
+            {
+                var rawKernelEvent = new RawKernelEvent
+                {
+                    ProcessId = data.ProcessID,
+                    EventName = data.EventName
+                };
+
+                _writer.TryWrite(rawKernelEvent);
+            };
+
+            session.Source.Kernel.ProcessStop += data => 
+            {
+                var rawKernelEvent = new RawKernelEvent
+                {
+                    ProcessId = data.ProcessID,
+                    EventName = data.EventName
+                };
+
+                _writer.TryWrite(rawKernelEvent);
+            };
+            
+            var collecting = Task.Run(() => session.Source.Process(), CancellationToken.None);
+
+            try 
+            {
+                await Task.Delay(Timeout.Infinite, ct);
+            } 
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("info: cancellation requested. Stopping collection");
+            }            
+
+            session.Stop();
+
+            await collecting;
+
+            Console.WriteLine("info: collection stopped");
+        }
     }
 }
