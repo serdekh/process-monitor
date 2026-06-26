@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Threading.Channels;
 
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +27,11 @@ internal class Program
         builder.Services.AddSingleton<MonitoringSessionState>();
         builder.Services.AddSingleton(Channel.CreateUnbounded<RawKernelEvent>());
         builder.Services.AddSingleton(Channel.CreateUnbounded<ProcessMetricsSnapshot>());
+        
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+        builder.Logging.AddDebug();
+
         builder.Services.AddSingleton<
             IMessageSerializer, 
             JsonMessageSerializer>();
