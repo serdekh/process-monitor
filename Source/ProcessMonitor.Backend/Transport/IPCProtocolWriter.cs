@@ -1,4 +1,26 @@
+using System;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace ProcessMonitor.Backend.Transport;
 
-// TODO: Implement class as soon as skeleton prototype is finished
-public sealed class IPCProtocolWriter;
+public sealed class IPCProtocolWriter
+{
+    private Stream _stream;
+
+    public IPCProtocolWriter(Stream stream)
+    {
+        _stream = stream;
+    }
+
+    public async Task WriteAsync(byte[] data, CancellationToken ct)
+    {
+        var length = BitConverter.GetBytes(data.Length);
+
+        await _stream.WriteAsync(length, ct);
+        await _stream.WriteAsync(data, ct);
+        await _stream.FlushAsync(ct);
+    }
+}
