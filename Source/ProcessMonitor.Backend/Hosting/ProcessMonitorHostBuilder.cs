@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Commands;
 using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
@@ -18,10 +19,8 @@ namespace ProcessMonitor.Backend.Hosting;
 
 public static class ProcessMonitorHostBuilder
 {
-    // what is this interface
     public static HostApplicationBuilder Create(string[] args)
     { 
-        // what is that method
         var builder = Host.CreateApplicationBuilder(args);
 
         ConfigureLogging(builder.Logging);
@@ -30,7 +29,6 @@ public static class ProcessMonitorHostBuilder
         return builder;
     }
 
-    // what is that interface
     private static void ConfigureLogging(ILoggingBuilder logging)
     {
         logging.ClearProviders();
@@ -40,7 +38,6 @@ public static class ProcessMonitorHostBuilder
         logging.AddDebug();
     }
 
-    // what is that interface
     private static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<MonitoringSessionState>();
@@ -57,9 +54,15 @@ public static class ProcessMonitorHostBuilder
         services.AddSingleton<EventMetricsEngine>();
 
         services.AddSingleton<IMetricsPublisher, IPCMetricsPublisher>();
+        
+        services.AddSingleton<CommandController>();
+        services.AddSingleton<ICommandTransport, CommandTransport>();
+        services.AddSingleton<CommandRouter>();
+        services.AddSingleton<CommandRegistry>();
 
         services.AddHostedService<CollectorHostedService>();
         services.AddHostedService<EngineHostedService>();
         services.AddHostedService<PublisherHostedService>();
+        services.AddHostedService<CommandListenerHostedService>();
     }
 } 
