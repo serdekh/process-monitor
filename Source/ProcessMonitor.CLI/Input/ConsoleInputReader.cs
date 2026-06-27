@@ -1,8 +1,11 @@
 using System;
+
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+
+using ProcessMonitor.CLI.Transport;
 
 namespace ProcessMonitor.CLI.Input;
 
@@ -29,9 +32,11 @@ public sealed class Command
 
 public sealed class ConsoleInputReader
 {
-    Dictionary<string, CommandType> _map;
+    private CommandPipeClient _client;
 
-    public ConsoleInputReader()
+    private Dictionary<string, CommandType> _map;
+
+    public ConsoleInputReader(string backendFilePath)
     {
         _map = new Dictionary<string, CommandType>()
         {
@@ -41,6 +46,8 @@ public sealed class ConsoleInputReader
             ["exit"] = CommandType.Exit,
             ["q"] = CommandType.Exit,
         };
+  
+        _client = new CommandPipeClient(backendFilePath);
     }
 
     private async Task<string[]?> LexInput()
@@ -119,11 +126,16 @@ public sealed class ConsoleInputReader
                 PrintUsage();
                 return;
             case CommandType.Create:
-                Console.WriteLine("Not implemented - a backend process should be created");
+                if (_client.IsConnected) return;
+
+                _ = Task.Run(async () => 
+                {
+                    await _client.ConnectAsync();
+                    await _client.Write();
+                });
                 return;
             case CommandType.Exit:
-                Debug.Assert(command.Args is not null); 
-                
+                Debug.Assert(command.Args is not null);                 
                 Environment.Exit((int)command.Args[0]);
                 return;
         }
