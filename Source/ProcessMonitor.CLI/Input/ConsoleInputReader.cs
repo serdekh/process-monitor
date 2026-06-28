@@ -131,7 +131,6 @@ public sealed class ConsoleInputReader
                 _ = Task.Run(async () => 
                 {
                     await _client.ConnectAsync();
-                    await _client.Write();
                 });
                 return;
             case CommandType.Exit:
