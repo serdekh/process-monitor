@@ -15,9 +15,15 @@ public sealed class CommandPipeClient : IDisposable
 
     public ProcessStartInfo BackendStartInfo { get; set; }
 
-    public bool IsConnected { get; private set; } = false;
-
     private NamedPipeClientStream? _client = null;
+
+    public bool IsConnected 
+    { 
+        get
+        {
+            return _client is null ? false : _client.IsConnected;
+        } 
+    }
 
     public CommandPipeClient(string backendFilePath)
     {
@@ -32,7 +38,6 @@ public sealed class CommandPipeClient : IDisposable
     public void CleanupConnection()
     {
         _client?.Dispose(); _client = null;
-        IsConnected = false;
     }
 
     public void Dispose()
@@ -105,7 +110,6 @@ public sealed class CommandPipeClient : IDisposable
             {
                 await _client.ConnectAsync();
                 Console.WriteLine("procmon: info:  Connected to the `Commands` pipe");
-                IsConnected = true;
             }
             catch (InvalidOperationException ) 
             {
@@ -123,10 +127,6 @@ public sealed class CommandPipeClient : IDisposable
            Console.WriteLine(e);
            Console.WriteLine("procmon: error: fatal");
            return;
-        }
-        finally 
-        {
-            IsConnected = false;
         }
     }
 }
