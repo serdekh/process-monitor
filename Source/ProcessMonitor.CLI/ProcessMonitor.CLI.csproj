@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProcessMonitor.Contracts\ProcessMonitor.Contracts.csproj" />
+    <ProjectReference Include="..\ProcessMonitor.Backend\ProcessMonitor.Backend.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
