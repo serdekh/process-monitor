@@ -23,11 +23,21 @@ public sealed class CommandPipeClient : IDisposable
 
     private IMessageSerializer _serializer;
 
+    private Process? _backendInstance = null;
+
+    public bool IsBackendInstanceCreated
+    {
+        get
+        {
+            return _backendInstance is not null;
+        }
+    }
+
     public bool IsConnected 
     { 
         get
         {
-            return _client is null ? false : _client.IsConnected;
+            return _client?.IsConnected ?? false;
         } 
     }
 
@@ -83,14 +93,12 @@ public sealed class CommandPipeClient : IDisposable
     {
         try
         {
-            var process = Process.Start(BackendStartInfo);
+            _backendInstance = Process.Start(BackendStartInfo);
             
-            if (process is null)
+            if (_backendInstance is null)
             {
                 Console.WriteLine("procmon: error: Could not start the backend process.");
             }
-
-            return process is null;
         }
         catch (Win32Exception)
         {
@@ -109,15 +117,15 @@ public sealed class CommandPipeClient : IDisposable
             Console.WriteLine("procmon: error: No process startup information was provided.");
         }
         catch (InvalidOperationException)
-	    {
-	        Console.WriteLine("procmon: error: No file name was provided or stream redirection failed.");
-	    }	 
+	{
+	    Console.WriteLine("procmon: error: No file name was provided or stream redirection failed.");
+	}	 
         catch (Exception)
         {
             Console.WriteLine("procmon: error: Unknown error.");
         }
 
-        return false;
+        return _backendInstance is not null;
     }
  
     private bool TryCreateClientStream()
@@ -136,11 +144,11 @@ public sealed class CommandPipeClient : IDisposable
 
         Console.WriteLine("procmon: info: Created the `Commands` pipe client.");
         return true;
-     }
+    }
    
     public async Task<bool> ConnectAsync()
     {
-        if (_client is not null) CleanupConnection();
+        if (IsBackendInstanceCreated || IsConnected) return true;
 
         if (!TryCreateBackendProcess()) return false; 
 
@@ -150,9 +158,11 @@ public sealed class CommandPipeClient : IDisposable
         { 
             if (_client is null) return false;
 
+            Console.WriteLine("procmon: info: trying to connect to the `Commands` pipe.");
+            
             await _client.ConnectAsync();
                 
-            Console.WriteLine("procmon: info:  Connected to the `Commands` pipe");
+            Console.WriteLine("procmon: info: Connected to the `Commands` pipe.");
         }
         catch (InvalidOperationException) 
         {
