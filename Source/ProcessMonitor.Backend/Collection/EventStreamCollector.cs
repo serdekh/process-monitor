@@ -29,17 +29,15 @@ public sealed class EventStreamCollector : IEventCollector
     {
         if (TraceEventSession.IsElevated() != true)
         {
-            _logger.LogError("Could only run as administrator.");
+            _logger.LogError("Collection: Could only run as administrator.");
             return;
         }
 
         using (var oldSession = new TraceEventSession(SessionName))
         {
-            _logger.LogDebug("Stopping previously created {sessionName} session", SessionName);
+            _logger.LogDebug("Collection: Stopping previously created {sessionName} session", SessionName);
             oldSession.Stop();
         }
-
-        _logger.LogInformation("Collection: Initializing...");
 
         using var session = new TraceEventSession(SessionName);
         
@@ -67,9 +65,11 @@ public sealed class EventStreamCollector : IEventCollector
             _writer.TryWrite(rawKernelEvent);
         };
         
-        _logger.LogInformation("Collection: Running.");
-
-        var collecting = Task.Run(() => session.Source.Process(), CancellationToken.None);
+        var collecting = Task.Run(() => 
+        {
+            _logger.LogInformation("Collection: Start event listening.");
+            session.Source.Process();
+        });
 
         try 
         {
@@ -91,6 +91,6 @@ public sealed class EventStreamCollector : IEventCollector
 
         await collecting;
 
-        _logger.LogInformation("Collection: finalizing...");
+        _logger.LogInformation("Collection: Stop event listening.");
     }
 }
