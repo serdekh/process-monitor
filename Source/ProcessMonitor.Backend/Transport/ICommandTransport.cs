@@ -10,4 +10,6 @@ public interface ICommandTransport
     Task SendAsync(byte[] data, CancellationToken ct);
 
     Task InitializeAsync(CancellationToken ct);
+
+    void Deinitialize();
 }
