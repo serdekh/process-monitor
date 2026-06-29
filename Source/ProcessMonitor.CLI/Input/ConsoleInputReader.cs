@@ -115,7 +115,7 @@ public sealed class ConsoleInputReader
 
     // Note: this method assumes the input arguments are
     // valid since they're handled by the BuildCommandToken method
-    private void RunCommand(Command command)
+    private async Task RunCommand(Command command)
     {
         switch (command.Operation)
         {
@@ -128,10 +128,8 @@ public sealed class ConsoleInputReader
             case CommandType.Create:
                 if (_client.IsConnected) return;
 
-                _ = Task.Run(async () => 
-                {
-                    await _client.ConnectAsync();
-                });
+                await _client.ConnectAsync();
+               
                 return;
             case CommandType.Exit:
                 Debug.Assert(command.Args is not null);                 
@@ -150,7 +148,7 @@ public sealed class ConsoleInputReader
 
             if (command is null) continue;
 
-            RunCommand(command);
+            await RunCommand(command);
         }    
     }
 }
