@@ -30,7 +30,12 @@ public class CommandTransport : ICommandTransport
 
     public async Task InitializeAsync(CancellationToken ct)
     {
-        await _pipe.WaitForConnectionAsync();
+        await _pipe.WaitForConnectionAsync(ct);
+    }
+
+    public void Deinitialize()
+    {
+        _pipe.Disconnect();
     }
 
     public async Task<byte[]?> ReceiveAsync(CancellationToken ct)
