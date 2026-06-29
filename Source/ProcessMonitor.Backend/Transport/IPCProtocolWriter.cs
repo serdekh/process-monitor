@@ -17,6 +17,8 @@ public sealed class IPCProtocolWriter
 
     public async Task WriteAsync(byte[] data, CancellationToken ct)
     {
+        if (ct.IsCancellationRequested) return;
+
         var length = BitConverter.GetBytes(data.Length);
 
         await _stream.WriteAsync(length, ct);
