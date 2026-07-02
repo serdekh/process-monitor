@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.ComponentModel;
 
+using ProcessMonitor.CLI.Common;
+
 // TODO: Extract the serialization code into a the contracts project
 // since it is being used by both the server and the client. Consider
 // renaming the contracts project to shared.
@@ -17,19 +19,17 @@ namespace ProcessMonitor.CLI.Transport;
 
 public sealed class CommandPipeClient : IDisposable
 {
-    public ProcessStartInfo BackendStartInfo { get; set; }
-
     private NamedPipeClientStream? _client = null;
 
     private IMessageSerializer _serializer;
 
-    private Process? _backendInstance = null;
+    private BackendProcess _backend;
 
     public bool IsBackendInstanceCreated
     {
         get
         {
-            return _backendInstance is not null;
+            return _backend.IsCreated;
         }
     }
 
@@ -43,12 +43,7 @@ public sealed class CommandPipeClient : IDisposable
 
     public CommandPipeClient(string backendFilePath, IMessageSerializer? serializer = null)
     {
-        BackendStartInfo = new ProcessStartInfo
-        {
-            FileName = backendFilePath,
-            UseShellExecute = true
-        };
-
+        _backend = new BackendProcess(backendFilePath);       
         _serializer = serializer is null ? new JsonMessageSerializer() : serializer;
     }
     
@@ -88,45 +83,6 @@ public sealed class CommandPipeClient : IDisposable
             Console.WriteLine("procmon: error: could not write a request to the `Commands` pipe.");
         }
     }
-
-    private bool TryCreateBackendProcess()
-    {
-        try
-        {
-            _backendInstance = Process.Start(BackendStartInfo);
-            
-            if (_backendInstance is null)
-            {
-                Console.WriteLine("procmon: error: Could not start the backend process.");
-            }
-        }
-        catch (Win32Exception)
-        {
-            Console.WriteLine("procmon: error: The file was not found, access was denied or executable was corruputed.");
-        }       
-        catch (FileNotFoundException)
-        {
-            Console.WriteLine($"procmon: error: Could not find the file at {BackendStartInfo.FileName}.");
-        }
-        catch (ObjectDisposedException)
-        {
-            Console.WriteLine("procmon: error: Could not start a process that has already been disposed.");
-        }
-        catch (ArgumentNullException)
-        {
-            Console.WriteLine("procmon: error: No process startup information was provided.");
-        }
-        catch (InvalidOperationException)
-	{
-	    Console.WriteLine("procmon: error: No file name was provided or stream redirection failed.");
-	}	 
-        catch (Exception)
-        {
-            Console.WriteLine("procmon: error: Unknown error.");
-        }
-
-        return _backendInstance is not null;
-    }
  
     private bool TryCreateClientStream()
     {
@@ -150,7 +106,7 @@ public sealed class CommandPipeClient : IDisposable
     {
         if (IsBackendInstanceCreated || IsConnected) return true;
 
-        if (!TryCreateBackendProcess()) return false; 
+        if (!_backend.Create()) return false; 
 
         if (!TryCreateClientStream()) return false;
 
