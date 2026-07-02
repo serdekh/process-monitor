@@ -126,10 +126,7 @@ public sealed class ConsoleInputReader
                 PrintUsage();
                 return;
             case CommandType.Create:
-                if (_client.IsConnected) return;
-
                 await _client.ConnectAsync();
-               
                 return;
             case CommandType.Exit:
                 Debug.Assert(command.Args is not null);                 
