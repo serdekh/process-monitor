@@ -36,6 +36,7 @@ public class CommandTransport : ICommandTransport
     public void Deinitialize()
     {
         _pipe.Disconnect();
+        _pipe.Dispose();
     }
 
     public async Task<byte[]?> ReceiveAsync(CancellationToken ct)
