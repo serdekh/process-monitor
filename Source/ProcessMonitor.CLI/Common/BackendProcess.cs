@@ -22,6 +22,18 @@ public sealed class BackendProcess : IDisposable
         } 
     } 
 
+    public bool HasExited
+    {
+        get
+        {
+            if (_backend is null) return false;
+
+            _backend.Refresh();
+
+            return _backend.HasExited;
+        }
+    }
+
     public bool IsCreated 
     { 
         get
@@ -49,13 +61,30 @@ public sealed class BackendProcess : IDisposable
 
     public bool Create()
     {
-        if (_backend is not null) return true;
+        if (_backend is not null)
+        {
+            if (HasExited)
+            {
+                _backend.Dispose();
+                _backend = null;
+            }
+            else
+            {
+                Console.WriteLine("- Attempt to create an existing process: ignore");
+                return true;
+            }
+        }
 
         _error = null;
 
         try
         {
             _backend = Process.Start(_startInfo);
+   
+            if (_backend is not null)
+            {
+                _backend.EnableRaisingEvents = true;
+            }
         }
         catch (Exception ex)
         {
@@ -87,6 +116,7 @@ public sealed class BackendProcess : IDisposable
 
         _backend.Kill();
         _backend.WaitForExit();
+        _backend = null;
     }
 
     public void Dispose()
