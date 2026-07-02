@@ -49,6 +49,7 @@ public sealed class CommandPipeClient : IDisposable
     
     public void CleanupConnection()
     {
+        _backend.Kill();
         _client?.Dispose(); _client = null;
         Console.WriteLine("procmon: info: The current client got disconnected.");
     }
@@ -86,6 +87,8 @@ public sealed class CommandPipeClient : IDisposable
  
     private bool TryCreateClientStream()
     {
+        if (_client is not null) return true;
+
         _client = new NamedPipeClientStream(
             ".", 
             "ProcessMonitor.Pipes.Commands", 
@@ -104,9 +107,11 @@ public sealed class CommandPipeClient : IDisposable
    
     public async Task<bool> ConnectAsync()
     {
-        if (IsBackendInstanceCreated || IsConnected) return true;
-
-        if (!_backend.Create()) return false; 
+        if (!_backend.Create()) 
+        {
+            Console.WriteLine($"procmon: error: {_backend.GetErrorString()}.");
+            return false; 
+        }
 
         if (!TryCreateClientStream()) return false;
 
