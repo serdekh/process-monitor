@@ -55,7 +55,8 @@ public sealed class BackendProcess : IDisposable
         _startInfo = new ProcessStartInfo
         {
             FileName = path,
-            UseShellExecute = true
+            UseShellExecute = true,
+            Verb = "runas"
         };
     }
 

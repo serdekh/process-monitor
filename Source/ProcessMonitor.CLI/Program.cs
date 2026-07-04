@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ProcessMonitor.CLI.Input;
@@ -10,6 +11,7 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
+        // I know that this is supermega funny but I'm to lazy to remove this into a command parsing logic
         var path = "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.Backend\\bin\\Debug\\net9.0\\ProcessMonitor.Backend.exe";
       
         var argsParser = new CommandLineParser();
@@ -28,6 +30,10 @@ internal class Program
       
         var reader = new ConsoleInputReader(path);
 
-        await reader.ReadAsync();
+        using var cts = new CancellationTokenSource();
+
+        var ct = cts.Token;
+
+        await reader.ReadAsync(ct);
     }
 }

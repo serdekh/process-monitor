@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ public sealed class ConsoleInputReader
 {
     private CommandPipeClient _client;
 
-    private Dictionary<string, CommandType> _map;
+    private readonly Dictionary<string, CommandType> _map;
 
     public ConsoleInputReader(string backendFilePath)
     {
@@ -48,9 +49,15 @@ public sealed class ConsoleInputReader
         _client = new CommandPipeClient(backendFilePath);
     }
 
-    private async Task<string[]?> LexInput()
+    private async Task<string[]?> LexInput(CancellationToken ct)
     {
-        string? input = await Task.Run(() => Console.ReadLine());
+        if (ct.IsCancellationRequested)
+        {
+            Console.WriteLine("procmon: Could not parse input string: cancellation requested.");
+            return null;
+        }
+
+        string? input = await Task.Run(() => Console.ReadLine(), ct);
 
         if (string.IsNullOrWhiteSpace(input)) return null;
 
@@ -60,15 +67,23 @@ public sealed class ConsoleInputReader
     }
 
     // TODO: handle errors using logging
-    private async Task<Command?> BuildCommandToken()
+    private async Task<Command?> BuildCommandToken(CancellationToken ct)
     {
-        var tokens = await LexInput();
+        if (ct.IsCancellationRequested)
+        {
+            Console.WriteLine("procmon: info: Could not parse a command: cancellation requested.");
+            return null;    
+        }
+
+        var tokens = await LexInput(ct);
 
         if (tokens is null) return null;
 
-        if (!_map.ContainsKey(tokens[0])) return null;
-
-        var commandType = _map[tokens[0]];
+        if (!_map.TryGetValue(tokens[0], out CommandType commandType))
+        {
+            Console.WriteLine($"procmon: error: The `{tokens[0]}` command was not recognized.\n\tRun 'h' or 'help' to get all the commands list.");
+            return null;
+        }
 
         var command = new Command(operation: commandType, args: null);
 
@@ -87,6 +102,7 @@ public sealed class ConsoleInputReader
                 {
                     if (!int.TryParse(tokens[1], out exitCode))
                     {
+                        Console.WriteLine($"procmon: error: Could not convert `{tokens[1]}` to an integer.");
                         return null;
                     }
                 }
@@ -113,18 +129,17 @@ public sealed class ConsoleInputReader
 
     // Note: this method assumes the input arguments are
     // valid since they're handled by the BuildCommandToken method
-    private async Task RunCommand(Command command)
+    private async Task RunCommand(Command command, CancellationToken ct)
     {
         switch (command.Operation)
         {
             case CommandType.None:
-                Console.WriteLine("Could not recognize a command. Skip.\nRun the `help` or `h` command to get more information.");
                 return;
             case CommandType.Help:
                 PrintUsage();
                 return;
             case CommandType.Create:
-                await _client.ConnectAsync();
+                await _client.ConnectAsync(ct);
                 return;
             case CommandType.Exit:
                 Debug.Assert(command.Args is not null);                 
@@ -133,17 +148,23 @@ public sealed class ConsoleInputReader
         }
     }
 
-    public async Task<string?> ReadAsync()
+    public async Task ReadAsync(CancellationToken ct)
     {
-        while (true)
+        if (ct.IsCancellationRequested)
+        {
+            Console.WriteLine("procmon: info: Could not start reading user input: cancellation requested.");
+            return;
+        }
+
+        while (!ct.IsCancellationRequested)
         {
             Console.Write("procmon-cli>");
 
-            var command = await BuildCommandToken();
+            var command = await BuildCommandToken(ct);
 
             if (command is null) continue;
 
-            await RunCommand(command);
+            await RunCommand(command, ct);
         }    
     }
 }

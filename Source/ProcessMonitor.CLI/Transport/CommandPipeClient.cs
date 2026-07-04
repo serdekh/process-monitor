@@ -1,5 +1,6 @@
 using System;
 using System.IO.Pipes;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ProcessMonitor.CLI.Common;
@@ -54,11 +55,17 @@ public sealed class CommandPipeClient : IDisposable
         CleanupConnection();
     }
 
-    public async Task WriteAsync(CommandRequest request)
+    public async Task WriteAsync(CommandRequest request, CancellationToken ct)
     {
         if (_client is null)
         {
             Console.WriteLine("procmon: error: Could not write a request. No connection was established.");
+            return;
+        }
+
+        if (ct.IsCancellationRequested)
+        {
+            Console.WriteLine("procmon: info: Could not write a request: cancellation requested.");
             return;
         }
  
@@ -68,15 +75,15 @@ public sealed class CommandPipeClient : IDisposable
 
             var lengthBytes = BitConverter.GetBytes(requestBytes.Length);
 
-            await _client.WriteAsync(lengthBytes, 0, 4);
+            await _client.WriteAsync(lengthBytes, 0, 4, ct);
         
-            await _client.WriteAsync(requestBytes, 0, requestBytes.Length);
+            await _client.WriteAsync(requestBytes, 0, requestBytes.Length, ct);
 
-            await _client.FlushAsync();
+            await _client.FlushAsync(ct);
         }
         catch (Exception)
         {
-            Console.WriteLine("procmon: error: could not write a request to the `Commands` pipe.");
+            Console.WriteLine("procmon: error: Could not write a request to the `Commands` pipe.");
         }
     }
  
@@ -100,15 +107,27 @@ public sealed class CommandPipeClient : IDisposable
         return true;
     }
    
-    public async Task<bool> ConnectAsync()
+    public async Task<bool> ConnectAsync(CancellationToken ct)
     {
+        if (ct.IsCancellationRequested)
+        {
+            Console.WriteLine("procmon: info: Could not start connecting to a server: cancellation requested.");
+            CleanupConnection();
+            return false;
+        }
+
         if (!_backend.Create()) 
         {
             Console.WriteLine($"procmon: error: {_backend.GetErrorString()}.");
+            CleanupConnection();
             return false; 
         }
 
-        if (!TryCreateClientStream()) return false;
+        if (!TryCreateClientStream()) 
+        {
+            CleanupConnection();
+            return false;
+        }
 
         try 
         { 
@@ -116,10 +135,16 @@ public sealed class CommandPipeClient : IDisposable
 
             Console.WriteLine("procmon: info: trying to connect to the `Commands` pipe.");
             
-            await _client.ConnectAsync();
+            await _client.ConnectAsync(ct);
                 
             Console.WriteLine("procmon: info: Connected to the `Commands` pipe.");
         }
+        catch (UnauthorizedAccessException)
+        {
+            Console.WriteLine("procmon: error: Could not connect to the `Commands` pipe: access denied.");
+            CleanupConnection();
+        }
+
         catch (InvalidOperationException) 
         {
             Console.WriteLine("procmon: error: Could not connect to `Commands` pipe: already connected.");
