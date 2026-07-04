@@ -1,19 +1,11 @@
 using System;
-using System.IO;
 using System.IO.Pipes;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using System.ComponentModel;
 
 using ProcessMonitor.CLI.Common;
 
-// TODO: Extract the serialization code into a the contracts project
-// since it is being used by both the server and the client. Consider
-// renaming the contracts project to shared.
-using ProcessMonitor.Backend.Serialization;
-
-using ProcessMonitor.Contracts.Protocol;
+using ProcessMonitor.Shared.Protocol;
+using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.CLI.Transport;
 
@@ -41,6 +33,8 @@ public sealed class CommandPipeClient : IDisposable
         } 
     }
 
+    // NOTE: Consider adding a hosting system similar to the backend project since
+    // the serialization dependency has to be injected manually
     public CommandPipeClient(string backendFilePath, IMessageSerializer? serializer = null)
     {
         _backend = new BackendProcess(backendFilePath);       
@@ -50,8 +44,9 @@ public sealed class CommandPipeClient : IDisposable
     public void CleanupConnection()
     {
         _backend.Kill();
-        _client?.Dispose(); _client = null;
-        Console.WriteLine("procmon: info: The current client got disconnected.");
+        _client?.Close();
+        _client?.Dispose(); 
+        _client = null;
     }
 
     public void Dispose()
