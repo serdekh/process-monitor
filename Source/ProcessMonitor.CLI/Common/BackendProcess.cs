@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using System.ComponentModel;
-using System.Collections.Generic;
 
 namespace ProcessMonitor.CLI.Common;
 
@@ -38,7 +37,8 @@ public sealed class BackendProcess : IDisposable
     { 
         get
         {
-            return _backend is not null; 
+            _backend?.Refresh();
+            return _backend is not null && !_backend.HasExited; 
         }
     }
 
@@ -70,7 +70,6 @@ public sealed class BackendProcess : IDisposable
             }
             else
             {
-                Console.WriteLine("- Attempt to create an existing process: ignore");
                 return true;
             }
         }
@@ -96,18 +95,17 @@ public sealed class BackendProcess : IDisposable
 
     public string GetErrorString()
     {
-        if (HasError) return "No error";
+        if (!HasError) return "No error";
 
-        switch (_error)
+        return _error switch
         {
-            case Win32Exception:            return "The file was not found, access was denied or executable was corruputed";
-            case FileNotFoundException:     return $"The file {_startInfo.FileName} was not found";
-            case ObjectDisposedException:   return "Could not start a backend process that has been disposed";
-            case ArgumentNullException:     return "No process start-up information was provided";
-            case InvalidOperationException: return "No file name was provided or stream redirection failed";
-            
-            default: return "Unknown error";     
-        }
+            Win32Exception => "The file was not found, access was denied or executable was corruputed",
+            FileNotFoundException => $"The file {_startInfo.FileName} was not found",
+            ObjectDisposedException => "Could not start a backend process that has been disposed",
+            ArgumentNullException => "No process start-up information was provided",
+            InvalidOperationException => "No file name was provided or stream redirection failed",
+            _ => "Unknown error",
+        };
     }
 
     public void Kill()
@@ -121,6 +119,6 @@ public sealed class BackendProcess : IDisposable
 
     public void Dispose()
     {
-        this.Kill();
+        Kill();
     }
 }
