@@ -11,7 +11,7 @@ using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
 using ProcessMonitor.Backend.Collection;
 
-using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 

@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Contracts.Protocol;
+using ProcessMonitor.Shared.Protocol;
 
 namespace ProcessMonitor.Backend.Commands;
 

@@ -2,12 +2,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Publishing;
 
+// TODO: Add logging
 public sealed class IPCMetricsPublisher : IMetricsPublisher 
 {
     private IMessageSerializer _serializer;

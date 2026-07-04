@@ -1,15 +1,12 @@
 using System;
-using System.Collections.Generic;
-
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Channels;
+using System.Collections.Generic;
 
 using ProcessMonitor.Backend.Models;
-using ProcessMonitor.Backend.Publishing;
-using ProcessMonitor.Backend.Collection;
 
-using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Processing;
 
@@ -17,16 +14,13 @@ public sealed class EventMetricsEngine
 {
     private ChannelReader<RawKernelEvent> _input;
     private ChannelWriter<ProcessMetricsSnapshot> _output;
-    private IMetricsPublisher _publisher;
     
     public EventMetricsEngine(
         Channel<RawKernelEvent> input,
-        Channel<ProcessMetricsSnapshot> output,
-        IMetricsPublisher publisher)
+        Channel<ProcessMetricsSnapshot> output)
     {
         _input = input.Reader;
         _output = output.Writer;
-        _publisher = publisher;
     }
 
     // Note: Consier bringing interface similar to Cancellation layer
@@ -52,8 +46,6 @@ public sealed class EventMetricsEngine
             };
 
             await _output.WriteAsync(snapshot);
-
-            await _publisher.PublishAsync(snapshot, ct);
         }
     }
 }

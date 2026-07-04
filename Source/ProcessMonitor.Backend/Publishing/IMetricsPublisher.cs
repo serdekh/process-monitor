@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Publishing;
 

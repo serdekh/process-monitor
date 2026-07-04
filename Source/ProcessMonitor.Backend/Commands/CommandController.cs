@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using ProcessMonitor.Contracts.Protocol;
+using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 

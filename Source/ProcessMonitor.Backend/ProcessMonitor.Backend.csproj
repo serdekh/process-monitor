@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProcessMonitor.Contracts\ProcessMonitor.Contracts.csproj" />
+    <ProjectReference Include="..\ProcessMonitor.Shared\ProcessMonitor.Shared.csproj" />
   </ItemGroup>
 
 </Project>

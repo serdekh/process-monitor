@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 
 using ProcessMonitor.Backend.Publishing;
 
-using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Hosting;
 
