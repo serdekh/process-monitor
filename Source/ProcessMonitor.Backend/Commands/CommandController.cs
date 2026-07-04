@@ -3,11 +3,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Backend.Transport;
-
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Contracts.Protocol;
+using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Commands;

@@ -2,9 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Backend.Transport;
-
 using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Publishing;

@@ -7,12 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Commands;
-using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
 using ProcessMonitor.Backend.Collection;
 
 using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Hosting;
