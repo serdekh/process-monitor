@@ -1,6 +1,4 @@
 using System;
-
-using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -87,13 +85,13 @@ public sealed class ConsoleInputReader
 
                 if (tokens.Length > 1)  
                 {
-                    if (!Int32.TryParse(tokens[1], out exitCode))
+                    if (!int.TryParse(tokens[1], out exitCode))
                     {
                         return null;
                     }
                 }
                     
-                command.Args = new object[1] {(object)exitCode};
+                command.Args = [exitCode];
               
                 return command;
 
