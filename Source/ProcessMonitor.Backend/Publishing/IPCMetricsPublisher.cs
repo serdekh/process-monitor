@@ -11,8 +11,8 @@ namespace ProcessMonitor.Backend.Publishing;
 // TODO: Add logging
 public sealed class IPCMetricsPublisher : IMetricsPublisher 
 {
-    private IMessageSerializer _serializer;
-    private ITelemetryTransport _transport;
+    private readonly IMessageSerializer _serializer;
+    private readonly ITelemetryTransport _transport;
 
     public IPCMetricsPublisher(IMessageSerializer serializer, ITelemetryTransport transport)
     {
@@ -24,15 +24,9 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher
     {
         if (!ct.IsCancellationRequested)
         {
-            var bytes = _serializer.Serialize<ProcessMetricsSnapshot>(snapshot);
-            
-            Console.WriteLine(bytes);
+            var bytes = _serializer.Serialize(snapshot);
 
             await _transport.SendAsync(bytes, ct);
-        }
-        else
-        {
-            Console.WriteLine("Info: Publishing is cancelled");
         }
     }
 }

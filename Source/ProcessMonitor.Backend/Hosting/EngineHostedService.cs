@@ -1,8 +1,8 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Processing;
 
@@ -10,21 +10,28 @@ namespace ProcessMonitor.Backend.Hosting;
 
 public sealed class EngineHostedService : BackgroundService
 {
-    private EventMetricsEngine _engine;
+    private readonly EventMetricsEngine _engine;
 
-    public EngineHostedService(EventMetricsEngine engine)
+    private readonly ILogger<EventMetricsEngine> _logger;
+
+    public EngineHostedService(EventMetricsEngine engine, ILogger<EventMetricsEngine> logger)
     {
         _engine = engine;
+        _logger = logger;
     }
 
-    // TODO: Handle cancellation token exception
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        if (!ct.IsCancellationRequested)
+        if (ct.IsCancellationRequested)
         {
-            await _engine.RunAsync(ct);
+            _logger.LogInformation("[Host][Processing]: Could not start the service: cancellation requested.");
+            return;
         }
 
-        Console.WriteLine("Processing service is cancelled");
+        _logger.LogInformation("[Host][Processing]: Starting...");
+
+        await _engine.RunAsync(ct);
+
+        _logger.LogInformation("[Host][Processing]: Terminating...");
     }
 }

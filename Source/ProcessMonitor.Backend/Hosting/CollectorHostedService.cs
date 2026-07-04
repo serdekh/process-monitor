@@ -26,15 +26,15 @@ public sealed class CollectorHostedService : BackgroundService
     {
         if (!ct.IsCancellationRequested)
         {
-            _logger.LogInformation("Collection: Starting...");
+            _logger.LogInformation("[Host][Collection]: Starting...");
             
             await _collector.RunAsync(ct);
             
-            _logger.LogInformation("Collection: Terminating...");
+            _logger.LogInformation("[Host][Collection]: Terminating...");
         }
         else
         {
-            _logger.LogInformation("Collection: Could not start the service: cancellation requested.");
+            _logger.LogInformation("[Host][Collection]: Could not start the service: cancellation requested.");
         }
     }
 }

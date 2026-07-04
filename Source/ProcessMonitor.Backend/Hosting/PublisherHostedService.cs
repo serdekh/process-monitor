@@ -1,9 +1,9 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Channels;
 
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Publishing;
 
@@ -13,21 +13,31 @@ namespace ProcessMonitor.Backend.Hosting;
 
 public sealed class PublisherHostedService : BackgroundService
 {
-    private ChannelReader<ProcessMetricsSnapshot> _input;
-    private IMetricsPublisher _publisher;
+    private readonly ChannelReader<ProcessMetricsSnapshot> _input;
+    private readonly IMetricsPublisher _publisher;
+
+    private readonly ILogger<PublisherHostedService> _logger;
 
     public PublisherHostedService(
         Channel<ProcessMetricsSnapshot> input,
-        IMetricsPublisher publisher)
+        IMetricsPublisher publisher,
+        ILogger<PublisherHostedService> logger)
     {
         _input = input.Reader;
         _publisher = publisher;
+        _logger =logger;
     }
 
-    // TODO: Handle cancellation token exception
-    // TODO: Handle channel exception
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
+        if (ct.IsCancellationRequested)
+        {
+            _logger.LogInformation("[Host][Publishing]: Could not start the service: cancellation requested.");
+            return;
+        }
+
+        _logger.LogInformation("[Host][Publishing]: Starting...");
+
         while (!ct.IsCancellationRequested)
         {
             var snapshot = await _input.ReadAsync(ct);
@@ -35,6 +45,6 @@ public sealed class PublisherHostedService : BackgroundService
             await _publisher.PublishAsync(snapshot, ct);
         }
 
-        Console.WriteLine("Publishing service is cancelled");
+        _logger.LogInformation("[Host][Publishing]: Terminating...");
     }
 }

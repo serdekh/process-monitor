@@ -41,8 +41,13 @@ public sealed class CommandController
 
             _logger.LogInformation("Command listening: Client connected successfully.");
         }
-        catch (OperationCanceledException)
+        catch (Exception ex)
         {
+            if (ex is OperationCanceledException) 
+            {
+                _logger.LogInformation("Command listening: Terminating...");
+                return;
+            }
             _logger.LogError("Command listening: No client has connected or the stream is already taken. Stop.");
             return;
         }
@@ -96,6 +101,8 @@ public sealed class CommandController
 
         }    
 
+        _logger.LogInformation("Command listening: Terminating...");
+        
         _transport.Deinitialize();        
     }
 }

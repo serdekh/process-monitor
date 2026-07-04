@@ -24,12 +24,16 @@ public sealed class CommandListenerHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        if (ct.IsCancellationRequested) return;
+        if (ct.IsCancellationRequested) 
+        {
+            _logger.LogInformation("[Host][Commands]: Could not start the service: cancellation requested.");
+            return;
+        }
 
-        _logger.LogInformation("Command listening: Start.");
+        _logger.LogInformation("[Host][Commands]: Starting...");
 
         await _controller.RunAsync(ct);
 
-        _logger.LogInformation("Command listening: Stop.");
+        _logger.LogInformation("[Host][Commands]: Terminating...");
     }
 }
