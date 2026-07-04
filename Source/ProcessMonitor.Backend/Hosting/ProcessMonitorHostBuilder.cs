@@ -11,9 +11,9 @@ using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
 using ProcessMonitor.Backend.Collection;
-using ProcessMonitor.Backend.Serialization;
 
 using ProcessMonitor.Contracts.Snapshots;
+using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Hosting;
 
