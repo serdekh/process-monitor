@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace ProcessMonitor.Contracts.Snapshots;
+namespace ProcessMonitor.Shared.Snapshots;
 
 public sealed class ProcessMetricsSnapshot
 {

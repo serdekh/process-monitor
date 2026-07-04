@@ -1,4 +1,4 @@
-namespace ProcessMonitor.Contracts.Snapshots;
+namespace ProcessMonitor.Shared.Snapshots;
 
 public sealed class ThreadMetricsSnapshot
 {

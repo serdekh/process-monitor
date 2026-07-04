@@ -1,4 +1,4 @@
-namespace ProcessMonitor.Contracts.Protocol;
+namespace ProcessMonitor.Shared.Protocol;
 
 public sealed class MessageEnvelope<T>
 {

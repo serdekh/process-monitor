@@ -1,10 +1,10 @@
 using System.Text.Json;
 
-namespace ProcessMonitor.Contracts.Protocol;
+namespace ProcessMonitor.Shared.Protocol;
 
 public sealed class CommandRequest
 {
-    public string Methid { get; init; } = string.Empty;
+    public string Method { get; init; } = string.Empty;
 
     public string Route { get; init; } = string.Empty;
 
