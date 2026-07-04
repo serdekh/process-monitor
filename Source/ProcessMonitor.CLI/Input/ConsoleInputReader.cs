@@ -14,6 +14,7 @@ public enum CommandType
     Help,
     Create,
     Exit,
+    Delete,
 }
 
 public sealed class Command
@@ -44,6 +45,7 @@ public sealed class ConsoleInputReader
             ["create"] = CommandType.Create,
             ["exit"] = CommandType.Exit,
             ["q"] = CommandType.Exit,
+            ["delete"] = CommandType.Delete
         };
   
         _client = new CommandPipeClient(backendFilePath);
@@ -95,6 +97,9 @@ public sealed class ConsoleInputReader
             case CommandType.Create: 
                 return command;
 
+            case CommandType.Delete:
+                return command;
+
             case CommandType.Exit:
                 var exitCode = 0;
 
@@ -116,15 +121,18 @@ public sealed class ConsoleInputReader
         }
     }
 
-    private void PrintUsage()
+    private static void PrintUsage()
     {
         Console.WriteLine("`procmon-cli` is a console client that lets you communicate with the metrics server.");
         Console.WriteLine("To interact with the api, use a predefined set of commands listed below:\n");
         Console.WriteLine("\thelp|h       - get this usage message.");
+        Console.WriteLine();
         Console.WriteLine("\tcreate       - start up the ProcessMonitor.Backend server process.");
-        Console.WriteLine("\texit <code?> - exit the client process with the `<code>` exit status");
+        Console.WriteLine("\tdelete       - kill the ProcessMonitor.Backend server process.");
+        Console.WriteLine();
+        Console.WriteLine("\texit <code?> - exit the client process with the `<code>` exit status.");
         Console.WriteLine("\t               if provided. Otherwise exit with `0`.");
-        Console.WriteLine("\tq              - exit with `0` exit code.");
+        Console.WriteLine("\tq            - exit with `0` exit code.");
     }
 
     // Note: this method assumes the input arguments are
@@ -144,6 +152,9 @@ public sealed class ConsoleInputReader
             case CommandType.Exit:
                 Debug.Assert(command.Args is not null);                 
                 Environment.Exit((int)command.Args[0]);
+                return;
+            case CommandType.Delete:
+                await _client.CleanupConnection();
                 return;
         }
     }

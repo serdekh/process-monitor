@@ -1,11 +1,13 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Diagnostics;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace ProcessMonitor.CLI.Common;
 
-public sealed class BackendProcess : IDisposable
+public sealed class BackendProcess : IAsyncDisposable
 {
     private Process? _backend = null;
 
@@ -104,22 +106,51 @@ public sealed class BackendProcess : IDisposable
             FileNotFoundException => $"The file {_startInfo.FileName} was not found",
             ObjectDisposedException => "Could not start a backend process that has been disposed",
             ArgumentNullException => "No process start-up information was provided",
+            ArgumentOutOfRangeException => "The cancellation time delay was out of rage",
             InvalidOperationException => "No file name was provided or stream redirection failed",
             _ => "Unknown error",
         };
     }
 
-    public void Kill()
+    public async Task KillAsync(TimeSpan delay)
     {
-        if (_backend is null) return;
+        if (_backend is null || HasExited) return;
 
-        _backend.Kill();
-        _backend.WaitForExit();
-        _backend = null;
+        _error = null;
+
+        try
+        {
+            var taskKillInfo = new ProcessStartInfo
+            {
+                FileName = "taskkill.exe",
+                Arguments = $"/PID {_backend.Id} /T", 
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
+
+            using var killer = Process.Start(taskKillInfo);
+
+            killer?.WaitForExit();
+
+            using var cts = new CancellationTokenSource(delay);
+            await _backend.WaitForExitAsync(cts.Token);
+        }
+        catch (Exception ex)
+        {
+            if (ex is not OperationCanceledException) 
+            {
+                _error = ex;
+            }
+        }
     }
 
-    public void Dispose()
+    public async Task KillAsync()
     {
-        Kill();
+        await KillAsync(TimeSpan.FromSeconds(3));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await KillAsync();
     }
 }

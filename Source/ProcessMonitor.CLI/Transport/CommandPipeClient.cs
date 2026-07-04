@@ -10,7 +10,7 @@ using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.CLI.Transport;
 
-public sealed class CommandPipeClient : IDisposable
+public sealed class CommandPipeClient : IAsyncDisposable
 {
     private NamedPipeClientStream? _client = null;
 
@@ -42,17 +42,17 @@ public sealed class CommandPipeClient : IDisposable
         _serializer = serializer is null ? new JsonMessageSerializer() : serializer;
     }
     
-    public void CleanupConnection()
+    public async Task CleanupConnection()
     {
-        _backend.Kill();
+        await _backend.KillAsync();
         _client?.Close();
         _client?.Dispose(); 
         _client = null;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        CleanupConnection();
+        await CleanupConnection();
     }
 
     public async Task WriteAsync(CommandRequest request, CancellationToken ct)
@@ -112,20 +112,20 @@ public sealed class CommandPipeClient : IDisposable
         if (ct.IsCancellationRequested)
         {
             Console.WriteLine("procmon: info: Could not start connecting to a server: cancellation requested.");
-            CleanupConnection();
+            await CleanupConnection();
             return false;
         }
 
         if (!_backend.Create()) 
         {
             Console.WriteLine($"procmon: error: {_backend.GetErrorString()}.");
-            CleanupConnection();
+            await CleanupConnection();
             return false; 
         }
 
         if (!TryCreateClientStream()) 
         {
-            CleanupConnection();
+            await CleanupConnection();
             return false;
         }
 
@@ -142,9 +142,8 @@ public sealed class CommandPipeClient : IDisposable
         catch (UnauthorizedAccessException)
         {
             Console.WriteLine("procmon: error: Could not connect to the `Commands` pipe: access denied.");
-            CleanupConnection();
+            await CleanupConnection();
         }
-
         catch (InvalidOperationException) 
         {
             Console.WriteLine("procmon: error: Could not connect to `Commands` pipe: already connected.");

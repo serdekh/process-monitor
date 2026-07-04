@@ -8,8 +8,8 @@ public class CommandTransport : ICommandTransport
 {
     private readonly NamedPipeServerStream _pipe;
     
-    private IPCProtocolReader _reader;
-    private IPCProtocolWriter _writer;
+    private readonly IPCProtocolReader _reader;
+    private readonly IPCProtocolWriter _writer;
 
     public CommandTransport()
     {
