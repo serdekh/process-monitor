@@ -64,7 +64,7 @@ public sealed class CommandController
                     break;
                 }
 
-                var request = _serializer.Deserialize<CommandRequest>(bytes);
+                var request = _serializer.Deserialize<MessageEnvelope<CommandRequest>>(bytes);
 
                 if (request is null)
                 {
@@ -93,8 +93,9 @@ public sealed class CommandController
                 _logger.LogError("Command listening: Could not finish processing the command due to one of the data streams getting disposed. Stop.");
                 break;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex.Message);
                 _logger.LogError("Command listening: Fatal error occured while processing the command. Stop.");
                 break;
             }
@@ -102,7 +103,7 @@ public sealed class CommandController
         }    
 
         _logger.LogInformation("Command listening: Terminating...");
-        
+
         _transport.Deinitialize();        
     }
 }
