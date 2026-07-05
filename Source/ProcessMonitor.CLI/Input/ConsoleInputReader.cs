@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using ProcessMonitor.CLI.Transport;
+using ProcessMonitor.Shared.Protocol;
+using System.Text.Json;
 
 namespace ProcessMonitor.CLI.Input;
 
@@ -15,6 +17,7 @@ public enum CommandType
     Create,
     Exit,
     Delete,
+    Set,
 }
 
 public sealed class Command
@@ -34,6 +37,10 @@ public sealed class ConsoleInputReader
 {
     private CommandPipeClient _client;
 
+    private int? _pid = null;
+
+    private uint _requestId = 0;
+
     private readonly Dictionary<string, CommandType> _map;
 
     public ConsoleInputReader(string backendFilePath)
@@ -45,7 +52,8 @@ public sealed class ConsoleInputReader
             ["create"] = CommandType.Create,
             ["exit"] = CommandType.Exit,
             ["q"] = CommandType.Exit,
-            ["delete"] = CommandType.Delete
+            ["delete"] = CommandType.Delete,
+            ["set"] = CommandType.Set
         };
   
         _client = new CommandPipeClient(backendFilePath);
@@ -68,7 +76,6 @@ public sealed class ConsoleInputReader
         return words;
     }
 
-    // TODO: handle errors using logging
     private async Task<Command?> BuildCommandToken(CancellationToken ct)
     {
         if (ct.IsCancellationRequested)
@@ -115,6 +122,27 @@ public sealed class ConsoleInputReader
                 command.Args = [exitCode];
               
                 return command;
+            
+            case CommandType.Set:
+                if (tokens.Length == 1)
+                {
+                    Console.WriteLine("procmon: error: Missing an argument for the `set` command.\nprocmon: note: set <int>");
+                    return null;
+                }
+
+                if (!int.TryParse(tokens[1], out int pid))
+                {
+                    Console.WriteLine($"procmon: error: Could not convert `{tokens[1]}` to an integer.");
+                    return null;
+                }
+
+                if (pid == _pid) return null;
+
+                _pid = pid;
+
+                command.Args = [pid];
+
+                return command;
 
             default: 
                 return null;
@@ -129,6 +157,7 @@ public sealed class ConsoleInputReader
         Console.WriteLine();
         Console.WriteLine("\tcreate       - start up the ProcessMonitor.Backend server process.");
         Console.WriteLine("\tdelete       - kill the ProcessMonitor.Backend server process.");
+        Console.WriteLine("\tset <int>    - requests the server to update the process id.");
         Console.WriteLine();
         Console.WriteLine("\texit <code?> - exit the client process with the `<code>` exit status.");
         Console.WriteLine("\t               if provided. Otherwise exit with `0`.");
@@ -155,6 +184,38 @@ public sealed class ConsoleInputReader
                 return;
             case CommandType.Delete:
                 await _client.CleanupConnection();
+                return;
+            case CommandType.Set:
+                var body = new
+                {
+                    version = 1,
+                    requestId = _requestId,
+                    pid = _pid
+                };
+
+                var bodyElement = JsonSerializer.SerializeToElement(body);
+
+                var envelope = new MessageEnvelope<CommandRequest>
+                {
+                    Type = MessageType.CommandRequest,
+                    Payload = new CommandRequest
+                    {
+                        Method = "post",
+                        Route = "monitoring",
+                        Body = bodyElement
+                    }    
+                };
+
+                var result = await _client.WriteAsync(envelope, ct);
+
+                if (!result)
+                {
+                    Console.WriteLine("prcomon: error: Failed to execute the `set` command.");
+                    return;    
+                }
+
+                _requestId++;
+
                 return;
         }
     }
