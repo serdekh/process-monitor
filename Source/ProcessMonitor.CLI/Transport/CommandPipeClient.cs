@@ -55,18 +55,19 @@ public sealed class CommandPipeClient : IAsyncDisposable
         await CleanupConnection();
     }
 
-    public async Task WriteAsync(CommandRequest request, CancellationToken ct)
+    // TODO: Implement server response handling
+    public async Task<bool> WriteAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
     {
         if (_client is null)
         {
             Console.WriteLine("procmon: error: Could not write a request. No connection was established.");
-            return;
+            return false;
         }
 
         if (ct.IsCancellationRequested)
         {
             Console.WriteLine("procmon: info: Could not write a request: cancellation requested.");
-            return;
+            return false;
         }
  
         try 
@@ -80,10 +81,13 @@ public sealed class CommandPipeClient : IAsyncDisposable
             await _client.WriteAsync(requestBytes, 0, requestBytes.Length, ct);
 
             await _client.FlushAsync(ct);
+
+            return true;
         }
         catch (Exception)
         {
             Console.WriteLine("procmon: error: Could not write a request to the `Commands` pipe.");
+            return false;
         }
     }
  
