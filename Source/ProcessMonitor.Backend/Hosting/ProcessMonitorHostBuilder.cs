@@ -10,6 +10,7 @@ using ProcessMonitor.Backend.Commands;
 using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
 using ProcessMonitor.Backend.Collection;
+using ProcessMonitor.Backend.Commands.Handlers;
 
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport;
@@ -55,6 +56,8 @@ public static class ProcessMonitorHostBuilder
 
         services.AddSingleton<IMetricsPublisher, IPCMetricsPublisher>();
         
+        services.AddTransient<StartMonitoringHandler>();
+
         services.AddSingleton<CommandController>();
         services.AddSingleton<ICommandTransport, CommandTransport>();
         services.AddSingleton<CommandRouter>();
