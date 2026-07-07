@@ -11,23 +11,26 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        // I know that this is supermega funny but I'm to lazy to remove this into a command parsing logic
-        var path = "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.Backend\\bin\\Debug\\net9.0\\ProcessMonitor.Backend.exe";
-      
-        var argsParser = new CommandLineParser();
+        var argsParser = new CommandLineParser(args);
 
-        // Temporary. Remove as soon as the parsing mechanism more flags is implemented
-        if (args.Length != 0)
+        if (!argsParser.Parse())
         {
-            int? processId = argsParser.ParseProcessId(args);
-
-            if (argsParser.ErrorMessage != string.Empty)
-            {
-                Console.WriteLine($"procmon-cli: error: {argsParser.ErrorMessage}");
-                return;
-            }
+            argsParser.PrintErrors();
+            return;
         }
-      
+
+        // TODO: Replace mannual '--path' flag insertion with a custom config file
+        if (!argsParser.Flags.TryGetValue("--path", out object? value))
+        {
+            Console.WriteLine("procmon: error: The filepath to the backend process was not specified.\nProvide the '--path <file-path>' flag in the command line arguments.");
+            return;
+        }
+
+        if (value is not string path)
+        {
+            return;
+        }
+
         var reader = new ConsoleInputReader(path);
 
         using var cts = new CancellationTokenSource();
