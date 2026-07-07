@@ -73,9 +73,9 @@ public sealed class CommandPipeClient : IAsyncDisposable
 
             var lengthBytes = BitConverter.GetBytes(requestBytes.Length);
 
-            await _client.WriteAsync(lengthBytes, 0, 4, ct);
+            await _client.WriteAsync(lengthBytes.AsMemory(0, 4), ct);
         
-            await _client.WriteAsync(requestBytes, 0, requestBytes.Length, ct);
+            await _client.WriteAsync(requestBytes, ct);
 
             await _client.FlushAsync(ct);
 
