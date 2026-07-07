@@ -40,8 +40,8 @@ public sealed class Command
 
 public sealed class ConsoleInputReader
 {
-    private BackendProcess _backend;
-    private CommandPipeClient _client;
+    private readonly BackendProcess _backend;
+    private readonly CommandPipeClient _client;
 
     private int? _pid = null;
 
@@ -49,7 +49,7 @@ public sealed class ConsoleInputReader
 
     private readonly Dictionary<string, CommandType> _map;
 
-    public ConsoleInputReader(string backendFilePath)
+    public ConsoleInputReader(BackendProcess backend, CommandPipeClient commandPipeClient)
     {
         _map = new Dictionary<string, CommandType>()
         {
@@ -64,9 +64,9 @@ public sealed class ConsoleInputReader
             ["stat"] = CommandType.Status,
         };
 
-        _backend = new BackendProcess(backendFilePath);
 
-        _client = new CommandPipeClient(_backend);
+        _backend = backend;
+        _client = commandPipeClient;
     }
 
     // TODO (not urgent): Replace console logging with the Microsoft logger.
