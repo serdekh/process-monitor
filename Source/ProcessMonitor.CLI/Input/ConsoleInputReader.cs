@@ -10,6 +10,7 @@ using System.Text.Json;
 
 namespace ProcessMonitor.CLI.Input;
 
+// TODO (not urgent): Move this type definition to a separate file
 public enum CommandType
 {
     None = 0,
@@ -20,6 +21,7 @@ public enum CommandType
     Set,
 }
 
+// TODO (not urgent): Move this type definition to a separate file
 public sealed class Command
 {
     public CommandType Operation { get; set; } = CommandType.None;
@@ -59,7 +61,12 @@ public sealed class ConsoleInputReader
         _client = new CommandPipeClient(backendFilePath);
     }
 
-    private async Task<string[]?> LexInput(CancellationToken ct)
+    // TODO (not urgent): Replace console logging with the Microsoft logger.
+    // TODO (not urgent): Make the lexer to support parsing things like
+    //     several commands: 'c1 & c2'
+    //     transactions:     '{ create & set }'
+    //     conditions:       '{ create } if exit 1 end'
+    private static async Task<string[]?> LexInput(CancellationToken ct)
     {
         if (ct.IsCancellationRequested)
         {
@@ -76,6 +83,7 @@ public sealed class ConsoleInputReader
         return words;
     }
 
+    // TODO (not urgent): Replace the switch case with a dicitionary mapping
     private async Task<Command?> BuildCommandToken(CancellationToken ct)
     {
         if (ct.IsCancellationRequested)
@@ -149,6 +157,7 @@ public sealed class ConsoleInputReader
         }
     }
 
+    // Note: Consider merging all the statements into a single one to reduce uncessary IO calls
     private static void PrintUsage()
     {
         Console.WriteLine("`procmon-cli` is a console client that lets you communicate with the metrics server.");
@@ -166,6 +175,7 @@ public sealed class ConsoleInputReader
 
     // Note: this method assumes the input arguments are
     // valid since they're handled by the BuildCommandToken method
+    // TODO (not urgent): Replace the switch statement with a dictionary mapping 
     private async Task RunCommand(Command command, CancellationToken ct)
     {
         switch (command.Operation)
@@ -220,6 +230,7 @@ public sealed class ConsoleInputReader
         }
     }
 
+    // TODO (not urgent): replace custom logs with the Microsoft logger.
     public async Task ReadAsync(CancellationToken ct)
     {
         if (ct.IsCancellationRequested)
