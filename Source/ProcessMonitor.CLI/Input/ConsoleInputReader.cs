@@ -41,7 +41,9 @@ public sealed class Command
 public sealed class ConsoleInputReader
 {
     private readonly BackendProcess _backend;
-    private readonly CommandPipeClient _client;
+    private readonly CommandPipeClient _commandsPipeClient;
+
+    private readonly TelemetryPipeClient _telemetryPipeClient;
 
     private int? _pid = null;
 
@@ -49,8 +51,15 @@ public sealed class ConsoleInputReader
 
     private readonly Dictionary<string, CommandType> _map;
 
-    public ConsoleInputReader(BackendProcess backend, CommandPipeClient commandPipeClient)
+    public ConsoleInputReader(
+        BackendProcess backend, 
+        CommandPipeClient commandPipeClient,
+        TelemetryPipeClient telemetryPipeClient)
     {
+        _backend = backend;
+        _commandsPipeClient = commandPipeClient;
+        _telemetryPipeClient = telemetryPipeClient;
+
         _map = new Dictionary<string, CommandType>()
         {
             ["help"] = CommandType.Help,
@@ -63,10 +72,6 @@ public sealed class ConsoleInputReader
             ["status"] = CommandType.Status,
             ["stat"] = CommandType.Status,
         };
-
-
-        _backend = backend;
-        _client = commandPipeClient;
     }
 
     // TODO (not urgent): Replace console logging with the Microsoft logger.
@@ -189,7 +194,7 @@ public sealed class ConsoleInputReader
 
     private void PrintStatus()
     {
-        string backendStatus = string.Empty;
+        string backendStatus;
 
         if (_backend.HasExited)
         {
@@ -200,9 +205,10 @@ public sealed class ConsoleInputReader
             backendStatus = _backend.IsRunning ? "Running" : "Not running";
         }
 
-        string commandsPipeStatus = _client.IsConnected ? "Connected" : "Not connected";
+        string commandsPipeStatus = _commandsPipeClient.IsConnected ? "Connected" : "Not connected";
+        string telemetryPipeStatus = _telemetryPipeClient.IsConnected ? "Connected" : "Not connected";
 
-        Console.WriteLine($"Backend: {backendStatus}\nCommands Pipe: {commandsPipeStatus}");
+        Console.WriteLine($"Backend: {backendStatus}\nCommands Pipe: {commandsPipeStatus}\nTelemetry Pipe: {telemetryPipeStatus}");
     }
 
     // Note: this method assumes the input arguments are
@@ -218,7 +224,8 @@ public sealed class ConsoleInputReader
                 PrintUsage();
                 return;
             case CommandType.Create:
-                await _client.ConnectAsync(ct);
+                await _commandsPipeClient.ConnectAsync(ct);
+                await _telemetryPipeClient.TryConnectAsync(ct);
                 return;
             case CommandType.Status:
                 PrintStatus();
@@ -228,7 +235,7 @@ public sealed class ConsoleInputReader
                 Environment.Exit((int)command.Args[0]);
                 return;
             case CommandType.Delete:
-                await _client.CleanupConnection();
+                await _commandsPipeClient.CleanupConnection();
                 return;
             case CommandType.Set:
                 var body = new
@@ -251,7 +258,7 @@ public sealed class ConsoleInputReader
                     }    
                 };
 
-                var result = await _client.WriteAsync(envelope, ct);
+                var result = await _commandsPipeClient.WriteAsync(envelope, ct);
 
                 if (!result)
                 {
