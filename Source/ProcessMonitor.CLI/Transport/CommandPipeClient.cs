@@ -28,9 +28,9 @@ public sealed class CommandPipeClient : IAsyncDisposable
 
     // NOTE: Consider adding a hosting system similar to the backend project since
     // the serialization dependency has to be injected manually
-    public CommandPipeClient(string backendFilePath, IMessageSerializer? serializer = null)
+    public CommandPipeClient(BackendProcess backend, IMessageSerializer? serializer = null)
     {
-        _backend = new BackendProcess(backendFilePath);       
+        _backend = backend;  
 
         _backend.AddOnExitHandler(async (sender, e) =>
         {
