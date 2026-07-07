@@ -26,9 +26,7 @@ public sealed class CommandPipeClient : IAsyncDisposable
         } 
     }
 
-    // NOTE: Consider adding a hosting system similar to the backend project since
-    // the serialization dependency has to be injected manually
-    public CommandPipeClient(BackendProcess backend, IMessageSerializer? serializer = null)
+    public CommandPipeClient(BackendProcess backend, IMessageSerializer serializer)
     {
         _backend = backend;  
 
@@ -38,7 +36,7 @@ public sealed class CommandPipeClient : IAsyncDisposable
             await CleanupConnection();
         });
 
-        _serializer = serializer is null ? new JsonMessageSerializer() : serializer;
+        _serializer = serializer;
     }
     
     public async Task CleanupConnection()
