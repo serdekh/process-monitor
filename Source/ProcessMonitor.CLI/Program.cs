@@ -1,9 +1,12 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+
 using ProcessMonitor.CLI.Input;
-using ProcessMonitor.CLI.Transport;
+using ProcessMonitor.CLI.Common;
+using ProcessMonitor.CLI.Hosting;
 
 namespace ProcessMonitor.CLI;
 
@@ -26,17 +29,19 @@ internal class Program
             return;
         }
 
-        if (value is not string path)
+        if (value is not string path) return;
+
+        var builder = CLIHostBuilder 
+            .Create(args);
+
+        // NOTE: Consider replacing this code with a refactorred logic inside the ConsoleInputReader class
+        // so that we don't explicitly inject this path string. For example, add a new hosted service that
+        // manages cli arguments and exposes them to the other services inside the ConfigureServices method. 
+        builder.Services.Configure<BackendProcessOptions>(options =>
         {
-            return;
-        }
+            options.FilePath = path;
+        });
 
-        var reader = new ConsoleInputReader(path);
-
-        using var cts = new CancellationTokenSource();
-
-        var ct = cts.Token;
-
-        await reader.ReadAsync(ct);
+        await builder.Build().RunAsync();
     }
 }
