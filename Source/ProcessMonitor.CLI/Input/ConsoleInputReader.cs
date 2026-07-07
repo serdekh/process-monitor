@@ -1,12 +1,14 @@
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+using ProcessMonitor.CLI.Common;
 using ProcessMonitor.CLI.Transport;
+
 using ProcessMonitor.Shared.Protocol;
-using System.Text.Json;
 
 namespace ProcessMonitor.CLI.Input;
 
@@ -19,6 +21,7 @@ public enum CommandType
     Exit,
     Delete,
     Set,
+    Status,
 }
 
 // TODO (not urgent): Move this type definition to a separate file
@@ -37,6 +40,7 @@ public sealed class Command
 
 public sealed class ConsoleInputReader
 {
+    private BackendProcess _backend;
     private CommandPipeClient _client;
 
     private int? _pid = null;
@@ -55,10 +59,14 @@ public sealed class ConsoleInputReader
             ["exit"] = CommandType.Exit,
             ["q"] = CommandType.Exit,
             ["delete"] = CommandType.Delete,
-            ["set"] = CommandType.Set
+            ["set"] = CommandType.Set,
+            ["status"] = CommandType.Status,
+            ["stat"] = CommandType.Status,
         };
-  
-        _client = new CommandPipeClient(backendFilePath);
+
+        _backend = new BackendProcess(backendFilePath);
+
+        _client = new CommandPipeClient(_backend);
     }
 
     // TODO (not urgent): Replace console logging with the Microsoft logger.
@@ -115,6 +123,9 @@ public sealed class ConsoleInputReader
             case CommandType.Delete:
                 return command;
 
+            case CommandType.Status:
+                return command;
+
             case CommandType.Exit:
                 var exitCode = 0;
 
@@ -167,10 +178,31 @@ public sealed class ConsoleInputReader
         Console.WriteLine("\tcreate       - start up the ProcessMonitor.Backend server process.");
         Console.WriteLine("\tdelete       - kill the ProcessMonitor.Backend server process.");
         Console.WriteLine("\tset <int>    - requests the server to update the process id.");
+        Console.WriteLine("\tstatus|stat  - shows the current connection stats such as:");
+        Console.WriteLine("\t                  1. Is the backend process running");
+        Console.WriteLine("\t                  2. Is the client connected to the backend (via the 'Commands' pipe)");
         Console.WriteLine();
         Console.WriteLine("\texit <code?> - exit the client process with the `<code>` exit status.");
         Console.WriteLine("\t               if provided. Otherwise exit with `0`.");
         Console.WriteLine("\tq            - exit with `0` exit code.");
+    }
+
+    private void PrintStatus()
+    {
+        string backendStatus = string.Empty;
+
+        if (_backend.HasExited)
+        {
+            backendStatus = "Exited";
+        }
+        else
+        {
+            backendStatus = _backend.IsRunning ? "Running" : "Not running";
+        }
+
+        string commandsPipeStatus = _client.IsConnected ? "Connected" : "Not connected";
+
+        Console.WriteLine($"Backend: {backendStatus}\nCommands Pipe: {commandsPipeStatus}");
     }
 
     // Note: this method assumes the input arguments are
@@ -187,6 +219,9 @@ public sealed class ConsoleInputReader
                 return;
             case CommandType.Create:
                 await _client.ConnectAsync(ct);
+                return;
+            case CommandType.Status:
+                PrintStatus();
                 return;
             case CommandType.Exit:
                 Debug.Assert(command.Args is not null);                 
