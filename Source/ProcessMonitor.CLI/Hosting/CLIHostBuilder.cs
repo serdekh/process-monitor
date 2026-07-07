@@ -7,7 +7,6 @@ using ProcessMonitor.CLI.Common;
 using ProcessMonitor.CLI.Transport;
 
 using ProcessMonitor.Shared.Serialization;
-using Microsoft.Extensions.Options;
 
 namespace ProcessMonitor.CLI.Hosting;
 
@@ -34,15 +33,15 @@ public sealed class CLIHostBuilder
 
     public static void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<CommandLineParser>();
-
-        services.AddSingleton<ConsoleInputReader>();
-
         services.AddSingleton<BackendProcess>();
+
+        services.AddSingleton<TelemetryPipeClient>();
 
         services.AddSingleton<IMessageSerializer, JsonMessageSerializer>();
 
         services.AddSingleton<CommandPipeClient>();
+
+        services.AddSingleton<ConsoleInputReader>();
 
         services.AddHostedService<InputReaderHostedService>();
     }
