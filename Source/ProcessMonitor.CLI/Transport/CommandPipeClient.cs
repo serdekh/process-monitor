@@ -14,23 +14,15 @@ public sealed class CommandPipeClient : IAsyncDisposable
 {
     private NamedPipeClientStream? _client = null;
 
-    private IMessageSerializer _serializer;
+    private readonly IMessageSerializer _serializer;
 
-    private BackendProcess _backend;
-
-    public bool IsBackendInstanceCreated
-    {
-        get
-        {
-            return _backend.IsCreated;
-        }
-    }
+    private readonly BackendProcess _backend;
 
     public bool IsConnected 
     { 
         get
         {
-            return _client?.IsConnected ?? false;
+            return _backend.IsRunning && (_client?.IsConnected ?? false);
         } 
     }
 
@@ -39,6 +31,13 @@ public sealed class CommandPipeClient : IAsyncDisposable
     public CommandPipeClient(string backendFilePath, IMessageSerializer? serializer = null)
     {
         _backend = new BackendProcess(backendFilePath);       
+
+        _backend.AddOnExitHandler(async (sender, e) =>
+        {
+            Console.Write("\nprocmon: warning: The backend process has terminated.\nRun the 'create' command to instantiate a new process.\nprocmon-cli>"); 
+            await CleanupConnection();
+        });
+
         _serializer = serializer is null ? new JsonMessageSerializer() : serializer;
     }
     
