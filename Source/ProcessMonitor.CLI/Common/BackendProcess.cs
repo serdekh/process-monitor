@@ -5,7 +5,15 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Options;
+
 namespace ProcessMonitor.CLI.Common;
+
+public sealed class BackendProcessOptions
+{
+    public string FilePath { get; set; } = string.Empty;   
+}
+
 
 public sealed class BackendProcess : IAsyncDisposable
 {
@@ -54,11 +62,11 @@ public sealed class BackendProcess : IAsyncDisposable
         }
     }
 
-    public BackendProcess(string path)
+    public BackendProcess(IOptions<BackendProcessOptions> options)
     {
         _startInfo = new ProcessStartInfo
         {
-            FileName = path,
+            FileName = options.Value.FilePath,
             UseShellExecute = true,
             Verb = "runas"
         };
