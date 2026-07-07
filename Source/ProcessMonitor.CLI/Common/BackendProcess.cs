@@ -13,7 +13,9 @@ public sealed class BackendProcess : IAsyncDisposable
 
     private Exception? _error = null;
 
-    private ProcessStartInfo _startInfo;
+    private readonly ProcessStartInfo _startInfo;
+
+    private EventHandler? _onExit = null;
 
     public string Path 
     { 
@@ -35,7 +37,7 @@ public sealed class BackendProcess : IAsyncDisposable
         }
     }
 
-    public bool IsCreated 
+    public bool IsRunning
     { 
         get
         {
@@ -62,6 +64,11 @@ public sealed class BackendProcess : IAsyncDisposable
         };
     }
 
+    public void AddOnExitHandler(EventHandler onExit)
+    {
+        _onExit = onExit;
+    }
+
     public bool Create()
     {
         if (_backend is not null)
@@ -86,6 +93,8 @@ public sealed class BackendProcess : IAsyncDisposable
             if (_backend is not null)
             {
                 _backend.EnableRaisingEvents = true;
+
+                if (_onExit is not null) _backend.Exited += _onExit;
             }
         }
         catch (Exception ex)
