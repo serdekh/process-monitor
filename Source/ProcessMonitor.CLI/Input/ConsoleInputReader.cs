@@ -223,9 +223,22 @@ public sealed class ConsoleInputReader
             case CommandType.Help:
                 PrintUsage();
                 return;
+            // TODO (not urgent): Move all this code into a new connect command
             case CommandType.Create:
                 await _commandsPipeClient.ConnectAsync(ct);
                 await _telemetryPipeClient.TryConnectAsync(ct);
+
+                _ = Task.Run(async () => 
+                {
+                    try
+                    {
+                        await _telemetryPipeClient.ReadAsync(ct);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"procmon-cli: error: The 'Telemetry' pipe handling exited abnormally: {ex.Message}");
+                    }
+                });
                 return;
             case CommandType.Status:
                 PrintStatus();
