@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using ProcessMonitor.Backend.Publishing;
 
 using ProcessMonitor.Shared.Snapshots;
+using System;
 
 namespace ProcessMonitor.Backend.Hosting;
 
@@ -38,12 +39,16 @@ public sealed class PublisherHostedService : BackgroundService
 
         _logger.LogInformation("[Host][Publishing]: Starting...");
 
+        await _publisher.InitializeAsync(ct);
+
         while (!ct.IsCancellationRequested)
         {
             var snapshot = await _input.ReadAsync(ct);
 
             await _publisher.PublishAsync(snapshot, ct);
         }
+
+        _publisher.Deinitialize();
 
         _logger.LogInformation("[Host][Publishing]: Terminating...");
     }
