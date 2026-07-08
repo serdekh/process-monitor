@@ -16,4 +16,10 @@ public sealed class ProcessMetricsSnapshot
     public DateTime TimestampUtc { get; init; }
 
     public List<ThreadMetricsSnapshot> Threads { get; set; } = new();
+
+    // TODO: Add more fields and use a string builder for a dynamic thread colletion
+    public override string ToString()
+    {
+        return $"{{ ProcessId: {ProcessId}, ProcessName: {ProcessName}, CpuUsage: {CpuUsage}, ThreadCount: {ThreadCount}}}";
+    }
 }
