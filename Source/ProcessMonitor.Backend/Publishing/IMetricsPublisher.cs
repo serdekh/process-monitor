@@ -8,4 +8,8 @@ namespace ProcessMonitor.Backend.Publishing;
 public interface IMetricsPublisher 
 {
     Task PublishAsync(ProcessMetricsSnapshot snapshot, CancellationToken ct);
+
+    Task InitializeAsync(CancellationToken ct);
+
+    void Deinitialize();
 }
