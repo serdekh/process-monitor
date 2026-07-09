@@ -8,6 +8,7 @@ using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
 
 using ProcessMonitor.Backend.Models;
+using Microsoft.Extensions.Hosting;
 
 namespace ProcessMonitor.Backend.Collection;
 
@@ -19,10 +20,16 @@ public sealed class EventStreamCollector : IEventCollector
 
     private readonly ILogger<EventStreamCollector> _logger;
 
-    public EventStreamCollector(Channel<RawKernelEvent> input, ILogger<EventStreamCollector> logger)
+    private readonly IHostApplicationLifetime _hostLifetime;
+
+    public EventStreamCollector(
+        Channel<RawKernelEvent> input, 
+        ILogger<EventStreamCollector> logger,
+        IHostApplicationLifetime hostLifetime)
     { 
         _writer = input.Writer;
         _logger = logger;
+        _hostLifetime = hostLifetime;
     }
 
     public async Task RunAsync(CancellationToken ct)
@@ -30,6 +37,8 @@ public sealed class EventStreamCollector : IEventCollector
         if (TraceEventSession.IsElevated() != true)
         {
             _logger.LogError("Collection: Could only run as administrator.");
+            
+            _hostLifetime.StopApplication();
             return;
         }
 
