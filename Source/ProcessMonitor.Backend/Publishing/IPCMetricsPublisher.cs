@@ -58,42 +58,14 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
             Payload = snapshot
         };
 
-        byte[] message;
+        var messageBytes = _serializer.Serialize(envelope, prefixed: true);
 
-        try
+        if (messageBytes is null)
         {
-            message = _serializer.Serialize(envelope);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("[Publishing]: Could not publish telemetry metrics: {}.", ex.Message);
+            _logger.LogError("[Publishing]: Could not serialize a message envelope: {}", _serializer.GetError()?.Message ?? "unknown error");
             return;
         }
 
-        var prefix = new byte[4];
-
-        if (!BitConverter.TryWriteBytes(prefix, message.Length))
-        {
-            _logger.LogError("[Publishing]: Could not convert the message length into bytes: {}.", message.Length);
-            return;
-        }
-
-        byte[] combined;
-
-        try
-        {
-            combined = new byte[prefix.Length + message.Length];
-
-            Buffer.BlockCopy(prefix, 0, combined, 0, prefix.Length);
-
-            Buffer.BlockCopy(message, 0, combined, prefix.Length, message.Length);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("[Publishing]: Could not prepare a telemetry message: {}.", ex.Message);
-            return;
-        }
-
-        await _transport.SendAsync(combined, ct);
+        await _transport.SendAsync(messageBytes, ct);
     }
 }

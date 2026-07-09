@@ -69,12 +69,14 @@ public sealed class CommandPipeClient : IAsyncDisposable
  
         try 
         {
-            var requestBytes = _serializer.Serialize(request);
+            var requestBytes = _serializer.Serialize(request, prefixed: true);
 
-            var lengthBytes = BitConverter.GetBytes(requestBytes.Length);
+            if (requestBytes is null)
+            {
+                Console.WriteLine($"procmon: error: Could not serialize a request: {_serializer.GetError()?.Message ?? "unknown error"}.");
+                return false;
+            }
 
-            await _client.WriteAsync(lengthBytes.AsMemory(0, 4), ct);
-        
             await _client.WriteAsync(requestBytes, ct);
 
             await _client.FlushAsync(ct);

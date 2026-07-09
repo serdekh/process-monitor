@@ -204,7 +204,7 @@ public sealed class TelemetryPipeClient : IAsyncDisposable
             
             try
             {
-                snapshot = _serializer.Deserialize<MessageEnvelope<ProcessMetricsSnapshot>>(rawMessage);
+                snapshot = _serializer.Deserialize<MessageEnvelope<ProcessMetricsSnapshot>>(rawMessage, prefixed: false);
             }
             catch (Exception ex)
             {

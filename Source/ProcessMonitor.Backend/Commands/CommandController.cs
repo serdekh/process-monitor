@@ -64,17 +64,23 @@ public sealed class CommandController
                     break;
                 }
 
-                var request = _serializer.Deserialize<MessageEnvelope<CommandRequest>>(bytes);
+                var request = _serializer.Deserialize<MessageEnvelope<CommandRequest>>(bytes, prefixed: true);
 
                 if (request is null)
                 {
-                    _logger.LogError("Command listening: The request has been corrupted. Stop.");
+                    _logger.LogError("Command listening: The request has been corrupted: {}. Stop.", _serializer.GetError()?.Message ?? "unknown error");
                     break;
                 }
                     
                 var response = await _router.RouteAsync(request, ct);
          
-                var responseBytes = _serializer.Serialize(response);
+                var responseBytes = _serializer.Serialize(response, prefixed: true);
+
+                if (responseBytes is null)
+                {
+                    _logger.LogError("Command listening: Failed to serialize a response object. Stop.");
+                    break;
+                }
             
                 await _transport.SendAsync(responseBytes, ct);
             }
@@ -99,7 +105,6 @@ public sealed class CommandController
                 _logger.LogError("Command listening: Fatal error occured while processing the command. Stop.");
                 break;
             }
-
         }    
 
         _logger.LogInformation("Command listening: Terminating...");
