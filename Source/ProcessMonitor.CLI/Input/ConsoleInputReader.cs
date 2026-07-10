@@ -244,11 +244,14 @@ public sealed class ConsoleInputReader
                 PrintStatus();
                 return;
             case CommandType.Exit:
-                Debug.Assert(command.Args is not null);                 
+                Debug.Assert(command.Args is not null);      
+                await _commandsPipeClient.CleanupConnection();
+                await _telemetryPipeClient.CleanupConnectionAsync();           
                 Environment.Exit((int)command.Args[0]);
                 return;
             case CommandType.Delete:
                 await _commandsPipeClient.CleanupConnection();
+                await _telemetryPipeClient.CleanupConnectionAsync();
                 return;
             case CommandType.Set:
                 var body = new

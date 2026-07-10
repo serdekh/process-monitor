@@ -13,6 +13,7 @@ using ProcessMonitor.CLI.Common;
 
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Snapshots;
+using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.CLI.Transport;
@@ -26,6 +27,8 @@ public sealed class TelemetryPipeClient : IAsyncDisposable
     private ILogger<TelemetryPipeClient> _logger;
 
     private readonly IMessageSerializer _serializer;
+
+    private IPCProtocolReader? _reader = null;
 
     public bool IsConnected => _backend.IsRunning && (_telemetryClient?.IsConnected ?? false);
 
@@ -77,6 +80,8 @@ public sealed class TelemetryPipeClient : IAsyncDisposable
                 "ProcessMonitor.Pipes.Telemetry", 
                 PipeDirection.In,
                 PipeOptions.Asynchronous);
+
+            _reader = new IPCProtocolReader(_telemetryClient);
         }
         catch (Exception ex)
         {
@@ -146,82 +151,35 @@ public sealed class TelemetryPipeClient : IAsyncDisposable
 
         Debug.Assert(_telemetryClient is not null, "_telemetryClient is expected to be non-null in here. If you see this message, then there is a bug");
 
-        var prefixBuffer = new byte[4];
+        Debug.Assert(_reader is not null, "_reader is expected to be non-null in here. If you see this message, then there is a bug");
 
         while (!ct.IsCancellationRequested)
         {
-            int prefixBytesRead;
-
             try
             {
-                if (_telemetryClient is null)
+                var bytes = await _reader.ReadAsync(ct);
+
+                if (bytes is null)
                 {
-                    _logger.LogError("[Telemetry]: Telemetry client stream object is null.");
-                    await CleanupConnectionAsync();
+                    _logger.LogError("[Telemetry]: Failed to read a telemetry message: Could not read from the pipe.");
                     return false;
                 }
 
-                prefixBytesRead = await _telemetryClient.ReadAsync(prefixBuffer.AsMemory(0, 4), ct);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("[Telemetry]: Failed to read a telemetry message: the size prefix has been corruputed: {}", ex.Message);
-                await CleanupConnectionAsync();
-                return false;
-            }
+                var snapshot = _serializer.Deserialize<MessageEnvelope<ProcessMetricsSnapshot>>(bytes, prefixed: false);
 
-            if (prefixBytesRead == 0)
-            {
-                _logger.LogInformation("[Telemetry]: Could not read a telemetry message: reached the end of the pipe.");
-                await CleanupConnectionAsync();
-                return true;
-            }
-
-            int rawMessageLength = BinaryPrimitives.ReadInt32LittleEndian(prefixBuffer);
-            if (rawMessageLength <= 0) continue;
-
-            var rawMessage = new byte[rawMessageLength];
-            
-            for (int totalBytesRead = 0; totalBytesRead < rawMessageLength;)
-            {
-                try
+                if (snapshot is null)
                 {
-                    int read = await _telemetryClient.ReadAsync(rawMessage.AsMemory(totalBytesRead, rawMessageLength - totalBytesRead), ct);
-                    
-                    if (read == 0) throw new EndOfStreamException("The backend process has exited");
-
-                    totalBytesRead += read;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("[Telemetry]: Failed to read a telemetry message: {}.", ex.Message);
-                    await CleanupConnectionAsync();
+                    _logger.LogError("[Telemetry]: Failed to read a telemetry message: Could not deserialize the input snapshot.");
                     return false;
                 }
-            }
 
-            MessageEnvelope<ProcessMetricsSnapshot>? snapshot;
-            
-            try
-            {
-                snapshot = _serializer.Deserialize<MessageEnvelope<ProcessMetricsSnapshot>>(rawMessage, prefixed: false);
-            }
+                System.Console.WriteLine(snapshot.Payload.ToString());
+            }   
             catch (Exception ex)
             {
-                _logger.LogError("[Telemetry]: Failed to read a telemetry message: {}.", ex.Message);
-                await CleanupConnectionAsync();
+                _logger.LogError("[Telemetry]: Failed to read a telemetry message: {}", ex.Message);
                 return false;
             }
-
-            if (snapshot is null)
-            {
-                _logger.LogError("[Telemetry]: Failed to read a telemetry message: could not deserialize the message into the metrics snapshot.");
-                await CleanupConnectionAsync();
-                return false;
-            }
-
-            // temp
-            Console.WriteLine(snapshot.Payload.ToString());
         }
 
         return true;

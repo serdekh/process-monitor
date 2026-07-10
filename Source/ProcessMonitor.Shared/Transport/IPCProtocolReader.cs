@@ -44,8 +44,9 @@ public sealed class IPCProtocolReader
 
             return buffer;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            System.Console.WriteLine(ex.Message);
             return null;
         }
     }

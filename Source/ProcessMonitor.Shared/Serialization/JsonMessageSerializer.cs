@@ -22,7 +22,7 @@ public sealed class JsonMessageSerializer : IMessageSerializer
             byte[] combined = new byte[4 + messageBytes.Length];
             Span<byte> combinedSpan = combined;
 
-            BinaryPrimitives.WriteInt32BigEndian(combinedSpan[..4], messageBytes.Length);
+            BinaryPrimitives.WriteInt32LittleEndian(combinedSpan[..4], messageBytes.Length);
             
             messageBytes.CopyTo(combinedSpan[4..]);
             return combined;
@@ -60,7 +60,7 @@ public sealed class JsonMessageSerializer : IMessageSerializer
         {
             ReadOnlySpan<byte> messageSpan = message;
             
-            int messageLength = BinaryPrimitives.ReadInt32BigEndian(messageSpan[..4]);
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(messageSpan[..4]);
 
             if (messageSpan.Length - 4 != messageLength)
             {
