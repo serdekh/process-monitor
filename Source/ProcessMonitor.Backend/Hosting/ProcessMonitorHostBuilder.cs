@@ -2,10 +2,10 @@ using System.Threading.Channels;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Diagnostics.Tracing;
 using Microsoft.Extensions.DependencyInjection;
 
 using ProcessMonitor.Backend.State;
-using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Commands;
 using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
@@ -43,7 +43,7 @@ public static class ProcessMonitorHostBuilder
     {
         services.AddSingleton<MonitoringSessionState>();
 
-        services.AddSingleton(Channel.CreateUnbounded<RawKernelEvent>());
+        services.AddSingleton(Channel.CreateUnbounded<TraceEvent>());
         services.AddSingleton(Channel.CreateUnbounded<ProcessMetricsSnapshot>());
 
         services.AddSingleton<IMessageSerializer, JsonMessageSerializer>();

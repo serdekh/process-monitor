@@ -11,7 +11,7 @@ public sealed class ProcessMetricsSnapshot
 
     public double CpuUsage { get; init; }
 
-    public int ThreadCount { get; init; }
+    public int ThreadCount { get; set; }
 
     public DateTime TimestampUtc { get; init; }
 
