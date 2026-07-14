@@ -22,27 +22,22 @@ public enum CommandType
     Delete,
     Set,
     Status,
+    Connect,
+    Length,
 }
 
 // TODO (not urgent): Move this type definition to a separate file
-public sealed class Command
+public sealed class CommandToken(CommandType operation = CommandType.None, object[]? args = null)
 {
-    public CommandType Operation { get; set; } = CommandType.None;
+    public CommandType Operation { get; set; } = operation;
 
-    public object[]? Args { get; set; } = null;
-
-    public Command(CommandType operation = CommandType.None, object[]? args = null)
-    {
-        Operation = operation;
-        Args = args;
-    }
+    public object[]? Args { get; set; } = args;
 }
 
 public sealed class ConsoleInputReader
 {
     private readonly BackendProcess _backend;
     private readonly CommandPipeClient _commandsPipeClient;
-
     private readonly TelemetryPipeClient _telemetryPipeClient;
 
     private int? _pid = null;
@@ -50,6 +45,10 @@ public sealed class ConsoleInputReader
     private uint _requestId = 0;
 
     private readonly Dictionary<string, CommandType> _map;
+
+    private readonly Dictionary<CommandType, Func<string[], bool>> _parsers;
+
+    private List<CommandToken> _tokens;
 
     public ConsoleInputReader(
         BackendProcess backend, 
@@ -71,7 +70,16 @@ public sealed class ConsoleInputReader
             ["set"] = CommandType.Set,
             ["status"] = CommandType.Status,
             ["stat"] = CommandType.Status,
+            ["connect"] = CommandType.Connect,
         };
+
+        _parsers = new Dictionary<CommandType, Func<string[], bool>>()
+        {
+            [CommandType.Set] = ParseSetCommand,
+            [CommandType.Exit] = ParseExitCommand
+        };
+
+        _tokens = new List<CommandToken>();
     }
 
     // TODO (not urgent): Replace console logging with the Microsoft logger.
@@ -96,81 +104,77 @@ public sealed class ConsoleInputReader
         return words;
     }
 
+    private bool ParseSetCommand(string[] words)
+    {
+        if (words.Length == 1)
+        {
+            Console.WriteLine("procmon: error: Missing an argument for the `set` command.\nprocmon: note: set <int>");
+            return false;
+        }
+
+        if (!int.TryParse(words[1], out int pid))
+        {
+            Console.WriteLine($"procmon: error: Could not convert `{words[1]}` to an integer.");
+            return false;
+        }
+
+        if (pid == _pid) return false;
+
+        _pid = pid;
+
+        var commandToken = new CommandToken(CommandType.Set, [pid]);
+
+        _tokens.Add(commandToken);
+
+        return true;
+    }
+
+    private bool ParseExitCommand(string[] words)
+    {
+        var exitCode = 0;
+
+        if (words.Length > 1)  
+        {
+            if (!int.TryParse(words[1], out exitCode))
+            {
+                Console.WriteLine($"procmon: error: Could not convert `{words[1]}` to an integer.");
+                return false;
+            }
+        }
+            
+        _tokens.Add(new CommandToken(CommandType.Delete));
+        _tokens.Add(new CommandToken(CommandType.Exit, [exitCode]));
+
+        return true;
+    }
+
     // TODO (not urgent): Replace the switch case with a dicitionary mapping
-    private async Task<Command?> BuildCommandToken(CancellationToken ct)
+    private async Task<bool> TryAddCommandTokens(CancellationToken ct)
     {
         if (ct.IsCancellationRequested)
         {
             Console.WriteLine("procmon: info: Could not parse a command: cancellation requested.");
-            return null;    
+            return false;    
         }
 
-        var tokens = await LexInput(ct);
+        var words = await LexInput(ct);
 
-        if (tokens is null) return null;
+        if (words is null) return false;
 
-        if (!_map.TryGetValue(tokens[0], out CommandType commandType))
+        if (!_map.TryGetValue(words[0], out CommandType commandType))
         {
-            Console.WriteLine($"procmon: error: The `{tokens[0]}` command was not recognized.\n\tRun 'h' or 'help' to get all the commands list.");
-            return null;
+            Console.WriteLine($"procmon: error: The `{words[0]}` command was not recognized.\n\tRun 'h' or 'help' to get all the commands list.");
+            return false;
         }
 
-        var command = new Command(operation: commandType, args: null);
-
-        switch (commandType)
+        if (!_parsers.TryGetValue(commandType, out Func<string[], bool>? handler))
         {
-            case CommandType.Help:
-                return command;
-
-            case CommandType.Create: 
-                return command;
-
-            case CommandType.Delete:
-                return command;
-
-            case CommandType.Status:
-                return command;
-
-            case CommandType.Exit:
-                var exitCode = 0;
-
-                if (tokens.Length > 1)  
-                {
-                    if (!int.TryParse(tokens[1], out exitCode))
-                    {
-                        Console.WriteLine($"procmon: error: Could not convert `{tokens[1]}` to an integer.");
-                        return null;
-                    }
-                }
-                    
-                command.Args = [exitCode];
-              
-                return command;
-            
-            case CommandType.Set:
-                if (tokens.Length == 1)
-                {
-                    Console.WriteLine("procmon: error: Missing an argument for the `set` command.\nprocmon: note: set <int>");
-                    return null;
-                }
-
-                if (!int.TryParse(tokens[1], out int pid))
-                {
-                    Console.WriteLine($"procmon: error: Could not convert `{tokens[1]}` to an integer.");
-                    return null;
-                }
-
-                if (pid == _pid) return null;
-
-                _pid = pid;
-
-                command.Args = [pid];
-
-                return command;
-
-            default: 
-                return null;
+            Debug.Assert((int)commandType < (int)CommandType.Length, "The condition assumes that all the incorrect types were filtered by the previous condition.");
+            _tokens.Add(new CommandToken(commandType));
+            return true;
         }
+
+        return handler(words);
     }
 
     // Note: Consider merging all the statements into a single one to reduce uncessary IO calls
@@ -181,6 +185,7 @@ public sealed class ConsoleInputReader
         Console.WriteLine("\thelp|h       - get this usage message.");
         Console.WriteLine();
         Console.WriteLine("\tcreate       - start up the ProcessMonitor.Backend server process.");
+        Console.WriteLine("\tconnect      - connects to the 'Telemetry' and 'Commands' pipes.");
         Console.WriteLine("\tdelete       - kill the ProcessMonitor.Backend server process.");
         Console.WriteLine("\tset <int>    - requests the server to update the process id.");
         Console.WriteLine("\tstatus|stat  - shows the current connection stats such as:");
@@ -214,7 +219,7 @@ public sealed class ConsoleInputReader
     // Note: this method assumes the input arguments are
     // valid since they're handled by the BuildCommandToken method
     // TODO (not urgent): Replace the switch statement with a dictionary mapping 
-    private async Task RunCommand(Command command, CancellationToken ct)
+    private async Task RunCommand(CommandToken command, CancellationToken ct)
     {
         switch (command.Operation)
         {
@@ -223,11 +228,29 @@ public sealed class ConsoleInputReader
             case CommandType.Help:
                 PrintUsage();
                 return;
-            // TODO (not urgent): Move all this code into a new connect command
-            case CommandType.Create:
-                await _commandsPipeClient.ConnectAsync(ct);
-                await _telemetryPipeClient.TryConnectAsync(ct);
+            case CommandType.Connect:
+                if (!_backend.IsRunning)
+                {
+                    Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: no server process has been created.");
+                    Console.WriteLine("procmon-cli: note: Consider running the 'create' command first before attempting to connect.");
+                    return;
+                }
+                
+                if (!await _commandsPipeClient.TryConnectAsync(ct))
+                {
+                    Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: Failed to connect to the 'Commands' pipe.");
+                    await _backend.KillAsync();
+                    return;
+                }
 
+                if (!await _telemetryPipeClient.TryConnectAsync(ct))
+                {
+                    Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: Failed to connect to the 'Telemetry' pipe.");
+                    await _backend.KillAsync();
+                    await _commandsPipeClient.CleanupConnection();
+                    return;
+                }
+                
                 _ = Task.Run(async () => 
                 {
                     try
@@ -237,19 +260,34 @@ public sealed class ConsoleInputReader
                     catch (Exception ex)
                     {
                         Console.WriteLine($"procmon-cli: error: The 'Telemetry' pipe handling exited abnormally: {ex.Message}");
+                        await _backend.KillAsync();
+                        await _telemetryPipeClient.CleanupConnectionAsync();
+                        await _commandsPipeClient.CleanupConnection();
                     }
-                });
+                }, ct);
+
+                return;
+            case CommandType.Create:
+                if (_backend.IsRunning)
+                {
+                    Console.WriteLine("procmon-cli: error: Could not startup a server process: already running.");
+                    return;
+                }
+
+                if (!_backend.Create())
+                {
+                    Console.WriteLine($"procmon-cli: error: Could not startup a server process: {_backend.GetErrorString()}");
+                }
                 return;
             case CommandType.Status:
                 PrintStatus();
                 return;
             case CommandType.Exit:
-                Debug.Assert(command.Args is not null);      
-                await _commandsPipeClient.CleanupConnection();
-                await _telemetryPipeClient.CleanupConnectionAsync();           
+                Debug.Assert(command.Args is not null);             
                 Environment.Exit((int)command.Args[0]);
                 return;
             case CommandType.Delete:
+                await _backend.KillAsync();
                 await _commandsPipeClient.CleanupConnection();
                 await _telemetryPipeClient.CleanupConnectionAsync();
                 return;
@@ -301,11 +339,14 @@ public sealed class ConsoleInputReader
         {
             Console.Write("procmon-cli>");
 
-            var command = await BuildCommandToken(ct);
+            if (!await TryAddCommandTokens(ct)) continue;
 
-            if (command is null) continue;
+            foreach (var token in _tokens)
+            {
+                await RunCommand(token, ct);
+            }
 
-            await RunCommand(command, ct);
+            _tokens.Clear();
         }    
     }
 }

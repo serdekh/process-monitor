@@ -48,14 +48,14 @@ public sealed class TelemetryPipeClient : IAsyncDisposable
         });
     }
 
-    public async Task CleanupConnectionAsync()
+    public async Task CleanupConnectionAsync(bool killBackend = false)
     {
         _logger.LogInformation("[Telemetry]: Attempting to disconnect.");
 
-        await _backend.KillAsync();
-
+        if (killBackend) await _backend.KillAsync();
+    
         if (_telemetryClient is null) return;
-        
+
         _telemetryClient.Close();
 
         _telemetryClient.Dispose();
