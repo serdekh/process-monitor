@@ -40,27 +40,22 @@ public sealed class TelemetryPipeClient : IAsyncDisposable
         _backend = backend;
         _logger = logger;
         _serializer = serializer;
-
-        _backend.AddOnExitHandler(async (sender, e) =>
-        {
-            _logger.LogInformation("[Telemetry]: The backend process has exited. Run the 'create' command to reconnect.");
-            await CleanupConnectionAsync();
-        });
     }
 
     public async Task CleanupConnectionAsync(bool killBackend = false)
     {
         _logger.LogInformation("[Telemetry]: Attempting to disconnect.");
 
-        if (killBackend) await _backend.KillAsync();
+        if (killBackend) await _backend.DisposeAsync();
     
-        if (_telemetryClient is null) return;
+        if (_telemetryClient is not null)
+        {
+            _telemetryClient.Close();
 
-        _telemetryClient.Close();
+            _telemetryClient.Dispose();
 
-        _telemetryClient.Dispose();
-
-        _telemetryClient = null;   
+            _telemetryClient = null;   
+        }
 
         _logger.LogInformation("[Telemetry]: Disconnection complete.");
     }
