@@ -5,19 +5,19 @@ namespace ProcessMonitor.Shared.Snapshots;
 
 public sealed class ProcessMetricsSnapshot
 {
-    public int ProcessId { get; init; }
+    public int ProcessId { get; set; }
 
-    public string ProcessName { get; init; } = string.Empty;
+    public string ProcessName { get; set; } = string.Empty;
 
-    public double CpuUsage { get; init; }
+    public double CpuUsage { get; set; }
 
     public int ThreadCount { get; set; }
 
-    public DateTime TimestampUtc { get; init; }
+    public DateTime TimestampUtc { get; set; }
 
-    public List<ThreadMetricsSnapshot> Threads { get; set; } = new();
+    // TODO: Implement per thread cpu usage handling in the processing stage
+    //public List<ThreadMetricsSnapshot> Threads { get; set; } = new();
 
-    // TODO: Add more fields and use a string builder for a dynamic thread colletion
     public override string ToString()
     {
         return $"{{ ProcessId: {ProcessId}, ProcessName: {ProcessName}, CpuUsage: {CpuUsage}, ThreadCount: {ThreadCount}}}";

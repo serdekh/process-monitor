@@ -2,9 +2,9 @@ namespace ProcessMonitor.Shared.Snapshots;
 
 public sealed class ThreadMetricsSnapshot
 {
-    public int ThreadId { get; init; }
+    public int ThreadId { get; set; }
 
-    public int ProcessId { get; init; }
-
-    public double CpuTime { get; init; }
+    // TODO: Implement handling the CpuTime value during
+    // the processing stage.
+    //public double CpuTime { get; set; }
 }
