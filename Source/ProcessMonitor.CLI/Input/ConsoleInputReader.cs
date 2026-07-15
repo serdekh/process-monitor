@@ -5,6 +5,9 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+using Microsoft.Extensions.Options;
+
+using ProcessMonitor.CLI.State;
 using ProcessMonitor.CLI.Common;
 using ProcessMonitor.CLI.Transport;
 
@@ -23,6 +26,9 @@ public enum CommandType
     Set,
     Status,
     Connect,
+    Start,
+    Stop,
+    Get,
     Length,
 }
 
@@ -40,24 +46,26 @@ public sealed class ConsoleInputReader
     private readonly CommandPipeClient _commandsPipeClient;
     private readonly TelemetryPipeClient _telemetryPipeClient;
 
-    private int? _pid = null;
-
     private uint _requestId = 0;
 
     private readonly Dictionary<string, CommandType> _map;
 
     private readonly Dictionary<CommandType, Func<string[], bool>> _parsers;
 
+    private IOptions<RuntimeState> _state;
+
     private List<CommandToken> _tokens;
 
     public ConsoleInputReader(
         BackendProcess backend, 
         CommandPipeClient commandPipeClient,
-        TelemetryPipeClient telemetryPipeClient)
+        TelemetryPipeClient telemetryPipeClient,
+        IOptions<RuntimeState> options)
     {
         _backend = backend;
         _commandsPipeClient = commandPipeClient;
         _telemetryPipeClient = telemetryPipeClient;
+        _state = options;
 
         _map = new Dictionary<string, CommandType>()
         {
@@ -67,19 +75,32 @@ public sealed class ConsoleInputReader
             ["exit"] = CommandType.Exit,
             ["q"] = CommandType.Exit,
             ["delete"] = CommandType.Delete,
+            ["del"] = CommandType.Delete,
             ["set"] = CommandType.Set,
             ["status"] = CommandType.Status,
             ["stat"] = CommandType.Status,
             ["connect"] = CommandType.Connect,
+            ["start"] = CommandType.Start,
+            ["stop"] = CommandType.Stop,
+            ["get"] = CommandType.Get,
         };
 
         _parsers = new Dictionary<CommandType, Func<string[], bool>>()
         {
+            [CommandType.Start] = ParseStartCommand,
+            [CommandType.Exit] = ParseExitCommand,
             [CommandType.Set] = ParseSetCommand,
-            [CommandType.Exit] = ParseExitCommand
         };
 
         _tokens = new List<CommandToken>();
+
+        _backend.AddOnExitHandler(async (sender, e) =>
+        {
+            Console.WriteLine("procmon: warning: the server process has exited. Run 'create' & 'connect' commands to reconnect again.");
+            await _backend.DisposeAsync();
+            await _commandsPipeClient.CleanupConnection();
+            await _telemetryPipeClient.CleanupConnectionAsync();
+        });
     }
 
     // TODO (not urgent): Replace console logging with the Microsoft logger.
@@ -104,12 +125,25 @@ public sealed class ConsoleInputReader
         return words;
     }
 
-    private bool ParseSetCommand(string[] words)
+    private bool ParseStartCommand(string[] words)
     {
         if (words.Length == 1)
         {
-            Console.WriteLine("procmon: error: Missing an argument for the `set` command.\nprocmon: note: set <int>");
-            return false;
+            // TODO: make target pid nullable to check whether it's been initialized
+            // since checking it to zero is unreliable (although usually working)
+            if (_state.Value.TargetPid == 0)
+            {
+                Console.WriteLine("procmon: error: Failed to execute the 'start' command: no target process id was specified.");
+                Console.WriteLine("procmon: note: run the 'set <pid>' command or provide the '--pid' flag in the input arguments.");
+                return false;
+            }
+
+            _tokens.Add(new CommandToken(CommandType.Create));
+            _tokens.Add(new CommandToken(CommandType.Connect));
+            _tokens.Add(new CommandToken(CommandType.Set, [_state.Value.TargetPid]));
+            _tokens.Add(new CommandToken(CommandType.Start));
+
+            return true;
         }
 
         if (!int.TryParse(words[1], out int pid))
@@ -118,13 +152,14 @@ public sealed class ConsoleInputReader
             return false;
         }
 
-        if (pid == _pid) return false;
+        if (pid == _state.Value.TargetPid) return true;
 
-        _pid = pid;
+        _state.Value.TargetPid = pid;
 
-        var commandToken = new CommandToken(CommandType.Set, [pid]);
-
-        _tokens.Add(commandToken);
+        _tokens.Add(new CommandToken(CommandType.Create));
+        _tokens.Add(new CommandToken(CommandType.Connect));
+        _tokens.Add(new CommandToken(CommandType.Set, [_state.Value.TargetPid]));
+        _tokens.Add(new CommandToken(CommandType.Start));
 
         return true;
     }
@@ -144,6 +179,28 @@ public sealed class ConsoleInputReader
             
         _tokens.Add(new CommandToken(CommandType.Delete));
         _tokens.Add(new CommandToken(CommandType.Exit, [exitCode]));
+
+        return true;
+    }
+
+    private bool ParseSetCommand(string[] words)
+    {
+        if (words.Length == 1)  
+        {
+            Console.WriteLine("procmon: error: Missing an argument for the 'set' command.");
+            Console.WriteLine("procmon: note: set <pid>");
+            return false;   
+        }
+
+        if (!int.TryParse(words[1], out int pid))  
+        {
+            Console.WriteLine($"procmon: error: Could not convert '{words[1]}' to an integer.");
+            return false;   
+        }
+
+        if (pid == _state.Value.TargetPid) return true;
+            
+        _tokens.Add(new CommandToken(CommandType.Set, [pid]));
 
         return true;
     }
@@ -228,6 +285,10 @@ public sealed class ConsoleInputReader
             case CommandType.Help:
                 PrintUsage();
                 return;
+            case CommandType.Get:
+                var pidInfo = _state.Value.TargetPid == 0 ? "not defined" : _state.Value.TargetPid.ToString();
+                Console.WriteLine($"pid: {pidInfo}\nserver file path: {_state.Value.BackendProcessFilePath}");
+                return;
             case CommandType.Connect:
                 if (!_backend.IsRunning)
                 {
@@ -235,48 +296,50 @@ public sealed class ConsoleInputReader
                     Console.WriteLine("procmon-cli: note: Consider running the 'create' command first before attempting to connect.");
                     return;
                 }
-                
-                if (!await _commandsPipeClient.TryConnectAsync(ct))
-                {
-                    Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: Failed to connect to the 'Commands' pipe.");
-                    await _backend.KillAsync();
-                    return;
-                }
 
-                if (!await _telemetryPipeClient.TryConnectAsync(ct))
+                if (!_commandsPipeClient.IsConnected)
                 {
-                    Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: Failed to connect to the 'Telemetry' pipe.");
-                    await _backend.KillAsync();
-                    await _commandsPipeClient.CleanupConnection();
-                    return;
+                    if (!await _commandsPipeClient.TryConnectAsync(ct))
+                    {
+                        Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: Failed to connect to the 'Commands' pipe.");
+                        await _backend.KillAsync();
+                        return;
+                    }
                 }
                 
-                _ = Task.Run(async () => 
+                if (!_telemetryPipeClient.IsConnected)
                 {
-                    try
+                    if (!await _telemetryPipeClient.TryConnectAsync(ct))
                     {
-                        await _telemetryPipeClient.ReadAsync(ct);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"procmon-cli: error: The 'Telemetry' pipe handling exited abnormally: {ex.Message}");
+                        Console.WriteLine("procmon-cli: error: Could not execute the 'connect' command: Failed to connect to the 'Telemetry' pipe.");
                         await _backend.KillAsync();
-                        await _telemetryPipeClient.CleanupConnectionAsync();
                         await _commandsPipeClient.CleanupConnection();
+                        return;
                     }
-                }, ct);
+                    
+                    _ = Task.Run(async () => 
+                    {
+                        try
+                        {
+                            await _telemetryPipeClient.ReadAsync(ct);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"procmon-cli: error: The 'Telemetry' pipe handling exited abnormally: {ex.Message}");
+                            await _backend.KillAsync();
+                            await _telemetryPipeClient.CleanupConnectionAsync();
+                            await _commandsPipeClient.CleanupConnection();
+                        }
+                    }, ct);
+                }
 
                 return;
             case CommandType.Create:
-                if (_backend.IsRunning)
-                {
-                    Console.WriteLine("procmon-cli: error: Could not startup a server process: already running.");
-                    return;
-                }
+                if (_backend.IsRunning) return;
 
                 if (!_backend.Create())
                 {
-                    Console.WriteLine($"procmon-cli: error: Could not startup a server process: {_backend.GetErrorString()}");
+                    Console.WriteLine($"procmon: error: Could not startup a server process: {_backend.GetErrorString()}");
                 }
                 return;
             case CommandType.Status:
@@ -287,16 +350,59 @@ public sealed class ConsoleInputReader
                 Environment.Exit((int)command.Args[0]);
                 return;
             case CommandType.Delete:
-                await _backend.KillAsync();
+                await _backend.DisposeAsync();
                 await _commandsPipeClient.CleanupConnection();
                 await _telemetryPipeClient.CleanupConnectionAsync();
                 return;
             case CommandType.Set:
+                Debug.Assert(command.Args is not null);             
+                _state.Value.TargetPid = (int)command.Args[0];
+                return;
+            case CommandType.Stop:
+            {
+                if (!_backend.IsRunning || !_telemetryPipeClient.IsConnected) return;
+
                 var body = new
                 {
                     version = 1,
                     requestId = _requestId,
-                    pid = _pid
+                };
+
+                var bodyElement = JsonSerializer.SerializeToElement(body);
+
+                var envelope = new MessageEnvelope<CommandRequest>
+                {
+                    Type = MessageType.CommandRequest,
+                    Payload = new CommandRequest
+                    {
+                        Method = "delete",
+                        Route = "monitoring",
+                        Body = bodyElement
+                    }    
+                };
+                var result = await _commandsPipeClient.WriteAsync(envelope, ct);
+
+                if (!result)
+                {
+                    Console.WriteLine("procmon: error: Failed to execute the 'stop' command.");
+                    return;    
+                }
+
+                _requestId++;
+
+                return;
+            }
+            case CommandType.Start:
+            {
+                
+                Debug.Assert(_telemetryPipeClient.IsConnected && _commandsPipeClient.IsConnected && _backend.IsRunning, 
+                    "The 'start' command is expected to be split into 'create & connect & set' commands. Therefore if some of the variables above are invalid, it's a bug.");
+                
+                var body = new
+                {
+                    version = 1,
+                    requestId = _requestId,
+                    pid = _state.Value.TargetPid
                 };
 
                 var bodyElement = JsonSerializer.SerializeToElement(body);
@@ -316,13 +422,14 @@ public sealed class ConsoleInputReader
 
                 if (!result)
                 {
-                    Console.WriteLine("prcomon: error: Failed to execute the `set` command.");
+                    Console.WriteLine("procmon: error: Failed to execute the 'start' command.");
                     return;    
                 }
 
                 _requestId++;
 
                 return;
+            }
         }
     }
 
