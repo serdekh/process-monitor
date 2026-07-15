@@ -1,21 +1,25 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Channels;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Diagnostics.Tracing.Parsers;
-using Microsoft.Diagnostics.Tracing.Session;
 
 using Microsoft.Diagnostics.Tracing;
-using System;
+using Microsoft.Diagnostics.Tracing.Parsers;
+using Microsoft.Diagnostics.Tracing.Session;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
+
+using ProcessMonitor.Backend.State;
 
 namespace ProcessMonitor.Backend.Collection;
 
 public sealed class EventStreamCollector(
     Channel<TraceEvent> input,
     ILogger<EventStreamCollector> logger,
-    IHostApplicationLifetime hostLifetime) : IEventCollector
+    IHostApplicationLifetime hostLifetime,
+    MonitoringSessionState state) : IEventCollector
 {
     // NOTE: Consider adding a configuration manager in the future that handles
     // loading a custom session name
@@ -26,6 +30,8 @@ public sealed class EventStreamCollector(
     private readonly ILogger<EventStreamCollector> _logger = logger;
 
     private readonly IHostApplicationLifetime _hostLifetime = hostLifetime;
+
+    private readonly MonitoringSessionState _state = state;
 
     private bool TryInitializeCollection()
     {
@@ -45,22 +51,53 @@ public sealed class EventStreamCollector(
         return true;
     }
 
+    private async void HandleEvent(TraceEvent e, CancellationToken ct)
+    {
+        var processId = _state.ProcessId;
+
+        if (processId is null) return;
+
+        try
+        {
+            if (e is CSwitchTraceData cSwitch)
+            {
+                await _writer.WriteAsync(cSwitch.Clone(), ct);
+            }
+            else
+            {
+                if (e.ProcessID != processId) return;
+                await _writer.WriteAsync(e.Clone(), ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("[Collection]: Could not write an incoming event: {}", ex.Message);
+            _hostLifetime.StopApplication();
+        }
+    }
+
     public async Task RunAsync(CancellationToken ct)
     {
         if (!TryInitializeCollection()) return;
 
         using var session = new TraceEventSession(SessionName);
+
+        var kernelKeywords = KernelTraceEventParser.Keywords.Process 
+            | KernelTraceEventParser.Keywords.Thread 
+            | KernelTraceEventParser.Keywords.ContextSwitch;
         
-        session.EnableKernelProvider(KernelTraceEventParser.Keywords.Process);
+        session.EnableKernelProvider(kernelKeywords);
 
-        session.Source.Kernel.ProcessStart += data => _writer.TryWrite(data.Clone());
-        session.Source.Kernel.ProcessStop += data => _writer.TryWrite(data.Clone());
+        session.Source.Kernel.ProcessStart += data => HandleEvent(data, ct);
+        session.Source.Kernel.ProcessStop += data => HandleEvent(data, ct);
 
-        session.Source.Kernel.ThreadStart += data => _writer.TryWrite(data.Clone());
-        session.Source.Kernel.ThreadStop += data => _writer.TryWrite(data.Clone());
+        session.Source.Kernel.ThreadStart += data => HandleEvent(data, ct);
+        session.Source.Kernel.ThreadStop += data => HandleEvent(data, ct);
 
-        session.Source.Kernel.ImageLoad += data => _writer.TryWrite(data.Clone());
-        session.Source.Kernel.ImageUnload += data => _writer.TryWrite(data.Clone());
+        session.Source.Kernel.ImageLoad += data => HandleEvent(data, ct);
+        session.Source.Kernel.ImageUnload += data => HandleEvent(data, ct);
+
+        session.Source.Kernel.ThreadCSwitch += data => HandleEvent(data, ct);
 
         var collecting = Task.Run(() => 
         {
@@ -78,7 +115,7 @@ public sealed class EventStreamCollector(
         }            
         catch (Exception ex)
         {
-            _logger.LogInformation("[Collection]: Could not read input events: {}. Terminating...", ex.Message);
+            _logger.LogError("[Collection]: Could not read input events: {}. Terminating...", ex.Message);
         }
 
         session.Stop();
