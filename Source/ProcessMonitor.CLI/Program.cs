@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ProcessMonitor.CLI.Input;
 using ProcessMonitor.CLI.Common;
 using ProcessMonitor.CLI.Hosting;
+using ProcessMonitor.CLI.State;
 
 namespace ProcessMonitor.CLI;
 
@@ -34,12 +35,20 @@ internal class Program
         var builder = CLIHostBuilder 
             .Create(args);
 
+        if (!argsParser.Flags.TryGetValue("--pid", out object? flag))
+        {
+            flag = 0;
+        }
+
+        int pid = flag is null ? 0 : (int)flag;
+
         // NOTE: Consider replacing this code with a refactorred logic inside the ConsoleInputReader class
         // so that we don't explicitly inject this path string. For example, add a new hosted service that
         // manages cli arguments and exposes them to the other services inside the ConfigureServices method. 
-        builder.Services.Configure<BackendProcessOptions>(options =>
+        builder.Services.Configure<RuntimeState>(options =>
         {
-            options.FilePath = path;
+            options.TargetPid = pid;
+            options.BackendProcessFilePath = path;
         });
 
         await builder.Build().RunAsync();
