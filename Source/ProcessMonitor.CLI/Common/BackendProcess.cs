@@ -7,13 +7,9 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Options;
 
+using ProcessMonitor.CLI.State;
+
 namespace ProcessMonitor.CLI.Common;
-
-public sealed class BackendProcessOptions
-{
-    public string FilePath { get; set; } = string.Empty;   
-}
-
 
 public sealed class BackendProcess : IAsyncDisposable
 {
@@ -62,11 +58,11 @@ public sealed class BackendProcess : IAsyncDisposable
         }
     }
 
-    public BackendProcess(IOptions<BackendProcessOptions> options)
+    public BackendProcess(IOptions<RuntimeState> options)
     {
         _startInfo = new ProcessStartInfo
         {
-            FileName = options.Value.FilePath,
+            FileName = options.Value.BackendProcessFilePath,
             UseShellExecute = true,
             Verb = "runas"
         };
