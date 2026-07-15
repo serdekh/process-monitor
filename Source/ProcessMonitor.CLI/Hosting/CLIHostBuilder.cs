@@ -2,6 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
+using ProcessMonitor.CLI.State;
 using ProcessMonitor.CLI.Input;
 using ProcessMonitor.CLI.Common;
 using ProcessMonitor.CLI.Transport;
@@ -33,6 +34,8 @@ public sealed class CLIHostBuilder
 
     public static void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<RuntimeState>();
+
         services.AddSingleton<BackendProcess>();
 
         services.AddSingleton<TelemetryPipeClient>();
