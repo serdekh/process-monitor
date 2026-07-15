@@ -9,12 +9,15 @@ using ProcessMonitor.CLI.Common;
 
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
+using ProcessMonitor.Shared.Transport;
 
 namespace ProcessMonitor.CLI.Transport;
 
 public sealed class CommandPipeClient : IAsyncDisposable
 {
     private NamedPipeClientStream? _client = null;
+
+    private IPCProtocolWriter? _writer = null;
 
     private readonly IMessageSerializer _serializer;
 
@@ -24,17 +27,13 @@ public sealed class CommandPipeClient : IAsyncDisposable
 
     public bool IsConnected => _backend.IsRunning && (_client?.IsConnected ?? false);
 
-    public CommandPipeClient(BackendProcess backend, IMessageSerializer serializer, ILogger<CommandPipeClient> logger)
+    public CommandPipeClient(
+        BackendProcess backend, 
+        IMessageSerializer serializer, 
+        ILogger<CommandPipeClient> logger)
     {
         _backend = backend;  
         _logger = logger;
-
-        _backend.AddOnExitHandler(async (sender, e) =>
-        {
-            _logger.LogWarning("[Commands]: The backend process has terminated.\nRun the 'create' command to instantiate a new process."); 
-            await CleanupConnection();
-        });
-
         _serializer = serializer;
     }
     
@@ -42,15 +41,16 @@ public sealed class CommandPipeClient : IAsyncDisposable
     {
         _logger.LogInformation("[Commands]: Attempting to disconnect.");
 
-        if (killBackend) await _backend.KillAsync();
+        if (killBackend) await _backend.DisposeAsync();
     
-        if (_client is null) return;
+        if (_client is not null) 
+        {
+            _client.Close();
 
-        _client.Close();
+            _client.Dispose();
 
-        _client.Dispose();
-
-        _client = null;   
+            _client = null;   
+        }
 
         _logger.LogInformation("[Commands]: Disconnection complete.");
     }
@@ -63,7 +63,7 @@ public sealed class CommandPipeClient : IAsyncDisposable
     // TODO: Implement server response handling
     public async Task<bool> WriteAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
     {
-        if (_client is null)
+        if (_client is null || _writer is null)
         {
             _logger.LogError("[Commands]: Could not write a request. No connection was established.");
             return false;
@@ -85,9 +85,15 @@ public sealed class CommandPipeClient : IAsyncDisposable
                 return false;
             }
 
-            await _client.WriteAsync(requestBytes, ct);
-
-            await _client.FlushAsync(ct);
+            try
+            {
+                await _writer.WriteAsync(requestBytes, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("[Commands]: Could not send a request: {}", ex.Message);
+                return false;
+            }
 
             return true;
         }
@@ -109,6 +115,8 @@ public sealed class CommandPipeClient : IAsyncDisposable
                 "ProcessMonitor.Pipes.Commands", 
                 PipeDirection.InOut,
                 PipeOptions.Asynchronous);
+
+            _writer = new IPCProtocolWriter(_client);
         }
         catch (Exception ex)
         {
