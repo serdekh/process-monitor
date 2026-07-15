@@ -57,6 +57,7 @@ public static class ProcessMonitorHostBuilder
         services.AddSingleton<IMetricsPublisher, IPCMetricsPublisher>();
         
         services.AddTransient<StartMonitoringHandler>();
+        services.AddTransient<StopMonitoringHandler>();
 
         services.AddSingleton<CommandController>();
         services.AddSingleton<ICommandTransport, CommandTransport>();
