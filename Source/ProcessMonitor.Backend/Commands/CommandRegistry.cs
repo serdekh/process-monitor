@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+
 using ProcessMonitor.Backend.Commands.Handlers;
 
 namespace ProcessMonitor.Backend.Commands;
@@ -12,7 +13,8 @@ public sealed class CommandRegistry
     {
         _map = new Dictionary<string, Type>
         {
-            ["monitoring/post"] = typeof(StartMonitoringHandler)
+            ["monitoring/post"] = typeof(StartMonitoringHandler),
+            ["monitoring/delete"] = typeof(StopMonitoringHandler)
         };
     }
 
