@@ -23,7 +23,44 @@ working application will be shipped for a release.
 
 ## Quick Start
 
-Not available until the first goal is complete
+The project does not have prebuilt binaries for now since it's being actively developed.
+To use the application in its current state you have to build it yourself. Here is how:
+
+1: Ensure that you have the .NET SDK installed. Check it by running this command
+
+```
+dotnet --version
+```
+
+If you have it installed, you will see the version number otherwise it'll be not recognized.
+In that case go to the official website (`https://dotnet.microsoft.com/en-us/download`) and
+download the .NET 9+ version.
+
+Once this is setup, go to the backend project (`./Source/ProcessMonitor.Backend/`) and build
+it by running this command:
+
+```
+dotnet build
+```
+
+It will generate the assemblies the client application will use to run the metrics. Take a look
+at the local `bin\Debug\net9.0` folder. There you will find the `ProcessMonitor.Backend.exe` file.
+Copy its filepath for the client app.
+
+Then go to the `CLI` project (`./Source/ProcessMonitor.CLI/`) and build it the same way:
+
+```
+dotnet build
+```
+
+you will find the executable at (`ProcessMonitor.CLI/bin/Debug/net9.0/`). Run it and provide the
+`--path <backend-filepath>` in the arguments:
+
+```
+.\ProcessMonitor.CLI.exe --path <your-path-to-the-backend>
+```
+
+Enjoy dealing with my profanity :)
 
 ## Goals
 
