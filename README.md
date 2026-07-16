@@ -66,19 +66,45 @@ Enjoy dealing with my profanity :)
 
 Here are the goals that are now defined for this project in order:
 
-[-] Make a basic working skeleton (Define core project structure, add the essential types
+[✓] Make a basic working skeleton (Define core project structure, add the essential types
    for simply booting the server project)
-   [-] Implement proper 'Collection' layer
-   [-] Implement basic metrics computations
-   [-] Add logging
-   [-] Add exception handling for background services
-   [-] Prepare 'Commands' layer for the second goal
    
-[-] Add a cli client (Create a separate C# Console App for interacting with the server
+   -- [✓] Implement proper 'Collection' layer
+   
+   -- [✓] Implement basic metrics computations
+   
+   -- [✓] Add logging
+   
+   -- [✓] Add exception handling for background services
+   
+   -- [✓] Prepare 'Commands' layer for the second goal
+   
+[✓] Add a cli client (Create a separate C# Console App for interacting with the server
    in a simpler way)
+
+[-] Improve the existing skeleton implementation
+
+    -- [-] Refactor the Transport-based layers in both the backend and the
+           cli frontend to be more flexible. The initial implementation 
+           considered the Transport layer to be used solely by the backend
+           project but it turned out to be a shared feature. Thus it has to
+           be reimplemented to support the shift to the Shared project.
+           
+    -- [-] Create an error-propagated system based on a union type
+           to make the error handling work on the background service level.
+           Instead of immediate logging right after an error occurs, force 
+           all the error-prone methods to return a union based type and 
+           make the consumers dispatch it.
+           
+    -- [-] Improve CLI Interface by introducing a UI framework for rendering
+           different components (telemetry, prompt and logs) in their 
+           corresponding places. For now, everything gets printed into a 
+           single stdout stream making the app unresponsive when the telemetry
+           data arrives.
    
-[-] Extend the server (Add more diagnostic parameters, improve `IPC` protocol, complete
-   a set of client commands)
+    -- [-] Improve the existing metrics engine to support more computations
+
+    -- [-] Introduce a separate project for testing purposes
    
 [-] Add documentation (Create a consistent style of guidelines and manuals)
 
@@ -87,7 +113,7 @@ Here are the goals that are now defined for this project in order:
 [-] Define release structure (Define concrete `IPC API` protocol, type definitions,
    bundle structure and create a first stable release)
    
-[-] Consider extending the project with new features (Testing, different Frontends,
+[-] Consider extending the project with new features (different Frontends,
    api updates, others...)
 
 ## Contributing
