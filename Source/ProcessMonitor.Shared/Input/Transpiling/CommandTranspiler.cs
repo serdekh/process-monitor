@@ -24,7 +24,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
 
             if (slice.Type != TokenSliceType.NumberLiteral) return (cursor + 1, new FormatException("'set' command expects a numeric literal argument"));
 
-            var processId = int.Parse(slice.Source.AsSpan(slice.StartIndex, slice.Length));
+            var processId = int.Parse(slice.AsSpan());
 
             var op = new CommandOperation(CommandOperationType.SetProcessId, slice, processId);
 
@@ -64,7 +64,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
 
             if (slice.Type != TokenSliceType.NumberLiteral) return (cursor + 1, new FormatException("Expected a numeric literal"));
 
-            int exitCode = int.Parse(slice.Source.AsSpan(slice.StartIndex, slice.Length));
+            int exitCode = int.Parse(slice.AsSpan());
 
             Operations.Add(new CommandOperation(CommandOperationType.Exit, slice, exitCode));
 
@@ -118,7 +118,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
         try
         {
             var slice = tokens[cursor];
-            int processId = int.Parse(slice.Source.AsSpan(slice.StartIndex, slice.Length));
+            int processId = int.Parse(slice.AsSpan());
 
             Operations.Add(new CommandOperation(CommandOperationType.SetProcessId, slice, processId));
             Operations.Add(new CommandOperation(CommandOperationType.CreateBackendProcess, slice, null));
@@ -259,7 +259,7 @@ public sealed class CommandTranspiler
 
         var token = tokens[cursor]; cursor++;
 
-        var dispatcher = _dispatchers[token.Source.AsSpan(token.StartIndex, token.Length).AsCommand()];
+        var dispatcher = _dispatchers[token.AsSpan().AsCommand()];
 
         (int newCursorPosition, Exception? result) = dispatcher(tokens, cursor);
 
