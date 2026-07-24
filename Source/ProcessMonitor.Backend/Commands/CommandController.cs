@@ -13,9 +13,10 @@ using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Commands;
 
+// TODO: Replace immediate logs with custom exception? return values
 public sealed class CommandController
 {
-    private ILogger<CommandController> _logger;
+    private readonly ILogger<CommandController> _logger;
     private readonly ITransportServer _transport;
     private readonly IMessageSerializer _serializer;
     private readonly CommandRouter _router;
