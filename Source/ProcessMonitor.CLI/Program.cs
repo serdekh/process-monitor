@@ -4,10 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-using ProcessMonitor.CLI.Input;
-using ProcessMonitor.CLI.Common;
-using ProcessMonitor.CLI.Hosting;
 using ProcessMonitor.CLI.State;
+using ProcessMonitor.CLI.Hosting;
+using ProcessMonitor.CLI.Input.Args;
 
 namespace ProcessMonitor.CLI;
 
