@@ -11,15 +11,25 @@ using ProcessMonitor.CLI.State;
 
 namespace ProcessMonitor.CLI.Common;
 
+// TODO: Consider making this class 'CLI project independent' to allow 
+// moving it upper into the 'Shared' project. This will let the future
+// 'WPF-based' client implementation to use the 'CommandInterpreter' and
+// 'CommandInterpreterState' classes thus eliminating the need of having
+// two interpreters for each client
+
+// TODO: Reimplement the error-prone methods to return a nullable exception
+// type instead of storing it in a private field thus reducing a risk of
+// possible race conditions in the future
 public sealed class BackendProcess : IAsyncDisposable
 {
     private Process? _backend = null;
 
-    private Exception? _error = null;
 
     private readonly ProcessStartInfo _startInfo;
 
     private EventHandler? _onExit = null;
+    
+    public Exception? Error { get; private set; }
 
     public string Path 
     { 
@@ -54,7 +64,7 @@ public sealed class BackendProcess : IAsyncDisposable
     {
         get
         {
-            return _error is not null;
+            return Error is not null;
         }
     }
 
@@ -88,7 +98,7 @@ public sealed class BackendProcess : IAsyncDisposable
             }
         }
 
-        _error = null;
+        Error = null;
 
         try
         {
@@ -103,17 +113,17 @@ public sealed class BackendProcess : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _error = ex;
+            Error = ex;
         }
 
-        return _error is null;
+        return Error is null;
     }
 
     public string GetErrorString()
     {
         if (!HasError) return "No error";
 
-        return _error switch
+        return Error switch
         {
             Win32Exception => "The file was not found, access was denied or executable was corruputed",
             FileNotFoundException => $"The file {_startInfo.FileName} was not found",
@@ -129,7 +139,7 @@ public sealed class BackendProcess : IAsyncDisposable
     {
         if (_backend is null || HasExited) return;
 
-        _error = null;
+        Error = null;
 
         try
         {
@@ -152,7 +162,7 @@ public sealed class BackendProcess : IAsyncDisposable
         {
             if (ex is not OperationCanceledException) 
             {
-                _error = ex;
+                Error = ex;
             }
         }
     }
