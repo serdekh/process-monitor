@@ -1,12 +1,14 @@
 using System;
 using System.IO;
+using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using ProcessMonitor.Backend.Transport;
+
 using ProcessMonitor.Shared.Protocol;
-using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Commands;
@@ -14,12 +16,12 @@ namespace ProcessMonitor.Backend.Commands;
 public sealed class CommandController
 {
     private ILogger<CommandController> _logger;
-    private readonly ICommandTransport _transport;
+    private readonly ITransportServer _transport;
     private readonly IMessageSerializer _serializer;
     private readonly CommandRouter _router;
 
     public CommandController(ILogger<CommandController> logger,
-                             ICommandTransport transport, 
+                             ITransportServer transport, 
                              IMessageSerializer serializer, 
                              CommandRouter router)
     {
@@ -33,56 +35,76 @@ public sealed class CommandController
     {
         if (ct.IsCancellationRequested) return;
 
-        try 
-        {
-            _logger.LogInformation("Command listening: Waiting for a client...");
-        
-            await _transport.InitializeAsync(ct);
+        _logger.LogInformation("Command listening: Waiting for a client...");
+    
+        var initializationException = _transport.TryInitialize(
+            pipeName:                   "ProcessMonitor.Pipes.Commands",
+            direction:                  PipeDirection.InOut,
+            maxNumberOfServerInstances: 1,
+            transmissionMode:           PipeTransmissionMode.Byte,
+            options:                    PipeOptions.Asynchronous);
 
-            _logger.LogInformation("Command listening: Client connected successfully.");
-        }
-        catch (Exception ex)
+        if (initializationException is not null)
         {
-            if (ex is OperationCanceledException) 
-            {
-                _logger.LogInformation("Command listening: Terminating...");
-                return;
-            }
-            _logger.LogError("Command listening: No client has connected or the stream is already taken. Stop.");
+            _logger.LogError("Command listening: Failed to initialize a server stream: {}.", initializationException.Message);
             return;
         }
+
+        var connectionException = await _transport.TryConnectAsync(ct);
+
+        if (connectionException is not null)
+        {
+            _logger.LogError("Command listening: Failed to connect to a client: {}.", connectionException.Message);
+            return;
+        }
+
+        _logger.LogInformation("Command listening: Client connected successfully.");
     
         while (!ct.IsCancellationRequested)
         {
             try
             {
-                var bytes = await _transport.ReceiveAsync(ct);
+                (var bytes, var readingException) = await _transport.TryReadAsync(ct);
        
-                if (bytes is null)
+                if (readingException is not null)
                 {
-                    _logger.LogError("Command listening: Could not read from the client. Stop.");                       
+                    _logger.LogError("Command listening: Could not read from the client: {}. Stop.", readingException.Message);                       
                     break;
                 }
 
-                var request = _serializer.Deserialize<MessageEnvelope<CommandRequest>>(bytes, prefixed: true);
+                (var request, var deserializationException) = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes);
+
+                if (deserializationException is not null)
+                {
+                    _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.", deserializationException.Message);
+                    break;
+                }
 
                 if (request is null)
                 {
-                    _logger.LogError("Command listening: The request has been corrupted: {}. Stop.", _serializer.GetError()?.Message ?? "unknown error");
+                    _logger.LogError("Command listening: The request has been corrupted. Stop.");
                     break;
                 }
                     
+                // TODO: add a TryRouteAsync method to handle the exception
+                // and remove the outer try-catch block from this method
                 var response = await _router.RouteAsync(request, ct);
          
-                var responseBytes = _serializer.Serialize(response, prefixed: true);
+                (var responseBytes, var serializationException) = _serializer.TrySerialize(response);
 
-                if (responseBytes is null)
+                if (serializationException is not null)
                 {
                     _logger.LogError("Command listening: Failed to serialize a response object. Stop.");
                     break;
                 }
             
-                await _transport.SendAsync(responseBytes, ct);
+                var writingException = await _transport.TryWriteAsync(responseBytes, ct);
+
+                if (writingException is not null)
+                {
+                    _logger.LogError("Command listening: Failed to write a message: {}. Stop.", writingException.Message);
+                    break;
+                }
             }
             catch (IOException)
             {
@@ -109,6 +131,8 @@ public sealed class CommandController
 
         _logger.LogInformation("Command listening: Terminating...");
 
-        _transport.Deinitialize();        
+        await _transport.DeinitializeAsync();       
+
+        _logger.LogInformation("Command listening: Terminated."); 
     }
 }
