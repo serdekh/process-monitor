@@ -3,11 +3,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 using ProcessMonitor.CLI.State;
-using ProcessMonitor.CLI.Input;
 using ProcessMonitor.CLI.Common;
-using ProcessMonitor.CLI.Transport;
 
 using ProcessMonitor.Shared.Serialization;
+using ProcessMonitor.Shared.Transport.Framing;
 
 namespace ProcessMonitor.CLI.Hosting;
 
@@ -36,15 +35,12 @@ public sealed class CLIHostBuilder
     {
         services.AddSingleton<RuntimeState>();
 
+        services.AddSingleton<IFrameReader, FrameReader>();
+        services.AddSingleton<IFrameWriter, FrameWriter>();
+
         services.AddSingleton<BackendProcess>();
 
-        services.AddSingleton<TelemetryPipeClient>();
-
         services.AddSingleton<IMessageSerializer, JsonMessageSerializer>();
-
-        services.AddSingleton<CommandPipeClient>();
-
-        services.AddSingleton<ConsoleInputReader>();
 
         services.AddHostedService<InputReaderHostedService>();
     }
