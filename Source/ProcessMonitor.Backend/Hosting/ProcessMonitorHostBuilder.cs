@@ -7,13 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Backend.Commands;
+using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Backend.Publishing;
 using ProcessMonitor.Backend.Processing;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Commands.Handlers;
 
 using ProcessMonitor.Shared.Snapshots;
-using ProcessMonitor.Shared.Transport;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Hosting;
@@ -47,8 +47,6 @@ public static class ProcessMonitorHostBuilder
         services.AddSingleton(Channel.CreateUnbounded<ProcessMetricsSnapshot>());
 
         services.AddSingleton<IMessageSerializer, JsonMessageSerializer>();
-    
-        services.AddSingleton<ITelemetryTransport, TelemetryTransport>();
 
         services.AddSingleton<IEventCollector, EventStreamCollector>();
 
@@ -60,7 +58,7 @@ public static class ProcessMonitorHostBuilder
         services.AddTransient<StopMonitoringHandler>();
 
         services.AddSingleton<CommandController>();
-        services.AddSingleton<ICommandTransport, CommandTransport>();
+        services.AddTransient<ITransportServer, TransportServer>();
         services.AddSingleton<CommandRouter>();
         services.AddSingleton<CommandRegistry>();
 
