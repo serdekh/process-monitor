@@ -4,9 +4,7 @@ namespace ProcessMonitor.Shared.Serialization;
 
 public interface IMessageSerializer
 {
-    public byte[]? Serialize<T>(T message, bool prefixed);
+    public (byte[], Exception?) TrySerialize<T>(T message);
 
-    public T? Deserialize<T>(byte[] data, bool prefixed);
-
-    public Exception? GetError();
+    public (T?, Exception?) TryDeserialize<T>(byte[] message);
 }

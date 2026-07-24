@@ -1,82 +1,41 @@
 using System;
 using System.Text.Json;
-using System.Buffers.Binary;
 
 namespace ProcessMonitor.Shared.Serialization;
 
 public sealed class JsonMessageSerializer : IMessageSerializer
 {
-    private Exception? _error = null;
-
-    // TODO: Replace this error handling with a different one to be thread safe
-    public Exception? GetError() => _error;
-
-    public byte[]? Serialize<T>(T message, bool prefixed)
-    {
+    public (byte[], Exception?) TrySerialize<T>(T message)
+    {   
+        byte[] messageBytes;
+        
         try
         {
-            byte[] messageBytes = JsonSerializer.SerializeToUtf8Bytes(message);
-
-            if (!prefixed) return messageBytes;
-
-            byte[] combined = new byte[4 + messageBytes.Length];
-            Span<byte> combinedSpan = combined;
-
-            BinaryPrimitives.WriteInt32LittleEndian(combinedSpan[..4], messageBytes.Length);
-            
-            messageBytes.CopyTo(combinedSpan[4..]);
-            return combined;
+            messageBytes = JsonSerializer.SerializeToUtf8Bytes(message);
+            return (messageBytes, null);
         }
         catch (Exception ex)
         {
-            _error = ex;
-            return null;
+            return (Array.Empty<byte>(), ex);
         }
     }
 
-    public T? Deserialize<T>(byte[] message, bool prefixed)
+    public (T?, Exception?) TryDeserialize<T>(byte[] message)
     {
-        if (!prefixed)
-        {
-            try
-            {
-                T? result = JsonSerializer.Deserialize<T>(message);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _error = ex;
-                return default;
-            }
-        }
-
-        if (message.Length < 4)
-        {
-            _error = new ArgumentException("Message is too short to contain a length prefix.", nameof(message));
-            return default;
-        }
-
         try
         {
-            ReadOnlySpan<byte> messageSpan = message;
-            
-            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(messageSpan[..4]);
+            var result = JsonSerializer.Deserialize<T>(message);
 
-            if (messageSpan.Length - 4 != messageLength)
+            if (result is null)
             {
-                _error = new InvalidOperationException($"Payload size mismatch. Expected: {messageLength} bytes, Got: {messageSpan.Length - 4} bytes.");
-                return default;
+                return (default, new InvalidOperationException("Message is corrupted"));    
             }
 
-            ReadOnlySpan<byte> payload = messageSpan.Slice(4, messageLength);
-            
-            T? result = JsonSerializer.Deserialize<T>(payload);
-            return result;
+            return (result, null);
         }
         catch (Exception ex)
         {
-            _error = ex;
-            return default;
+            return (default, ex);
         }
     }
 }
