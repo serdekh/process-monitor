@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,16 +9,11 @@ using ProcessMonitor.Shared.Protocol;
 
 namespace ProcessMonitor.Backend.Commands.Handlers;
 
-public sealed class StartMonitoringHandler : ICommandHandler
+public sealed class StartMonitoringHandler(MonitoringSessionState state) : ICommandHandler
 {
-    private MonitoringSessionState _state;
+    private readonly MonitoringSessionState _state = state;
 
-    public StartMonitoringHandler(MonitoringSessionState state)
-    {
-        _state = state;
-    }
-
-    public Task<MessageEnvelope<CommandResponse>> HandleAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
+    public Task<(MessageEnvelope<CommandResponse>, Exception?)> HandleAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
     {
         var envelope = new MessageEnvelope<CommandResponse>
         {
@@ -38,7 +34,10 @@ public sealed class StartMonitoringHandler : ICommandHandler
             
             envelope.Payload.Message = "No body with the process id was provided";
 
-            return Task.FromResult(envelope);
+            (MessageEnvelope<CommandResponse>, Exception?) response = 
+                (envelope, new ArgumentException(envelope.Payload.Message));
+
+            return Task.FromResult(response);
         }
 
         if (requestBody?.TryGetProperty("pid", out JsonElement pidElement) is null)
@@ -47,7 +46,10 @@ public sealed class StartMonitoringHandler : ICommandHandler
 
             envelope.Payload.Message = "The body is missing the 'pid' property name";
 
-            return Task.FromResult(envelope);
+            (MessageEnvelope<CommandResponse>, Exception?) response = 
+                (envelope, new ArgumentException(envelope.Payload.Message));
+
+            return Task.FromResult(response);
         }
 
         if (!pidElement.TryGetInt32(out int pid))
@@ -56,7 +58,10 @@ public sealed class StartMonitoringHandler : ICommandHandler
 
             envelope.Payload.Message = "The value of the 'pid' property is not a 32-bit signed integer";
 
-            return Task.FromResult(envelope);
+            (MessageEnvelope<CommandResponse>, Exception?) response = 
+                (envelope, new ArgumentException(envelope.Payload.Message));
+
+            return Task.FromResult(response);
         }
 
         _state.SetProcessId(pid);
@@ -64,6 +69,8 @@ public sealed class StartMonitoringHandler : ICommandHandler
         envelope.Payload.Message = "The process id was updated successfully";
         envelope.Payload.Data = new int[1] { pid };
 
-        return Task.FromResult(envelope);
+        (MessageEnvelope<CommandResponse>, Exception?) result = (envelope, null);
+
+        return Task.FromResult(result);
     }
 }

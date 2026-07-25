@@ -15,10 +15,10 @@ public sealed class FrameWriter : IFrameWriter
 
         if (!stream.CanWrite) return new InvalidOperationException("Stream does not support writing");
 
-        var messageLength = BitConverter.GetBytes(message.Length);
-
         try
         {
+            var messageLength = BitConverter.GetBytes(message.Length);
+            
             await stream.WriteAsync(messageLength, ct);
 
             await stream.WriteAsync(message, ct);

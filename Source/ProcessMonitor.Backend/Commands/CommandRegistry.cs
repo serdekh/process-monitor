@@ -18,14 +18,28 @@ public sealed class CommandRegistry
         };
     }
 
-    public void Register(string route, Type handler)
+    public Exception? Register(string route, Type handler)
     {
-        _map[route] = handler;
+        try
+        {
+            _map[route] = handler;
+            return null;
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
     }
 
-    // TODO: Handle invalid lookup
-    public Type GetHandler(string route)
+    public (Type?, Exception?) GetHandler(string route)
     {
-        return _map[route];
+        try
+        {
+            return (_map[route], null);
+        }
+        catch (Exception ex)
+        {
+            return (null, ex);
+        }
     }
 }

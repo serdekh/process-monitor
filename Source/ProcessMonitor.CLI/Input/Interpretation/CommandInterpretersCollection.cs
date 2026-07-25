@@ -275,9 +275,20 @@ public sealed class CommandInterpretersCollection
 
         Debug.Assert(op.Argument is not null, "All argument validation should've been completed at transpiling step.");
 
-        var writingException = await interpreterState.CommandsPipe.TryWriteAsync((MessageEnvelope<CommandRequest>)op.Argument, interpreterState.CancellationToken);
+        return await Task.Run(async() =>
+        {
+            var writingException = await interpreterState.CommandsPipe.TryWriteAsync((MessageEnvelope<CommandRequest>)op.Argument, interpreterState.CancellationToken);
 
-        return writingException;
+            if (writingException is not null) return writingException;
+
+            (var response, var readingException) = await interpreterState.CommandsPipe.TryReadAsync<CommandResponse>(interpreterState.CancellationToken);
+
+            if (readingException is not null) return readingException;
+
+            interpreterState.Out.Append(response.Payload.Message);
+
+            return null;
+        }, interpreterState.CancellationToken);
     }
 
     private Task<Exception?> InterpretUnknownCommand(CommandInterpreterState interpreterState, CommandOperation op)

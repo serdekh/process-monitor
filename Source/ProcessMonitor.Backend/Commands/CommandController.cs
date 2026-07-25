@@ -14,23 +14,15 @@ using ProcessMonitor.Shared.Serialization;
 namespace ProcessMonitor.Backend.Commands;
 
 // TODO: Replace immediate logs with custom exception? return values
-public sealed class CommandController
+public sealed class CommandController(ILogger<CommandController> logger,
+                         ITransportServer transport,
+                         IMessageSerializer serializer,
+                         CommandRouter router)
 {
-    private readonly ILogger<CommandController> _logger;
-    private readonly ITransportServer _transport;
-    private readonly IMessageSerializer _serializer;
-    private readonly CommandRouter _router;
-
-    public CommandController(ILogger<CommandController> logger,
-                             ITransportServer transport, 
-                             IMessageSerializer serializer, 
-                             CommandRouter router)
-    {
-        _logger = logger;
-        _transport = transport; 
-        _serializer = serializer;
-        _router = router;
-    }
+    private readonly ILogger<CommandController> _logger = logger;
+    private readonly ITransportServer _transport = transport;
+    private readonly IMessageSerializer _serializer = serializer;
+    private readonly CommandRouter _router = router;
 
     public async Task RunAsync(CancellationToken ct)
     {
@@ -63,69 +55,37 @@ public sealed class CommandController
     
         while (!ct.IsCancellationRequested)
         {
-            try
+            (var bytes, var readingException) = await _transport.TryReadAsync(ct); if (readingException is not null)
             {
-                (var bytes, var readingException) = await _transport.TryReadAsync(ct);
-       
-                if (readingException is not null)
-                {
-                    _logger.LogError("Command listening: Could not read from the client: {}. Stop.", readingException.Message);                       
-                    break;
-                }
+                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", readingException.Message);                       
+                break;
+            }
 
-                (var request, var deserializationException) = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes);
-
-                if (deserializationException is not null)
-                {
-                    _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.", deserializationException.Message);
-                    break;
-                }
-
-                if (request is null)
-                {
-                    _logger.LogError("Command listening: The request has been corrupted. Stop.");
-                    break;
-                }
-                    
-                // TODO: add a TryRouteAsync method to handle the exception
-                // and remove the outer try-catch block from this method
-                var response = await _router.RouteAsync(request, ct);
-         
-                (var responseBytes, var serializationException) = _serializer.TrySerialize(response);
-
-                if (serializationException is not null)
-                {
-                    _logger.LogError("Command listening: Failed to serialize a response object. Stop.");
-                    break;
-                }
+            (var request, var deserializationException) = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes); if (deserializationException is not null)
+            {
+                _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.", deserializationException.Message);
+                break;
+            } if (request is null)
+            {
+                _logger.LogError("Command listening: The request has been corrupted. Stop.");
+                break;
+            }
+                
+            (var response, var routingException) = await _router.TryRouteAsync(request, ct); if (routingException is not null)
+            {
+                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", routingException.Message);                       
+                break;
+            }
+        
+            (var responseBytes, var serializationException) = _serializer.TrySerialize(response); if (serializationException is not null)
+            {
+                _logger.LogError("Command listening: Failed to serialize a response object. Stop.");
+                break;
+            }
             
-                var writingException = await _transport.TryWriteAsync(responseBytes, ct);
-
-                if (writingException is not null)
-                {
-                    _logger.LogError("Command listening: Failed to write a message: {}. Stop.", writingException.Message);
-                    break;
-                }
-            }
-            catch (IOException)
+            var writingException = await _transport.TryWriteAsync(responseBytes, ct); if (writingException is not null)
             {
-                _logger.LogError("Command listening: Could not process a command. The pipe is broken or read through. Stop.");
-                break;
-            }
-            catch (OperationCanceledException)
-            {
-                _logger.LogError("Command listening: Could not finish processing the command due to a cancellation request. Stop.");
-                break;
-            }
-            catch (ObjectDisposedException)
-            {
-                _logger.LogError("Command listening: Could not finish processing the command due to one of the data streams getting disposed. Stop.");
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                _logger.LogError("Command listening: Fatal error occured while processing the command. Stop.");
+                _logger.LogError("Command listening: Failed to write a message: {}. Stop.", writingException.Message);
                 break;
             }
         }    

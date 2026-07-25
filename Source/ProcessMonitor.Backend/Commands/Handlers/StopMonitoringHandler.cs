@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,16 +8,11 @@ using ProcessMonitor.Shared.Protocol;
 
 namespace ProcessMonitor.Backend.Commands.Handlers;
 
-public sealed class StopMonitoringHandler : ICommandHandler
+public sealed class StopMonitoringHandler(MonitoringSessionState state) : ICommandHandler
 {
-    private MonitoringSessionState _state;
+    private readonly MonitoringSessionState _state = state;
 
-    public StopMonitoringHandler(MonitoringSessionState state)
-    {
-        _state = state;
-    }
-
-    public Task<MessageEnvelope<CommandResponse>> HandleAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
+    public Task<(MessageEnvelope<CommandResponse>, Exception?)> HandleAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
     {
         var envelope = new MessageEnvelope<CommandResponse>
         {
@@ -37,14 +33,20 @@ public sealed class StopMonitoringHandler : ICommandHandler
             
             envelope.Payload.Message = "No body with the process id was provided";
 
-            return Task.FromResult(envelope);
+            (MessageEnvelope<CommandResponse>, Exception?) response = 
+                (envelope, new ArgumentException(envelope.Payload.Message));
+
+            return Task.FromResult(response);
         }
 
         _state.ResetProcessId();
 
         envelope.Payload.Message = "The process id was reset successfully";
+
         System.Console.WriteLine("pid is gone :(");
 
-        return Task.FromResult(envelope);
+        (MessageEnvelope<CommandResponse>, Exception?) result = (envelope, null);
+
+        return Task.FromResult(result);
     }
 }
