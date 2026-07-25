@@ -9,9 +9,14 @@ using ProcessMonitor.Shared.Protocol;
 
 namespace ProcessMonitor.Backend.Commands.Handlers;
 
-public sealed class StartMonitoringHandler(MonitoringSessionState state) : ICommandHandler
+public sealed class StartMonitoringHandler : ICommandHandler
 {
-    private readonly MonitoringSessionState _state = state;
+    private readonly MonitoringSessionState _state;
+
+    public StartMonitoringHandler(MonitoringSessionState state)
+    {
+        _state = state;
+    }
 
     public Task<(MessageEnvelope<CommandResponse>, Exception?)> HandleAsync(MessageEnvelope<CommandRequest> request, CancellationToken ct)
     {

@@ -8,8 +8,19 @@ using ProcessMonitor.Shared.Input.Lexing;
 
 namespace ProcessMonitor.Shared.Input.Transpiling;
 
+// TODO: Introduce a state class to hold references for metadata such as:
+//    request id - which is assigned uniquely per each request operation
+//    process id - which is going to be used by the 'start' command handler
+//                 to find a reference of the process id if it were not
+//                 speicified previously. For instance, when running the
+//                 following instruction sequence: 'set <id> start'. 
+//                 In this case the 'start' command should infer the 
+//                 process id from some sort of a state holder and inject
+//                 it as an argument while generating a list of ops
 public sealed class CommandDispatchersCollection(List<CommandOperation> operations)
 {
+    private uint _requestId = 0;
+
     public List<CommandOperation> Operations { get; set; } = operations;
 
     public (int, Exception?) DispatchSetCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
@@ -89,7 +100,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
                 Operations.Add(new CommandOperation(CommandOperationType.CreateBackendProcess, slice, null));
                 Operations.Add(new CommandOperation(CommandOperationType.ConnectToBackendProcess, slice, null));
 
-                return (cursor + 1, null);
+                return (cursor + 1, AddSendRequestOperation(slice, "post", "monitoring", new { version = 0.1, requestId = _requestId, pid = 0 }));
                 
             } 
             catch (Exception ex)
@@ -107,7 +118,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
                 Operations.Add(new CommandOperation(CommandOperationType.CreateBackendProcess, slice, null));
                 Operations.Add(new CommandOperation(CommandOperationType.ConnectToBackendProcess, slice, null));
 
-                return (cursor + 1, null);
+                return (cursor + 1, AddSendRequestOperation(slice, "post", "monitoring", new { version = 0.1, requestId = _requestId, pid = 0 }));
             }
         }
         catch (Exception ex)
@@ -124,7 +135,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
             Operations.Add(new CommandOperation(CommandOperationType.CreateBackendProcess, slice, null));
             Operations.Add(new CommandOperation(CommandOperationType.ConnectToBackendProcess, slice, null));
 
-            return (cursor + 1, null);
+            return (cursor + 1, AddSendRequestOperation(slice, "post", "monitoring", new { version = 0.1, requestId = _requestId, pid = processId }));
         }
         catch (Exception ex)
         {
@@ -149,36 +160,40 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
             return (cursor + 1, ex);
         }
 
-        var body = new
-        {
-            version = 0.1,
-        };
+        var operationAppendException = AddSendRequestOperation(slice, "delete", "monitoring", new { version = 0.1, requestId = _requestId });
 
-        JsonElement bodyElement;
+        return (cursor + 1, operationAppendException);
+    }
+
+    private Exception? AddSendRequestOperation(TokenSlice sourceToken, string method, string route, object rawBody)
+    {
+        JsonElement body;
 
         try
         {
-            bodyElement = JsonSerializer.SerializeToElement(body);
+            body = JsonSerializer.SerializeToElement(rawBody);
         }
         catch (Exception ex)
         {
-            return (cursor + 1, ex);
+            return ex;
         }
 
         var envelope = new MessageEnvelope<CommandRequest>
         {
             Type = MessageType.CommandRequest,
-            Payload = new CommandRequest
+            Payload = new CommandRequest()
             {
-                Method = "delete",
-                Route = "monitoring",
-                Body = bodyElement
-            }    
+                Method = method,
+                Route = route,
+                Body = body
+            }
         };
 
-        Operations.Add(new CommandOperation(CommandOperationType.SendRequest, slice, envelope));
+        Operations.Add(new CommandOperation(CommandOperationType.SendRequest, sourceToken, envelope));
 
-        return (cursor + 1, null);
+        _requestId++;
+
+        return null;
     }
 
     public (int, Exception?) DispatchNoArgumentCommand(IReadOnlyList<TokenSlice> tokens, int cursor, CommandOperationType op)
