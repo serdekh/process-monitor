@@ -91,9 +91,9 @@ public sealed class CommandInterpretersCollection
     {
         if (interpreterState.Backend.IsRunning) return null;
             
-        if (interpreterState.Backend.HasError) return interpreterState.Backend.Error;
+        var backendCreationException = interpreterState.Backend.TryCreate();
 
-        if (!interpreterState.Backend.Create()) return interpreterState.Backend.Error;
+        if (backendCreationException is not null) return backendCreationException;
 
         var commandsInitException = interpreterState.CommandsPipe.TryInitialize();
 

@@ -16,28 +16,15 @@ namespace ProcessMonitor.CLI.Common;
 // 'WPF-based' client implementation to use the 'CommandInterpreter' and
 // 'CommandInterpreterState' classes thus eliminating the need of having
 // two interpreters for each client
-
-// TODO: Reimplement the error-prone methods to return a nullable exception
-// type instead of storing it in a private field thus reducing a risk of
-// possible race conditions in the future
 public sealed class BackendProcess : IAsyncDisposable
 {
     private Process? _backend = null;
 
-
     private readonly ProcessStartInfo _startInfo;
 
     private EventHandler? _onExit = null;
-    
-    public Exception? Error { get; private set; }
 
-    public string Path 
-    { 
-        get
-        {
-            return _startInfo.FileName;
-        } 
-    } 
+    public string Path => _startInfo.FileName;
 
     public bool HasExited
     {
@@ -60,14 +47,6 @@ public sealed class BackendProcess : IAsyncDisposable
         }
     }
 
-    public bool HasError
-    {
-        get
-        {
-            return Error is not null;
-        }
-    }
-
     public BackendProcess(IOptions<RuntimeState> options)
     {
         _startInfo = new ProcessStartInfo
@@ -80,10 +59,10 @@ public sealed class BackendProcess : IAsyncDisposable
 
     public void AddOnExitHandler(EventHandler onExit)
     {
-        _onExit = onExit;
+        _onExit += onExit;
     }
 
-    public bool Create()
+    public Exception? TryCreate()
     {
         if (_backend is not null)
         {
@@ -94,36 +73,33 @@ public sealed class BackendProcess : IAsyncDisposable
             }
             else
             {
-                return true;
+                return null;
             }
         }
-
-        Error = null;
 
         try
         {
             _backend = Process.Start(_startInfo);
    
-            if (_backend is not null)
-            {
-                _backend.EnableRaisingEvents = true;
+            if (_backend is null) return null;
+            
+            _backend.EnableRaisingEvents = true;
 
-                if (_onExit is not null) _backend.Exited += _onExit;
-            }
+            if (_onExit is not null) _backend.Exited += _onExit;
+
+            return null;
         }
         catch (Exception ex)
         {
-            Error = ex;
+            return ex;
         }
-
-        return Error is null;
     }
 
-    public string GetErrorString()
+    public string GetErrorString(Exception? ex)
     {
-        if (!HasError) return "No error";
+        if (ex is null) return "No error";
 
-        return Error switch
+        return ex switch
         {
             Win32Exception => "The file was not found, access was denied or executable was corruputed",
             FileNotFoundException => $"The file {_startInfo.FileName} was not found",
@@ -135,11 +111,9 @@ public sealed class BackendProcess : IAsyncDisposable
         };
     }
 
-    public async Task KillAsync(TimeSpan delay)
+    public async Task<Exception?> KillAsync(TimeSpan delay)
     {
-        if (_backend is null || HasExited) return;
-
-        Error = null;
+        if (_backend is null || HasExited) return null;
 
         try
         {
@@ -157,23 +131,16 @@ public sealed class BackendProcess : IAsyncDisposable
 
             using var cts = new CancellationTokenSource(delay);
             await _backend.WaitForExitAsync(cts.Token);
+            
+            return null;
         }
         catch (Exception ex)
         {
-            if (ex is not OperationCanceledException) 
-            {
-                Error = ex;
-            }
+            return ex;
         }
     }
 
-    public async Task KillAsync()
-    {
-        await KillAsync(TimeSpan.FromSeconds(3));
-    }
+    public async Task<Exception?> KillAsync() => await KillAsync(TimeSpan.FromSeconds(3));
 
-    public async ValueTask DisposeAsync()
-    {
-        await KillAsync();
-    }
+    public async ValueTask DisposeAsync() => await KillAsync();
 }
