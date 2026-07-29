@@ -5,13 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using ProcessMonitor.CLI.Common;
-using ProcessMonitor.CLI.Input.Interpretation;
-
-using ProcessMonitor.Shared.Input.Lexing;
-using ProcessMonitor.Shared.Serialization;
-using ProcessMonitor.Shared.Input.Transpiling;
-using ProcessMonitor.Shared.Transport.Framing;
+using ProcessMonitor.Shared.Client.State;
+using ProcessMonitor.Shared.Client.Input.Lexing;
+using ProcessMonitor.Shared.Client.Input.Transpiling;
+using ProcessMonitor.Shared.Client.Input.Interpretation;
 
 namespace ProcessMonitor.CLI.Hosting;
 
@@ -20,16 +17,13 @@ public sealed class InputReaderHostedService : BackgroundService
     private readonly CommandLexer _lexer;
     private readonly CommandTranspiler _transpiler;
     private readonly CommandInterpreter _interpreter;
-    private readonly CommandInterpreterState _state;
+    private readonly ClientApplicationState _state;
 
     private readonly ILogger<InputReaderHostedService> _logger;
 
     public InputReaderHostedService(
         ILogger<InputReaderHostedService> logger,
-        BackendProcess backend, 
-        IFrameWriter writer,
-        IFrameReader reader,
-        IMessageSerializer serializer)
+        ClientApplicationState state)
     {
         _logger = logger;
 
@@ -37,7 +31,7 @@ public sealed class InputReaderHostedService : BackgroundService
 
         _transpiler = new CommandTranspiler();
 
-        _state = new CommandInterpreterState(backend, writer, reader, serializer);
+        _state = state;
 
         _interpreter = new CommandInterpreter(_state);
     }
@@ -60,12 +54,11 @@ public sealed class InputReaderHostedService : BackgroundService
 
             if (interpretationException is not null) return interpretationException;
 
-            foreach (var telemetry in _state.Telemetry)
+            if (_state.LatestSnapshot is not null)
             {
-                Console.WriteLine($"{telemetry}");
+                Console.WriteLine($"{_state.LatestSnapshot}");
+                _state.LatestSnapshot = null;
             }
-
-            _state.Telemetry.Clear();
             
             return null;
         });
