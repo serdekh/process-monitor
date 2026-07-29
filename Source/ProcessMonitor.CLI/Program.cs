@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-using ProcessMonitor.CLI.State;
 using ProcessMonitor.CLI.Hosting;
 using ProcessMonitor.CLI.Input.Args;
+using ProcessMonitor.Shared.Client.State;
 
 namespace ProcessMonitor.CLI;
 
@@ -44,10 +44,9 @@ internal class Program
         // NOTE: Consider replacing this code with a refactorred logic inside the ConsoleInputReader class
         // so that we don't explicitly inject this path string. For example, add a new hosted service that
         // manages cli arguments and exposes them to the other services inside the ConfigureServices method. 
-        builder.Services.Configure<RuntimeState>(options =>
+        builder.Services.Configure<ClientApplicationOptions>(options =>
         {
-            options.TargetPid = pid;
-            options.BackendProcessFilePath = path;
+            options.BackendPath = path;
         });
 
         await builder.Build().RunAsync();
