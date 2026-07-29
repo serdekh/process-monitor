@@ -4,13 +4,17 @@ using System.Collections.Generic;
 
 namespace ProcessMonitor.CLI.Input.Args;
 
+// TODO: Rewrite the error handling mechanism
+// TODO: Consider making this class coupled with
+// the host builder to not force the Program.cs to
+// manually inject the options for client state class. 
 public sealed class CommandLineParser
 {
     public readonly Dictionary<string, object?> Flags = [];
 
     private delegate bool FlagHandler(string[] args, ref int args_i);
 
-    private Dictionary<string, FlagHandler> _handlers;
+    private readonly Dictionary<string, FlagHandler> _handlers;
 
     private readonly string[]? _args;
 
