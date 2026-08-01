@@ -153,13 +153,13 @@ public sealed class CommandInterpretersCollection
     private Task<Exception?> InterpretGetCommand(ClientApplicationState applicationState, CommandOperation op)
     {
         var processIdStatus = applicationState.Configuration.ProcessId is null ? "undefined" : (applicationState.Configuration.ProcessId.ToString() ?? "null");
-        var serverLocStatus = applicationState.Backend is null ? "undefined" : applicationState.Backend.Path;
+        var serverLocStatus = applicationState.Configuration.ServerFilepath is null ? "undefined" : applicationState.Configuration.ServerFilepath;
 
         applicationState.Out.Append
         (
             $"""
             ProcessId: {processIdStatus}
-            ServerLoc: {serverLocStatus}
+            ServerLoc: '{serverLocStatus}'
             """
         );
 
