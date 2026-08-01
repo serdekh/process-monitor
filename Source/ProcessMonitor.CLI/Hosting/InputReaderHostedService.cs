@@ -82,7 +82,7 @@ public sealed class InputReaderHostedService : BackgroundService
 
             if (readingException is not null)
             {
-                Console.WriteLine($"procmon: error: could not run the command(s): {readingException.Message}\n\tRun 'h' or 'help' to get a list of the availiable commands");
+                Console.WriteLine($"[ProcessMonitor]: error: could not run the command(s): {readingException.Message}\n\tRun 'h' or 'help' to get a list of the availiable commands");
                 continue;
             }
 
