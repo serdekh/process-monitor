@@ -9,7 +9,6 @@ using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.CLient.Transport;
 using ProcessMonitor.Shared.Client.Transport;
 using ProcessMonitor.Shared.Transport.Framing;
-
 using Microsoft.Extensions.Options;
 
 namespace ProcessMonitor.Shared.Client.State;
@@ -34,9 +33,11 @@ public sealed class ClientApplicationState
         IFrameWriter frameWriter, 
         IFrameReader frameReader, 
         IMessageSerializer serializer,
-        IOptions<ClientApplicationOptions> options)
+        IOptions<ClientApplicationConfiguration> configuration)
     {
-        Backend = new BackendProcess(options.Value.BackendPath);
+        Configuration = configuration.Value;
+
+        Backend = new BackendProcess(configuration.Value.ServerFilepath);
 
         CommandsPipe = new TransportClient(
             ".", "ProcessMonitor.Pipes.Commands", PipeDirection.InOut, PipeOptions.Asynchronous,
