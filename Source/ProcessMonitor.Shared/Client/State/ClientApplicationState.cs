@@ -16,7 +16,7 @@ namespace ProcessMonitor.Shared.Client.State;
 
 public sealed class ClientApplicationState
 {
-    public int? ProcessId { get; set; } = null;
+    public ClientApplicationConfiguration Configuration { get; set; } = new();
 
     public StringBuilder Out { get; set; } = new StringBuilder();
 
