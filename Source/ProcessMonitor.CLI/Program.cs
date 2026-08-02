@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.Hosting;
-
 using ProcessMonitor.CLI.Hosting;
+
+using ProcessMonitor.Shared.Client.Hosting;
 
 namespace ProcessMonitor.CLI;
 
@@ -17,14 +17,21 @@ internal class Program
             return;
         }
 
-        (var builder, var parsingException) = CLIHostBuilder.Create(args);
+        var builder = new ClientHostBuilder(args);
 
-        if (parsingException is not null)
+        builder
+            .UseCore()
+            .UseLogging()
+            .UseInputReader<InputReaderHostedService>()
+            .UseRenderer<RendererHostedService>()
+            .Build();
+
+        if (builder.Failed is not null)
         {
-            Console.WriteLine($"[ProcessMonitor]: error: Could not parse input arguments: {parsingException.Message}");
+            Console.WriteLine($"[ProcessMonitor]: error: Failed to initialize the application: {builder.Failed.Message}.");
             return;
         }
-
-        await builder.Build().RunAsync();
+        
+        await builder.RunAsync();
     }
 }
