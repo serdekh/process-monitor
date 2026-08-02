@@ -2,17 +2,17 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Shared.Client.State;
 using ProcessMonitor.Shared.Client.Input.Lexing;
 using ProcessMonitor.Shared.Client.Input.Transpiling;
 using ProcessMonitor.Shared.Client.Input.Interpretation;
+using ProcessMonitor.Shared.Client.Hosting.Services;
 
 namespace ProcessMonitor.CLI.Hosting;
 
-public sealed class InputReaderHostedService : BackgroundService
+public sealed class InputReaderHostedService : InputReaderService
 {
     private readonly CommandLexer _lexer;
     private readonly CommandTranspiler _transpiler;
@@ -36,7 +36,7 @@ public sealed class InputReaderHostedService : BackgroundService
         _interpreter = new CommandInterpreter(_state);
     }
 
-    public async Task<Exception?> ReadLineAsync(CancellationToken ct)
+    public override async Task<Exception?> ReadLineAsync(CancellationToken ct)
     {
         if (ct.IsCancellationRequested) return new OperationCanceledException();
 
@@ -48,20 +48,7 @@ public sealed class InputReaderHostedService : BackgroundService
 
         if (transpilingException is not null) return transpilingException;
         
-        return await Task.Run(async () =>
-        {
-            var interpretationException = await _interpreter.Interpret(_transpiler.Operations);
-
-            if (interpretationException is not null) return interpretationException;
-
-            if (_state.LatestSnapshot is not null)
-            {
-                Console.WriteLine($"{_state.LatestSnapshot}");
-                _state.LatestSnapshot = null;
-            }
-            
-            return null;
-        });
+        return await Task.Run(async () => await _interpreter.Interpret(_transpiler.Operations));
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
