@@ -10,10 +10,11 @@ using ProcessMonitor.Shared.CLient.Transport;
 using ProcessMonitor.Shared.Client.Transport;
 using ProcessMonitor.Shared.Transport.Framing;
 using Microsoft.Extensions.Options;
+using System;
 
 namespace ProcessMonitor.Shared.Client.State;
 
-public sealed class ClientApplicationState
+public sealed class ClientApplicationState : IAsyncDisposable
 {
     public ClientApplicationConfiguration Configuration { get; set; } = new();
 
@@ -28,6 +29,15 @@ public sealed class ClientApplicationState
     public CancellationToken CancellationToken { get; set; }
 
     public ProcessMetricsSnapshot? LatestSnapshot { get; set; }
+
+    public async Task Cleanup()
+    {
+        await Backend.DisposeAsync();
+        await CommandsPipe.DeinitializeAsync();
+        await TelemetryPipe.DeinitializeAsync();
+    }
+
+    public async ValueTask DisposeAsync() => await Cleanup();
 
     public ClientApplicationState(
         IFrameWriter frameWriter, 
@@ -49,12 +59,7 @@ public sealed class ClientApplicationState
 
         Backend.AddOnExitHandler((sender, e) =>
         {
-            _ = Task.Run(async () => 
-            {
-                await Backend.DisposeAsync();
-                await CommandsPipe.DeinitializeAsync();
-                await TelemetryPipe.DeinitializeAsync();
-            });
+            _ = Task.Run(async () => await Cleanup());
         });
     }
 }
