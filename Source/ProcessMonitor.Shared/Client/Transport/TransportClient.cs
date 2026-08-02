@@ -107,11 +107,7 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
 
         if (serializationException is not null) return serializationException;
         
-        var writingException = await _frameWriter.TryWriteFrameAsync(_client, messageBytes, ct);
-
-        if (writingException is not null) return writingException;
-        
-        return null;
+        return await _frameWriter.TryWriteFrameAsync(_client, messageBytes, ct);
     }
 
     public async Task<(MessageEnvelope<T>, Exception?)> TryReadAsync<T>(CancellationToken ct)
