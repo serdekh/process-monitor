@@ -27,7 +27,7 @@ public sealed class ArgsParser
 
     private (int, Exception?) ParsePidFlag(string[] args, int cursor)
     {
-        if (cursor >= args.Length || cursor < 0) return (cursor, new ArgumentException("Index out range during flag parsing"));
+        if (cursor >= args.Length || cursor < 0) return (cursor, new ArgumentException("Index out of range during flag parsing"));
 
         if (cursor + 1 == args.Length) return (cursor, new ArgumentException("Not enough arguments for the 'pid' flag.\nUsage:\t--pid <integer>"));
 
@@ -47,7 +47,7 @@ public sealed class ArgsParser
 
     private (int, Exception?) ParsePathFlag(string[] args, int cursor)
     {
-        if (cursor >= args.Length || cursor < 0) return (cursor, new ArgumentException("Index out range during flag parsing"));
+        if (cursor >= args.Length || cursor < 0) return (cursor, new ArgumentException("Index out of range during flag parsing"));
 
         if (cursor + 1 == args.Length) return (cursor, new ArgumentException("Not enough arguments for the 'path' flag.\nUsage:\t--path <filepath>"));
 
