@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{E16DEF23-2350-4E8B-B4F6-C6FE7E019A1C}|ProcessMonitor.WPF_Experimental.csproj|c:\\users\\serhii\\repos\\process-monitor\\source\\processmonitor.wpf_experimental\\processmonitor.wpf_experimental.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{E16DEF23-2350-4E8B-B4F6-C6FE7E019A1C}|ProcessMonitor.WPF_Experimental.csproj|solutionrelative:processmonitor.wpf_experimental.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{E16DEF23-2350-4E8B-B4F6-C6FE7E019A1C}|ProcessMonitor.WPF_Experimental.csproj|c:\\users\\serhii\\repos\\process-monitor\\source\\processmonitor.wpf_experimental\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{E16DEF23-2350-4E8B-B4F6-C6FE7E019A1C}|ProcessMonitor.WPF_Experimental.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
@@ -30,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -38,7 +42,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
+              "Title": "ProcessMonitor.WPF_Experimental",
+              "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\ProcessMonitor.WPF_Experimental.csproj",
+              "RelativeDocumentMoniker": "ProcessMonitor.WPF_Experimental.csproj",
+              "ToolTip": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\ProcessMonitor.WPF_Experimental.csproj",
+              "RelativeToolTip": "ProcessMonitor.WPF_Experimental.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-08-04T14:26:07.648Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "App.xaml.cs",
               "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\App.xaml.cs",
               "RelativeDocumentMoniker": "App.xaml.cs",
@@ -46,12 +63,11 @@
               "RelativeToolTip": "App.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-04T07:20:05.223Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-04T07:20:05.223Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "App.xaml",
               "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\App.xaml",
               "RelativeDocumentMoniker": "App.xaml",
@@ -63,7 +79,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "AssemblyInfo.cs",
               "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\AssemblyInfo.cs",
               "RelativeDocumentMoniker": "AssemblyInfo.cs",
@@ -71,12 +87,11 @@
               "RelativeToolTip": "AssemblyInfo.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-04T07:19:58.357Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-04T07:19:58.357Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml",
               "RelativeDocumentMoniker": "MainWindow.xaml",
@@ -88,13 +103,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
               "ToolTip": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-04T07:19:40.353Z",
               "EditorCaption": ""

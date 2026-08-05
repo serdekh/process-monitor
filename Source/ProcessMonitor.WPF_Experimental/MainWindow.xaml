@@ -7,6 +7,19 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-
+        <TextBlock 
+            Name="MainLabel"
+            Text="Hello world!" 
+            FontSize="75" 
+            VerticalAlignment="Top" 
+            HorizontalAlignment="Center"/>
+        <Button
+            Name="Run"
+            Content="Run"
+            Width="100"
+            Height="50"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            Click="Run_Click"/>
     </Grid>
 </Window>

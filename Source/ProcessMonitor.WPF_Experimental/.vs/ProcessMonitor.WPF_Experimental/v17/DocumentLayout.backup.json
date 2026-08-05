@@ -46,8 +46,7 @@
               "RelativeToolTip": "App.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-04T07:20:05.223Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-04T07:20:05.223Z"
             },
             {
               "$type": "Document",
@@ -71,8 +70,7 @@
               "RelativeToolTip": "AssemblyInfo.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-04T07:19:58.357Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-04T07:19:58.357Z"
             },
             {
               "$type": "Document",
@@ -80,8 +78,8 @@
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml",
               "RelativeDocumentMoniker": "MainWindow.xaml",
-              "ToolTip": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml",
-              "RelativeToolTip": "MainWindow.xaml",
+              "ToolTip": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml*",
+              "RelativeToolTip": "MainWindow.xaml*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2026-08-04T07:19:43.745Z",
               "EditorCaption": ""
@@ -94,7 +92,7 @@
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
               "ToolTip": "C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.WPF_Experimental\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-08-04T07:19:40.353Z",
               "EditorCaption": ""
