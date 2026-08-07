@@ -20,18 +20,31 @@ $buildArgs = @(
     }
 )
 
+function Log {
+    param (
+        [string]$message,
+        [string]$type
+    )
+
+    Write-Host "[ProcessMonitor][Build]: ${type}: $message."
+}
+
+function LogInfo { param ([string]$message) Log "info" $message }
+function LogError { param ([string]$message) Log "error" $message }
+function LogWarning { param ([string]$message) Log "warning" $message }
+
 function BuildProject {
     param (
         [string]$ProjectFolder,
         [string]$TargetName
     )
 
-    Write-Host "[ProcessMonitor][Build]: info: building the '$TargetName' target."
+    LogInfo "building the '$TargetName' target"
 
     dotnet build @buildArgs $ProjectFolder
 
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "[ProcessMonitor][Build]: error: failed to build the '$TargetName' target. Abort."
+        LogError "failed to build the '$TargetName' target"
         exit 1
     }
 }
@@ -43,11 +56,11 @@ function RunProject {
         "serverOnly"       { .\ProcessMonitor.Backend\bin\Debug\net9.0\ProcessMonitor.Backend.exe }
         "full"             { .\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.CLI.exe --path '.\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.Backend.exe' }
         "console"          { .\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.CLI.exe --path '.\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.Backend.exe' }
-        "desktop"          { Write-Host "[ProcessMonitor][Build]: warning: running the desktop target is not implemented yet. Ignore." }
-        "desktopNoConsole" { Write-Host "[ProcessMonitor][Build]: warning: running the desktopNoConsole target is not implemented yet. Ignore." }
+        "desktop"          { LogWarning "running the desktop target is not implemented yet" }
+        "desktopNoConsole" { LogWarning "running the desktopNoConsole target is not implemented yet" }
 
         default {
-            Write-Error "[ProcessMonitor][Build]: error: could not run a target called '$Target'. Abort."
+            LogError "could not run a target called '$Target'"
             exit 1
         }
     }
@@ -88,12 +101,12 @@ switch ($Target) {
     "desktopNoConsole" { BuildDesktopNoConsole }
 
     default {
-        Write-Error "[ProcessMonitor][Build]: error: could not find a target called '$TargetName'. Abort."
+        LogError "could not find a target called '$TargetName'"
         exit 1
     }
 }
 
-Write-Host "[ProcessMonitor][Build]: info: successfully built the '$Target' target."
+LogInfo "successfully built the '$Target' target"
 
 RunProject
 
