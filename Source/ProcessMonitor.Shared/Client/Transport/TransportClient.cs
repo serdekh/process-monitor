@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Client.Utils;
 using ProcessMonitor.Shared.Serialization;
-using ProcessMonitor.Shared.Client.Transport;
 using ProcessMonitor.Shared.Transport.Framing;
 
-namespace ProcessMonitor.Shared.CLient.Transport;
+namespace ProcessMonitor.Shared.Client.Transport;
 
 public sealed class TransportClient : ITransportClient, IAsyncDisposable
 {

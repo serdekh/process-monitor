@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.IO.Pipes;
 using System.Threading;
@@ -6,11 +7,10 @@ using System.Threading.Tasks;
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Client.Utils;
 using ProcessMonitor.Shared.Serialization;
-using ProcessMonitor.Shared.CLient.Transport;
 using ProcessMonitor.Shared.Client.Transport;
 using ProcessMonitor.Shared.Transport.Framing;
+
 using Microsoft.Extensions.Options;
-using System;
 
 namespace ProcessMonitor.Shared.Client.State;
 
