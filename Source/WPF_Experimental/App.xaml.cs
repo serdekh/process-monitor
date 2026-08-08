@@ -1,6 +1,6 @@
-﻿
-using System.Windows;
+﻿using System.Windows;
 
 public partial class App : Application
-{ 
+{
+
 }
