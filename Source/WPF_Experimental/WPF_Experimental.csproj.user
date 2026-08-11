@@ -2,7 +2,13 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
+    <Compile Update="View\Common\AboutButton.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Common\SettingsButton.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Common\UndoSwitchButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="View\Modes\RunningModeWindow.xaml.cs">
