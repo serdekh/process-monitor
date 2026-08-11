@@ -8,6 +8,17 @@
         xmlns:State="clr-namespace:WPF_Experimental.Client.State"
         mc:Ignorable="d"
         Title="Process Monitor" Height="450" Width="800">
+    <Window.Resources>
+        <ControlTemplate x:Key="StartupTemplate">
+            <Modes:StartupModeWindow/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="SettingsTemplate">
+            <Modes:SettingsModeWindow/>
+        </ControlTemplate>
+        <ControlTemplate x:Key="RunningTemplate">
+            <Modes:RunningModeWindow/>
+        </ControlTemplate>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -15,15 +26,42 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <Modes:StartupModeWindow/>
+        <ContentControl>
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="Template" Value="{StaticResource StartupTemplate}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Source={x:Static State:ApplicationState.Instance}, Path=CurrentMode}" 
+                                     Value="{x:Static State:ApplicationMode.Startup}">
+                            <Setter Property="Template" Value="{StaticResource StartupTemplate}"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Source={x:Static State:ApplicationState.Instance}, Path=CurrentMode}" 
+                                     Value="{x:Static State:ApplicationMode.Settings}">
+                            <Setter Property="Template" Value="{StaticResource SettingsTemplate}"/>
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Source={x:Static State:ApplicationState.Instance}, Path=CurrentMode}" 
+                                     Value="{x:Static State:ApplicationMode.Running}">
+                            <Setter Property="Template" Value="{StaticResource RunningTemplate}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+
         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"/>
+
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="{Binding Source={x:Static State:ApplicationState.Instance}, Path=CurrentModeAsString}" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="0" 
+                       Text="{Binding Source={x:Static State:ApplicationState.Instance}, Path=CurrentModeAsString}" 
+                       HorizontalAlignment="Center" 
+                       Margin="5,0"/>
             <Rectangle Grid.Column="1" Fill="SeaGreen"/>
         </Grid>
     </Grid>
