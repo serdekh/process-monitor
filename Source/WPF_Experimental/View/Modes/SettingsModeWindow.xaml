@@ -4,9 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WPF_Experimental.View.Modes"
+             xmlns:Common="clr-namespace:WPF_Experimental.View.Common"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-            
+        <StackPanel
+            Width="780"
+            Height="430"
+            Background="LightPink"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"/>
+        <Common:UndoSwitchButton/>
+        <Common:AboutButton HorizontalAlignment="Right"/>
     </Grid>
 </UserControl>
