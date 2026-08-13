@@ -5,6 +5,9 @@
     <Compile Update="View\Common\AboutButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Common\CpuUsageBar.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Common\SettingsButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
