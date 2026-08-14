@@ -15,7 +15,11 @@ public sealed class BackendProcess : IAsyncDisposable
 
     private EventHandler? _onExit = null;
 
-    public string Path => _startInfo.FileName;
+    public string Path 
+    { 
+        get { return _startInfo.FileName; } 
+        set { _startInfo.FileName = value; }
+    }
 
     public bool HasExited
     {
