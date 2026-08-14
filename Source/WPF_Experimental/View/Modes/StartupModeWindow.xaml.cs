@@ -1,5 +1,6 @@
 ﻿using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Snapshots;
+using System.ComponentModel;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -86,6 +87,7 @@ public partial class StartupModeWindow : UserControl
 
         if (ex != null)
         {
+            MessageBox.Show(ex.Message, "error", MessageBoxButton.OK, MessageBoxImage.Error);
             ApplicationState.Instance.CurrentMode = ApplicationMode.Startup;
             return;
         }
