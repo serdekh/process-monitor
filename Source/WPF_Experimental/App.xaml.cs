@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.Options;
+using ProcessMonitor.Shared.Client.Input.Args;
 using ProcessMonitor.Shared.Client.State;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Transport.Framing;
@@ -13,13 +14,32 @@ public partial class App : Application
         new FrameWriter(),
         new FrameReader(),
         new JsonMessageSerializer(),
-        // TODO: Unhardcode these constants via the settings mode configurations
-        Options.Create(new ClientApplicationConfiguration 
-        { 
-            ProcessId = 0, 
-            ServerFilepath = "\"C:\\Users\\Serhii\\repos\\process-monitor\\Source\\ProcessMonitor.Backend\\bin\\Debug\\net9.0\\ProcessMonitor.Backend.exe\""
-        })
+        Options.Create(new ClientApplicationConfiguration())
     );
 
     public static ClientApplicationState RuntimeState => _runtimeState;
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        var argsParser = new ArgsParser();
+
+        var parsingException = argsParser.Parse(e.Args);
+
+        if (parsingException != null)
+        {
+            MessageBox.Show(parsingException.Message, "error", MessageBoxButton.OK, MessageBoxImage.Error); 
+            return;
+        }
+
+        RuntimeState.Backend.Path = argsParser.Configuration.ServerFilepath;
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        base.OnExit(e);
+
+        RuntimeState.Cleanup();
+    }
 }
