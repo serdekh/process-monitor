@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="ProcessMonitor.WPF.View.Modes.Common.Header"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Common"
+             xmlns:Common="clr-namespace:ProcessMonitor.WPF.View.Common"
+             mc:Ignorable="d" 
+             d:DesignWidth="800">
+    <Grid Name="HeaderControl">
+        <Common:SettingsButton
+            VerticalAlignment="Top"
+            HorizontalAlignment="Left"/>
+        <Common:AboutButton
+            VerticalAlignment="Top"
+            HorizontalAlignment="Right"/>
+    </Grid>
+</UserControl>
