@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="ProcessMonitor.WPF.View.Common.Log"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="20">
+    <Border 
+        Name="LogControl"
+        BorderBrush="Navy" 
+        BorderThickness="0.5" 
+        Background="Wheat"
+        HorizontalAlignment="Left">
+        <TextBlock 
+            Text="Test: a single log message" 
+            Foreground="DarkSlateGray" />
+    </Border>
+</UserControl>
