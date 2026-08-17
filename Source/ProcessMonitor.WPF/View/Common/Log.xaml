@@ -10,9 +10,9 @@
         Name="LogControl"
         BorderBrush="Navy" 
         BorderThickness="0.5" 
-        Background="Wheat"
-        HorizontalAlignment="Left">
+        Background="Wheat">
         <TextBlock 
+            HorizontalAlignment="Stretch"
             Text="Test: a single log message" 
             Foreground="DarkSlateGray" />
     </Border>

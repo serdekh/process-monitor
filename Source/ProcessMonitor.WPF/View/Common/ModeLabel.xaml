@@ -8,7 +8,6 @@
     <TextBlock
         Name="ModeLabelControl"
         Text="Startup"
-        Width="Auto"
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"/>
+        HorizontalAlignment="Left" 
+        VerticalAlignment="Top"/>
 </UserControl>

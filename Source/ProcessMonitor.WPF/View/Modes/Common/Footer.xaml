@@ -6,12 +6,13 @@
              xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Common"
              xmlns:Common="clr-namespace:ProcessMonitor.WPF.View.Common"
              mc:Ignorable="d">
-    <Grid Name="FooterControl">
+    <Grid Name="FooterControl"
+        HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Common:ModeLabel Grid.Column="0" Margin="5,0,5,0"/>
+        <Common:ModeLabel Grid.Column="0" Margin="5,0,5,0" HorizontalContentAlignment="Center"/>
         <Common:LogsPanel Grid.Column="1"/>
     </Grid>
 </UserControl>

@@ -26,5 +26,8 @@
     <Compile Update="View\Modes\Common\Header.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Startup\StartupMode.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>
