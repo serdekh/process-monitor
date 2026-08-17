@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="ProcessMonitor.WPF.View.Modes.Startup.StartupMode"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Startup"
+             xmlns:ModeComponents="clr-namespace:ProcessMonitor.WPF.View.Modes.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Name="StartupModeControl">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <ModeComponents:Header Grid.Row="0"/>
+        <GridSplitter Grid.Row="2"/>
+        <ModeComponents:Footer Grid.Row="3"/>
+    </Grid>
+</UserControl>
