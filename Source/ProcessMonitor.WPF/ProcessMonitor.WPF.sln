@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37502.11 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessMonitor.WPF", "ProcessMonitor.WPF.csproj", "{F59160EF-8100-4B2D-B7DC-0DC8C4A6776D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F59160EF-8100-4B2D-B7DC-0DC8C4A6776D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F59160EF-8100-4B2D-B7DC-0DC8C4A6776D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F59160EF-8100-4B2D-B7DC-0DC8C4A6776D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F59160EF-8100-4B2D-B7DC-0DC8C4A6776D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CDE08087-3781-4A8E-B6E6-A7231C04D953}
+	EndGlobalSection
+EndGlobal
