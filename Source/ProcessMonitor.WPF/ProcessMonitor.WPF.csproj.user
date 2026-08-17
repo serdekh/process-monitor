@@ -26,6 +26,12 @@
     <Compile Update="View\Modes\Common\Header.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Running\CPUUsageBar.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Modes\Running\RunningMode.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Modes\Startup\RunButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

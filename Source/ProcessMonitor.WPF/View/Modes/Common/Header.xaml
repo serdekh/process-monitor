@@ -8,10 +8,21 @@
              mc:Ignorable="d" 
              d:DesignWidth="800">
     <Grid Name="HeaderControl">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
         <Common:SettingsButton
+            Grid.Column="0"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Left"/>
+        <Common:GoBackButton
+            Grid.Column="1"
             VerticalAlignment="Top"
             HorizontalAlignment="Left"/>
         <Common:AboutButton
+            Grid.Column="2"
             VerticalAlignment="Top"
             HorizontalAlignment="Right"/>
     </Grid>
