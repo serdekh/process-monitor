@@ -32,6 +32,15 @@
     <Compile Update="View\Modes\Running\RunningMode.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Settings\SettingsMode.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Modes\Settings\SettingsOption.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Modes\Settings\SettingsOptionsPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Modes\Startup\RunButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

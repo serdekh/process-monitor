@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="ProcessMonitor.WPF.View.Modes.Settings.SettingsOption"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Settings"
+             mc:Ignorable="d">
+    <!--TODO: Add data binding for passing 'Value' property-->
+    <Grid Name="SettingsOptionControl">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Border 
+            Grid.Row="0" 
+            Grid.Column="0" 
+            Margin="5"
+            BorderThickness="2" 
+            BorderBrush="LightBlue">
+            <TextBlock 
+                Background="AliceBlue"
+                FontSize="30" 
+                Text="Property Name"/>
+        </Border>
+        <Border 
+            Grid.Row="0" 
+            Grid.Column="1" 
+            Margin="5"
+            BorderThickness="2" 
+            BorderBrush="Wheat">
+            <TextBox 
+                Background="LightYellow"
+                FontSize="30" 
+                Text="Property Value"/>
+        </Border>
+    </Grid>
+</UserControl>
