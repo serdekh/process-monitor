@@ -20,6 +20,9 @@
     <Compile Update="View\Common\SettingsButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Common\Footer.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Modes\Common\Header.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
