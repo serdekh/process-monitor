@@ -1,4 +1,5 @@
 ﻿using ProcessMonitor.WPF.State;
+using ProcessMonitor.WPF.Services;
 
 using System.Windows;
 using System.Windows.Controls;
@@ -26,7 +27,7 @@ public partial class RunButton : UserControl
         var modeSwitchingException = await TrySwitchToRunningMode();
 
         if (modeSwitchingException is null) return;
-        
-        MessageBox.Show(modeSwitchingException.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+        LoggingService.Instance.Log($"[Error]: {modeSwitchingException.Message}");
     }
 }

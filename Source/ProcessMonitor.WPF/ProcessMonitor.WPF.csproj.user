@@ -8,9 +8,6 @@
     <Compile Update="View\Common\GoBackButton.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\Common\Log.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="View\Common\LogsPanel.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
