@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 
 using ProcessMonitor.Shared.Client.State;
+using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport.Framing;
@@ -8,6 +9,7 @@ using ProcessMonitor.Shared.Transport.Framing;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace ProcessMonitor.WPF.State;
 
@@ -137,6 +139,125 @@ public sealed class GlobalState : INotifyPropertyChanged
     }
 
     public void FinalizeRuntime() => _runtime?.Cleanup();
+
+    public Exception? IsRuntimeInitialized()
+    {
+        if (_runtime == null) return new InvalidOperationException("No runtime was initialized");
+
+        if (!_runtime.Backend.IsRunning) return new InvalidOperationException("The backend process was not initialized");
+
+        if (!_runtime.CommandsPipe.IsConnected()) return new InvalidOperationException("The commands pipe was not initialized");
+
+        if (!_runtime.TelemetryPipe.IsConnected()) return new InvalidOperationException("The telemetry pipe was not initialized");
+
+        return null;
+    }
+
+    public async Task<Exception?> StartProcessing()
+    {
+        var runtimeInitializationException = IsRuntimeInitialized();
+
+        if (runtimeInitializationException is not null) return runtimeInitializationException;
+
+        JsonElement body;
+
+        try
+        {
+            body = JsonSerializer.SerializeToElement(new { version = 0.1, requestId = LatestRequestId, pid = 0 });
+        }
+        catch (Exception ex) 
+        {
+            return ex;
+        }
+
+        var request = new CommandRequest()
+        {
+            Method = "post",
+            Route = "monitoring",
+            Body = body
+        };
+
+        var envelope = new MessageEnvelope<CommandRequest>()
+        {
+            Type = MessageType.CommandRequest,
+            Payload = request
+        };
+
+        var writingException = await _runtime!.TelemetryPipe.TryWriteAsync(envelope, _runtime.CancellationToken);
+
+        if (writingException is not null) return writingException;
+
+        CurrentMode = ModeState.Running;
+
+        _ = Task.Run(async () =>
+        {
+            while (!_runtime.CancellationToken.IsCancellationRequested)
+            {
+                (var latest, var telemetryReadingException) = await _runtime.TelemetryPipe.TryReadAsync<ProcessMetricsSnapshot>(_runtime.CancellationToken);
+
+                if (telemetryReadingException is not null)
+                {
+                    CurrentMode = ModeState.Startup;
+                    return;
+                }
+
+                if (latest != null)
+                {
+                    LatestSnapshot = latest.Payload;
+                }
+
+                try
+                {
+                    await Task.Delay(50, _runtime.CancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }, _runtime.CancellationToken);
+
+        return null;
+    }
+
+    public async Task<Exception?> StopProcessing()
+    {
+        var runtimeInitializationException = IsRuntimeInitialized();
+
+        if (runtimeInitializationException is not null) return runtimeInitializationException;
+
+        JsonElement body;
+
+        try
+        {
+            body = JsonSerializer.SerializeToElement(new { version = 0.1, requestId = LatestRequestId, pid = 0 });
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+
+        var request = new CommandRequest()
+        {
+            Method = "delete",
+            Route = "monitoring",
+            Body = body
+        };
+
+        var envelope = new MessageEnvelope<CommandRequest>()
+        {
+            Type = MessageType.CommandRequest,
+            Payload = request
+        };
+
+        var writingException = await _runtime!.TelemetryPipe.TryWriteAsync(envelope, _runtime.CancellationToken);
+
+        if (writingException is not null) return writingException;
+
+        CurrentMode = ModeState.Startup;
+
+        return null;
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

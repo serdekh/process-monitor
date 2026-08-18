@@ -12,8 +12,21 @@ public partial class RunButton : UserControl
         InitializeComponent();
     }
 
-    private void RunButtonControl_Click(object sender, RoutedEventArgs e)
+    private async Task<Exception?> TrySwitchToRunningMode()
     {
-        GlobalState.Instance.CurrentMode = ModeState.Running;
+        var runtimeInitializationException = await GlobalState.Instance.TryInitializeRuntime();
+
+        if (runtimeInitializationException is not null) return runtimeInitializationException;
+
+        return await GlobalState.Instance.StartProcessing();
+    }
+
+    private async void RunButtonControl_Click(object sender, RoutedEventArgs e)
+    {
+        var modeSwitchingException = await TrySwitchToRunningMode();
+
+        if (modeSwitchingException is null) return;
+        
+        MessageBox.Show(modeSwitchingException.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }

@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
         <ModeComponents:Header Grid.Row="0"/>
         <local:RunButton Grid.Row="1"/>
-        <GridSplitter Grid.Row="2"/>
+        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"/>
         <ModeComponents:Footer Grid.Row="3"/>
     </Grid>
 </UserControl>
