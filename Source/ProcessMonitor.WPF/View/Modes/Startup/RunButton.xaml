@@ -13,5 +13,6 @@
         HorizontalAlignment="Center"
         VerticalAlignment="Center"
         Content="Run"
-        FontSize="40"/>
+        FontSize="40"
+        Click="RunButtonControl_Click"/>
 </UserControl>

@@ -14,5 +14,6 @@
         Content="⚙️"
         FontSize="35"
         Foreground="Gray"
-        BorderThickness="0"/>
+        BorderThickness="0"
+        Click="SettingsButtonControl_Click"/>
 </UserControl>
