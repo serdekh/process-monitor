@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Settings"
+             x:Name="Root"
              mc:Ignorable="d">
-    <!--TODO: Add data binding for passing 'Value' property-->
     <Grid Name="SettingsOptionControl">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -23,7 +23,7 @@
             <TextBlock 
                 Background="AliceBlue"
                 FontSize="30" 
-                Text="Property Name"/>
+                Text="{Binding PropertyName, ElementName=Root}"/>
         </Border>
         <Border 
             Grid.Row="0" 
@@ -34,7 +34,7 @@
             <TextBox 
                 Background="LightYellow"
                 FontSize="30" 
-                Text="Property Value"/>
+                Text="{Binding PropertyValue, ElementName=Root, UpdateSourceTrigger=PropertyChanged}"/>
         </Border>
     </Grid>
 </UserControl>
