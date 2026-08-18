@@ -8,7 +8,6 @@ using ProcessMonitor.Shared.Transport.Framing;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Windows;
 
 namespace ProcessMonitor.WPF.State;
 
@@ -42,18 +41,13 @@ public sealed class GlobalState : INotifyPropertyChanged
             // Note: This if-check is required to prevent WPF engine to 
             // recursively initialize GlobalState class. Do not remove
             string processName = Process.GetCurrentProcess().ProcessName.ToLower();
+
             if (processName.Contains("wpfsurface") || processName.Contains("xdesproc") || processName.Contains("devenv"))
             {
                 return null!;
             }
-            _runtime ??= new ClientApplicationState(
-                new FrameWriter(),
-                new FrameReader(),
-                new JsonMessageSerializer(),
-                Options.Create(new ClientApplicationConfiguration())
-            );
 
-            return _runtime;
+            return TryCreateRuntime();
         }
     }
 
@@ -86,6 +80,47 @@ public sealed class GlobalState : INotifyPropertyChanged
             return ex;
         }
     }
+
+    private ClientApplicationState TryCreateRuntime()
+    {
+        _runtime ??= new ClientApplicationState(
+            new FrameWriter(),
+            new FrameReader(),
+            new JsonMessageSerializer(),
+            Options.Create(new ClientApplicationConfiguration())
+        );
+
+        return _runtime;
+    }
+
+    public Exception? TryInitializeRuntime()
+    {
+        var runtime = TryCreateRuntime();
+
+        var backendCreationException = runtime.Backend.TryCreate();
+
+        if (backendCreationException is not null) return backendCreationException;
+
+        var commandsPipeException = runtime.CommandsPipe.TryInitialize();
+
+        if (commandsPipeException is not null)
+        {
+            runtime.Cleanup();
+            return commandsPipeException;
+        }
+
+        var telemetryPipeException = runtime.TelemetryPipe.TryInitialize();
+
+        if (telemetryPipeException is not null)
+        {
+            runtime.Cleanup();
+            return telemetryPipeException;
+        }
+
+        return null;
+    }
+
+    public void FinalizeRuntime() => _runtime?.Cleanup();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
