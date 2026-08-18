@@ -4,9 +4,54 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ProcessMonitor.WPF"
+        xmlns:state="clr-namespace:ProcessMonitor.WPF.State"
+        xmlns:StartupComponents="clr-namespace:ProcessMonitor.WPF.View.Modes.Startup"
+        xmlns:SettingsComponents="clr-namespace:ProcessMonitor.WPF.View.Modes.Settings"
+        xmlns:RunningComponents="clr-namespace:ProcessMonitor.WPF.View.Modes.Running"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
 
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type state:ModeState}">
+            <ContentControl Content="{Binding}">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static state:ModeState.Startup}">
+                                <Setter Property="ContentTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <StartupComponents:StartupMode DataContext="{x:Static state:GlobalState.Instance}"/>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static state:ModeState.Settings}">
+                                <Setter Property="ContentTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <SettingsComponents:SettingsMode DataContext="{x:Static state:GlobalState.Instance}"/>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding}" Value="{x:Static state:ModeState.Running}">
+                                <Setter Property="ContentTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <RunningComponents:RunningMode DataContext="{x:Static state:GlobalState.Instance}"/>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <ContentControl Content="{Binding Source={x:Static state:GlobalState.Instance}, Path=CurrentMode}"/>
     </Grid>
 </Window>
