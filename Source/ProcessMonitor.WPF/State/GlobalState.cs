@@ -47,7 +47,7 @@ public sealed class GlobalState : INotifyPropertyChanged
                 return null!;
             }
 
-            return TryCreateRuntime();
+            return CreateRuntime();
         }
     }
 
@@ -81,7 +81,7 @@ public sealed class GlobalState : INotifyPropertyChanged
         }
     }
 
-    private ClientApplicationState TryCreateRuntime()
+    private ClientApplicationState CreateRuntime()
     {
         _runtime ??= new ClientApplicationState(
             new FrameWriter(),
@@ -93,9 +93,9 @@ public sealed class GlobalState : INotifyPropertyChanged
         return _runtime;
     }
 
-    public Exception? TryInitializeRuntime()
+    public async Task<Exception?> TryInitializeRuntime()
     {
-        var runtime = TryCreateRuntime();
+        var runtime = CreateRuntime();
 
         var backendCreationException = runtime.Backend.TryCreate();
 
@@ -105,7 +105,7 @@ public sealed class GlobalState : INotifyPropertyChanged
 
         if (commandsPipeException is not null)
         {
-            runtime.Cleanup();
+            await runtime.Cleanup();
             return commandsPipeException;
         }
 
@@ -113,8 +113,24 @@ public sealed class GlobalState : INotifyPropertyChanged
 
         if (telemetryPipeException is not null)
         {
-            runtime.Cleanup();
+            await runtime.Cleanup();
             return telemetryPipeException;
+        }
+
+        var commandsPipeConnectionException = await runtime.CommandsPipe.TryConnectAsync(runtime.CancellationToken);
+
+        if (commandsPipeConnectionException is not null)
+        {
+            await runtime.Cleanup();
+            return commandsPipeConnectionException;
+        }
+
+        var telemetryPipeConnectionException = await runtime.TelemetryPipe.TryConnectAsync(runtime.CancellationToken);
+
+        if (telemetryPipeConnectionException is not null)
+        {
+            await runtime.Cleanup();
+            return telemetryPipeConnectionException;
         }
 
         return null;
