@@ -34,6 +34,8 @@ public sealed class GlobalState : INotifyPropertyChanged
         }
     }
 
+    public ClientApplicationConfiguration Configuration { get; } = new();
+
     private ClientApplicationState? _runtime;
 
     public ClientApplicationState Runtime
@@ -85,11 +87,18 @@ public sealed class GlobalState : INotifyPropertyChanged
 
     private ClientApplicationState CreateRuntime()
     {
+        // TODO: This options creation statement is run on every
+        // time a new instance is required. In case of this project
+        // it happens every time a user presses the 'Run' button. 
+        // For now it's not a big deal but it would've been improved
+        // if configuration properties were cacheable
+        var configuration = Options.Create(Configuration);
+
         _runtime ??= new ClientApplicationState(
             new FrameWriter(),
             new FrameReader(),
             new JsonMessageSerializer(),
-            Options.Create(new ClientApplicationConfiguration())
+            configuration
         );
 
         return _runtime;

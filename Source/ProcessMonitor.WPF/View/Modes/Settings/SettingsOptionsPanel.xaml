@@ -15,7 +15,7 @@
             Height="450"
             Background="LightPink">
             <local:BackendFilePathOption HorizontalAlignment="Center"/>
-            <local:TargetPIDOption/>
+            <local:TargetPIDOption HorizontalAlignment="Center"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
