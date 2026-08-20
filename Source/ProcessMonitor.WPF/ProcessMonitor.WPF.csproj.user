@@ -29,6 +29,9 @@
     <Compile Update="View\Modes\Running\RunningMode.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Settings\BackendFilePathOption.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Modes\Settings\SettingsMode.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -36,6 +39,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="View\Modes\Settings\SettingsOptionsPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Modes\Settings\TargetPIDOption.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="View\Modes\Startup\RunButton.xaml.cs">

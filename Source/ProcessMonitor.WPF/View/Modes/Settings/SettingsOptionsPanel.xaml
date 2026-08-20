@@ -14,14 +14,8 @@
             Width="800"
             Height="450"
             Background="LightPink">
-            <local:SettingsOption 
-                PropertyName="Backend File Path" 
-                PropertyValue="undefined" 
-                HorizontalAlignment="Center"/>
-            <local:SettingsOption 
-                PropertyName="Target Process Id"
-                PropertyValue="0"
-                HorizontalAlignment="Center"/>
+            <local:BackendFilePathOption HorizontalAlignment="Center"/>
+            <local:TargetPIDOption/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
