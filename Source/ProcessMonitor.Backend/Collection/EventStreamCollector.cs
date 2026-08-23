@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 
 using ProcessMonitor.Backend.State;
 
@@ -51,28 +50,25 @@ public sealed class EventStreamCollector(
         return true;
     }
 
-    private async void HandleEvent(TraceEvent e, CancellationToken ct)
+    private async Task<Exception?> TryWriteEvent(TraceEvent e, CancellationToken ct)
     {
+        if (ct.IsCancellationRequested) return new InvalidOperationException("Could not write event: cancellation requested");
+
         var processId = _state.ProcessId;
 
-        if (processId is null) return;
+        if (processId is null) return null;
+
+        if (processId != e.ProcessID) return null;
 
         try
         {
-            if (e is CSwitchTraceData cSwitch)
-            {
-                await _writer.WriteAsync(cSwitch.Clone(), ct);
-            }
-            else
-            {
-                if (e.ProcessID != processId) return;
-                await _writer.WriteAsync(e.Clone(), ct);
-            }
-        }
+            await _writer.WriteAsync(e.Clone(), ct);
+            return null;
+        } 
         catch (Exception ex)
         {
-            _logger.LogError("[Collection]: Could not write an incoming event: {}", ex.Message);
             _hostLifetime.StopApplication();
+            return ex;
         }
     }
 
@@ -84,20 +80,21 @@ public sealed class EventStreamCollector(
 
         var kernelKeywords = KernelTraceEventParser.Keywords.Process 
             | KernelTraceEventParser.Keywords.Thread 
-            | KernelTraceEventParser.Keywords.ContextSwitch;
+            | KernelTraceEventParser.Keywords.ContextSwitch
+            | KernelTraceEventParser.Keywords.SystemCall;
         
         session.EnableKernelProvider(kernelKeywords);
 
-        session.Source.Kernel.ProcessStart += data => HandleEvent(data, ct);
-        session.Source.Kernel.ProcessStop += data => HandleEvent(data, ct);
+        session.Source.Kernel.ProcessStart += async data => await TryWriteEvent(data, ct);
+        session.Source.Kernel.ProcessStop += async data => await TryWriteEvent(data, ct);
 
-        session.Source.Kernel.ThreadStart += data => HandleEvent(data, ct);
-        session.Source.Kernel.ThreadStop += data => HandleEvent(data, ct);
+        session.Source.Kernel.ThreadStart += async data => await TryWriteEvent(data, ct);
+        session.Source.Kernel.ThreadStop += async data => await TryWriteEvent(data, ct);
 
-        session.Source.Kernel.ImageLoad += data => HandleEvent(data, ct);
-        session.Source.Kernel.ImageUnload += data => HandleEvent(data, ct);
+        session.Source.Kernel.ImageLoad += async data => await TryWriteEvent(data, ct);
+        session.Source.Kernel.ImageUnload += async data => await TryWriteEvent(data, ct);
 
-        session.Source.Kernel.ThreadCSwitch += data => HandleEvent(data, ct);
+        session.Source.Kernel.ThreadCSwitch += async data => await TryWriteEvent(data, ct);
 
         var collecting = Task.Run(() => 
         {
@@ -108,11 +105,7 @@ public sealed class EventStreamCollector(
         try 
         {
             await Task.Delay(Timeout.Infinite, ct);
-        } 
-        catch (OperationCanceledException)
-        {
-            _logger.LogInformation("[Collection]: Cancellation requested. Terminating...");
-        }            
+        }      
         catch (Exception ex)
         {
             _logger.LogError("[Collection]: Could not read input events: {}. Terminating...", ex.Message);
