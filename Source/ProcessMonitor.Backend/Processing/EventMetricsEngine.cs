@@ -3,27 +3,29 @@ using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading.Channels;
-using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Diagnostics.Tracing;
 
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Snapshots;
 using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
+using ProcessMonitor.Backend.Models;
+using System.Collections.Generic;
 
 namespace ProcessMonitor.Backend.Processing;
 
 public class ProcessRuntimeState
 {
-    public ConcurrentDictionary<int, double> ThreadsExecutionStarts { get; set; } = new();
+    public HashSet<int> ThreadIds { get; set; } = [];
 
-    public double TotalCpuTimeMs = 0;
+    public Dictionary<int, double> ThreadExecutionStarts { get; set; } = [];
+
+    public double TotalCpuTimeMs { get; set; } 
 }
 
 public sealed class EventMetricsEngine 
 {
-    private readonly ChannelReader<TraceEvent> _input;
+    private readonly ChannelReader<RawEvent> _input;
     private readonly ChannelWriter<ProcessMetricsSnapshot> _output;
     private readonly ILogger<EventMetricsEngine> _logger;
     private readonly MonitoringSessionState _state;
@@ -31,7 +33,7 @@ public sealed class EventMetricsEngine
     private ProcessRuntimeState _processRuntimeState;
     
     public EventMetricsEngine(
-        Channel<TraceEvent> input,
+        Channel<RawEvent> input,
         Channel<ProcessMetricsSnapshot> output,
         ILogger<EventMetricsEngine> logger,
         MonitoringSessionState state)
@@ -48,7 +50,7 @@ public sealed class EventMetricsEngine
     {
         if (data.OldProcessID == _state.ProcessId)
         {     
-            if (_processRuntimeState.ThreadsExecutionStarts.TryRemove(data.OldThreadID, out double startTime))
+            if (_processRuntimeState.ThreadExecutionStarts.Remove(data.OldThreadID, out double startTime))
             {
                 double threadTimeDurationMs = data.TimeStampRelativeMSec - startTime;
 
@@ -61,7 +63,33 @@ public sealed class EventMetricsEngine
         
         if (data.NewProcessID == _state.ProcessId)
         {
-            _processRuntimeState.ThreadsExecutionStarts[data.NewThreadID] = data.TimeStampRelativeMSec;
+            _processRuntimeState.ThreadExecutionStarts[data.NewThreadID] = data.TimeStampRelativeMSec;
+        }
+    }
+
+    private void HandleRawEvent(ref ProcessMetricsSnapshot acc, RawEvent rawEvent)
+    {
+        if (rawEvent.Source is null) return;
+
+        switch (rawEvent.Kind)
+        {
+            case RawEventKind.ContextSwitch:
+                ComputeCpuUsage((CSwitchTraceData)rawEvent.Source); break;
+
+            case RawEventKind.ThreadStart:
+                _processRuntimeState.ThreadIds.Add(rawEvent.Source.ThreadID); break;
+            case RawEventKind.ThreadStop:
+                _processRuntimeState.ThreadIds.Remove(rawEvent.Source.ThreadID); break;
+            case RawEventKind.SyscallEnter:
+                acc.SyscallsCount++; break;
+
+            default: return;
+        }
+
+        if (acc.ProcessId == rawEvent.Source.ProcessID)
+        {
+            acc.ProcessName = rawEvent.Source.ProcessName;
+            acc.TimestampUtc = DateTime.UtcNow;
         }
     }
 
@@ -85,36 +113,14 @@ public sealed class EventMetricsEngine
         {
             while (await _input.WaitToReadAsync(linkedCt))
             {
-                while (_input.TryRead(out var inputEvent))
+                while (_input.TryRead(out var rawEvent))
                 {
-                    if (inputEvent is null) continue;
-
-                    if (inputEvent is CSwitchTraceData cswitchData)
-                    {
-                        ComputeCpuUsage(cswitchData);
-                    }
-
-                    snapshot.ProcessName = inputEvent.ProcessName;
-                    snapshot.TimestampUtc = DateTime.UtcNow;
-
-                    if (inputEvent.EventName == "Thread/Start")
-                    {
-                        snapshot.ThreadCount++;
-                    }
-                    else if (inputEvent.EventName == "Thread/Stop")
-                    {
-                        snapshot.ThreadCount--;
-                    }
+                    HandleRawEvent(ref snapshot, rawEvent);
                 }
             }
         }
         catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !ct.IsCancellationRequested)
         {
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogError("[Processing]: Could not compute metrics: cancellation requested.");
-            return;
         }
         catch (Exception ex)
         {
@@ -130,19 +136,16 @@ public sealed class EventMetricsEngine
             
             if (elapsedMs > 0)
             {
-                snapshot.CpuUsage = (_processRuntimeState.TotalCpuTimeMs / elapsedMs) * 100;
+                snapshot.CpuUsage = _processRuntimeState.TotalCpuTimeMs / elapsedMs * 100;
             }
-            System.Console.WriteLine($"Accumulated CPU Time: {_processRuntimeState.TotalCpuTimeMs:F2} ms over {elapsedMs:F2} ms window");
-            
 
+            snapshot.ThreadCount = _processRuntimeState.ThreadIds.Count;
+
+            Console.WriteLine(snapshot.ToString());
+            
             await _output.WriteAsync(snapshot, ct);
             
             _processRuntimeState.TotalCpuTimeMs = 0; 
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogError("[Processing]: Could not write the computed metrics (interrupted).");
-            return;
         }
         catch (Exception ex)
         {

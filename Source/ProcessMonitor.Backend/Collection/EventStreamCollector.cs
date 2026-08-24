@@ -11,11 +11,14 @@ using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
 
 using ProcessMonitor.Backend.State;
+using ProcessMonitor.Backend.Models;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
+using System.Collections.Generic;
 
 namespace ProcessMonitor.Backend.Collection;
 
 public sealed class EventStreamCollector(
-    Channel<TraceEvent> input,
+    Channel<RawEvent> input,
     ILogger<EventStreamCollector> logger,
     IHostApplicationLifetime hostLifetime,
     MonitoringSessionState state) : IEventCollector
@@ -24,13 +27,15 @@ public sealed class EventStreamCollector(
     // loading a custom session name
     public static string SessionName { get; } = "ProcessMonitor.Backend.TraceEventSession";
 
-    private readonly ChannelWriter<TraceEvent> _writer = input.Writer;
+    private readonly ChannelWriter<RawEvent> _writer = input.Writer;
 
     private readonly ILogger<EventStreamCollector> _logger = logger;
 
     private readonly IHostApplicationLifetime _hostLifetime = hostLifetime;
 
     private readonly MonitoringSessionState _state = state;
+
+    private readonly Dictionary<int, (int ProcessId, int ThreadId)> _runningThreads = [];
 
     private bool TryInitializeCollection()
     {
@@ -50,26 +55,67 @@ public sealed class EventStreamCollector(
         return true;
     }
 
-    private async Task<Exception?> TryWriteEvent(TraceEvent e, CancellationToken ct)
+    private bool IsWriteable(int processId, TraceEvent e)
     {
-        if (ct.IsCancellationRequested) return new InvalidOperationException("Could not write event: cancellation requested");
+        return e switch
+        {
+            CSwitchTraceData cs =>
+                cs.OldProcessID == processId ||
+                cs.NewProcessID == processId,
 
+            ThreadTraceData thread =>
+                thread.ProcessID == processId,
+
+            _ =>
+                e.ProcessID == processId
+        };
+    }
+
+    private void TryWriteEvent(TraceEvent e, RawEventKind kind)
+    {
         var processId = _state.ProcessId;
 
-        if (processId is null) return null;
+        if (processId is null) return;
 
-        if (processId != e.ProcessID) return null;
+        if (!IsWriteable((int)processId, e)) return;
 
         try
         {
-            await _writer.WriteAsync(e.Clone(), ct);
-            return null;
+            _writer.TryWrite(new RawEvent(e, kind));
         } 
-        catch (Exception ex)
+        catch (Exception)
         {
             _hostLifetime.StopApplication();
-            return ex;
         }
+    }
+
+    private void TryWriteContextSwitchEvent(CSwitchTraceData data)
+    {
+        _runningThreads[data.ProcessorNumber] = (data.NewProcessID, data.NewThreadID);
+        TryWriteEvent(data, RawEventKind.ContextSwitch);
+    }
+
+    private void TryWriteThreadStartEvent(ThreadTraceData data)
+    {
+        if (data.ProcessID != _state.ProcessId) return;
+
+        _writer.TryWrite(new RawEvent(data, RawEventKind.ThreadStart));
+    }
+
+    private void TryWriteThreadStopEvent(ThreadTraceData data)
+    {
+        if (data.ProcessID != _state.ProcessId) return;
+
+        _writer.TryWrite(new RawEvent(data, RawEventKind.ThreadStop));
+    }
+
+    private void TryWriteSyscallEnterEvent(SysCallEnterTraceData data)
+    {
+        if (!_runningThreads.TryGetValue(data.ProcessorNumber, out var running)) return;
+        
+        if (running.ProcessId != _state.ProcessId) return;
+    
+        _writer.TryWrite(new RawEvent(data, RawEventKind.SyscallEnter));
     }
 
     public async Task RunAsync(CancellationToken ct)
@@ -85,16 +131,12 @@ public sealed class EventStreamCollector(
         
         session.EnableKernelProvider(kernelKeywords);
 
-        session.Source.Kernel.ProcessStart += async data => await TryWriteEvent(data, ct);
-        session.Source.Kernel.ProcessStop += async data => await TryWriteEvent(data, ct);
+        session.Source.Kernel.ThreadStart += data => TryWriteThreadStartEvent(data);
+        session.Source.Kernel.ThreadStop += data => TryWriteThreadStopEvent(data);
 
-        session.Source.Kernel.ThreadStart += async data => await TryWriteEvent(data, ct);
-        session.Source.Kernel.ThreadStop += async data => await TryWriteEvent(data, ct);
+        session.Source.Kernel.ThreadCSwitch += data => TryWriteContextSwitchEvent(data);
 
-        session.Source.Kernel.ImageLoad += async data => await TryWriteEvent(data, ct);
-        session.Source.Kernel.ImageUnload += async data => await TryWriteEvent(data, ct);
-
-        session.Source.Kernel.ThreadCSwitch += async data => await TryWriteEvent(data, ct);
+        session.Source.Kernel.PerfInfoSysClEnter += data => TryWriteSyscallEnterEvent(data);
 
         var collecting = Task.Run(() => 
         {

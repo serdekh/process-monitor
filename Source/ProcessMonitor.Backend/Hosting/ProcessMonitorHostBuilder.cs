@@ -15,6 +15,7 @@ using ProcessMonitor.Backend.Commands.Handlers;
 
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Serialization;
+using ProcessMonitor.Backend.Models;
 
 namespace ProcessMonitor.Backend.Hosting;
 
@@ -43,7 +44,7 @@ public static class ProcessMonitorHostBuilder
     {
         services.AddSingleton<MonitoringSessionState>();
 
-        services.AddSingleton(Channel.CreateUnbounded<TraceEvent>());
+        services.AddSingleton(Channel.CreateUnbounded<RawEvent>());
         services.AddSingleton(Channel.CreateUnbounded<ProcessMetricsSnapshot>());
 
         services.AddSingleton<IMessageSerializer, JsonMessageSerializer>();

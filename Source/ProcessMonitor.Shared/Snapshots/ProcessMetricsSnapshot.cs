@@ -13,6 +13,8 @@ public sealed class ProcessMetricsSnapshot
 
     public int ThreadCount { get; set; }
 
+    public int SyscallsCount { get; set; }
+
     public DateTime TimestampUtc { get; set; }
 
     // TODO: Implement per thread cpu usage handling in the processing stage
@@ -20,6 +22,6 @@ public sealed class ProcessMetricsSnapshot
 
     public override string ToString()
     {
-        return $"{{ ProcessId: {ProcessId}, ProcessName: {ProcessName}, CpuUsage: {CpuUsage}, ThreadCount: {ThreadCount}}}";
+        return $"{{ ProcessId: {ProcessId}, ProcessName: {ProcessName}, CpuUsage: {CpuUsage}, ThreadCount: {ThreadCount}, SyscallsCount: {SyscallsCount}}}";
     }
 }
