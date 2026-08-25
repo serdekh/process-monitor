@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="ProcessMonitor.WPF.View.Modes.Running.SyscallsCountLabel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Running"
+             xmlns:State="clr-namespace:ProcessMonitor.WPF.State"
+             mc:Ignorable="d">
+    <TextBlock
+        Name="SyscallsCountLabelControl"
+        Width="160" 
+        Height="90"
+        TextAlignment="Center"
+        FontWeight="Bold"
+        FontSize="60"
+        Foreground="DarkGray"
+        Text="{Binding Source={x:Static State:GlobalState.Instance}, Path=LatestSnapshotSyscallsCount}"/>
+</UserControl>
