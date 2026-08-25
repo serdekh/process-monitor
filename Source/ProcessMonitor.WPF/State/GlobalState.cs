@@ -63,9 +63,26 @@ public sealed class GlobalState : INotifyPropertyChanged
             if (_runtime != null)
             {
                 _runtime.LatestSnapshot = value; 
-                OnPropertyChanged(); 
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LatestSnapshotCpuUsage));
             }
         } 
+    }
+
+    public double LatestSnapshotCpuUsage
+    {
+        get
+        {
+            return LatestSnapshot is null ? 0 : LatestSnapshot.CpuUsage;
+        }
+        set
+        {
+            if (LatestSnapshot is not null)
+            {
+                LatestSnapshot.CpuUsage = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
     private uint _latestRequestId = 0;
@@ -172,7 +189,7 @@ public sealed class GlobalState : INotifyPropertyChanged
 
         try
         {
-            body = JsonSerializer.SerializeToElement(new { version = 0.1, requestId = LatestRequestId, pid = 0 });
+            body = JsonSerializer.SerializeToElement(new { version = 0.1, requestId = LatestRequestId, pid = Runtime.Configuration.ProcessId });
         }
         catch (Exception ex) 
         {
@@ -192,7 +209,7 @@ public sealed class GlobalState : INotifyPropertyChanged
             Payload = request
         };
 
-        var writingException = await _runtime!.TelemetryPipe.TryWriteAsync(envelope, _runtime.CancellationToken);
+        var writingException = await _runtime!.CommandsPipe.TryWriteAsync(envelope, _runtime.CancellationToken);
 
         if (writingException is not null) return writingException;
 
