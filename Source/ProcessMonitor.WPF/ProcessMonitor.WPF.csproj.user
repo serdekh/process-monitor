@@ -29,6 +29,9 @@
     <Compile Update="View\Modes\Running\RunningMode.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Running\SyscallsCountLabel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Modes\Settings\BackendFilePathOption.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

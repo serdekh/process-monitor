@@ -65,6 +65,7 @@ public sealed class GlobalState : INotifyPropertyChanged
                 _runtime.LatestSnapshot = value; 
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(LatestSnapshotCpuUsage));
+                OnPropertyChanged(nameof(LatestSnapshotSyscallsCount));
             }
         } 
     }
@@ -80,6 +81,22 @@ public sealed class GlobalState : INotifyPropertyChanged
             if (LatestSnapshot is not null)
             {
                 LatestSnapshot.CpuUsage = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int LatestSnapshotSyscallsCount
+    {
+        get
+        {
+            return LatestSnapshot is null ? 0 : LatestSnapshot.SyscallsCount;
+        }
+        set
+        {
+            if (LatestSnapshot is not null)
+            {
+                LatestSnapshot.SyscallsCount = value;
                 OnPropertyChanged();
             }
         }
