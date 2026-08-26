@@ -20,6 +20,10 @@
             Grid.Row="1"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"/>
+        <local:ContextSwitchesCountLabel
+             Grid.Row="1"
+             HorizontalAlignment="Left"
+             VerticalAlignment="Center"/>
         <GridSplitter Grid.Row="2"/>
         <ModeComponents:Footer Grid.Row="3"/>
     </Grid>
