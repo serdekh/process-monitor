@@ -66,6 +66,7 @@ public sealed class GlobalState : INotifyPropertyChanged
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(LatestSnapshotCpuUsage));
                 OnPropertyChanged(nameof(LatestSnapshotSyscallsCount));
+                OnPropertyChanged(nameof(LatestSnapshotContextSwitchesCount));
             }
         } 
     }
@@ -97,6 +98,22 @@ public sealed class GlobalState : INotifyPropertyChanged
             if (LatestSnapshot is not null)
             {
                 LatestSnapshot.SyscallsCount = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int LatestSnapshotContextSwitchesCount 
+    {
+        get
+        {
+            return LatestSnapshot is null ? 0 : LatestSnapshot.ContextSwitchesCount;
+        }
+        set
+        {
+            if (LatestSnapshot is not null)
+            {
+                LatestSnapshot.ContextSwitchesCount = value;
                 OnPropertyChanged();
             }
         }

@@ -23,6 +23,9 @@
     <Compile Update="View\Modes\Common\Header.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Modes\Running\ContextSwitchesCountLabel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Modes\Running\CPUUsageBar.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
