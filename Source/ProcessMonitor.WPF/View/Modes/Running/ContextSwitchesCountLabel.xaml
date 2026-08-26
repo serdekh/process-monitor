@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="ProcessMonitor.WPF.View.Modes.Running.ContextSwitchesCountLabel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Running"
+             xmlns:State="clr-namespace:ProcessMonitor.WPF.State"
+             mc:Ignorable="d">
+    <Grid Name="ContextSwitchesCountLabelControl" Width="160" Height="90">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <TextBlock 
+            Grid.Row="0" 
+            TextAlignment="Center"
+            FontWeight="Bold"
+            FontSize="15"
+            Foreground="DarkSlateGray"
+            Background="Aquamarine"
+            Text="Context Switches"/>
+
+        <TextBlock
+            Grid.Row="1"
+            TextAlignment="Center"
+            FontWeight="Bold"
+            FontSize="15"
+            Foreground="White"
+            Background="LightSteelBlue"
+            Text="{Binding Source={x:Static State:GlobalState.Instance}, Path=LatestSnapshotContextSwitchesCount}"/>
+    </Grid>
+</UserControl>
