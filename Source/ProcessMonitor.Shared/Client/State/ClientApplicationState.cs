@@ -47,7 +47,7 @@ public sealed class ClientApplicationState : IAsyncDisposable
     {
         Configuration = configuration.Value;
 
-        Backend = new BackendProcess(configuration.Value.ServerFilepath);
+        Backend = new BackendProcess(configuration.Value);
 
         CommandsPipe = new TransportClient(
             ".", "ProcessMonitor.Pipes.Commands", PipeDirection.InOut, PipeOptions.Asynchronous,
