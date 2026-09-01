@@ -4,6 +4,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using ProcessMonitor.Shared.Client.State;
 
 namespace ProcessMonitor.Shared.Client.Utils;
 
@@ -15,11 +16,19 @@ public sealed class BackendProcess : IAsyncDisposable
 
     private EventHandler? _onExit = null;
 
-    public string Path 
+    public string? Path 
     { 
         get { return _startInfo.FileName; } 
         set { _startInfo.FileName = value; }
     }
+
+    private int? _processId;
+    public int? ProcessId
+    {
+        get { return _processId; }
+        set { _processId = value; }
+    }
+    
 
     public bool HasExited
     {
@@ -61,6 +70,19 @@ public sealed class BackendProcess : IAsyncDisposable
         };
     }
 
+    public BackendProcess(ClientApplicationConfiguration configuration)
+    {
+        _startInfo = new ProcessStartInfo
+        {
+            FileName = configuration.ServerFilepath,
+            UseShellExecute = true,
+            Verb = "runas"
+        };
+
+        Path = configuration.ServerFilepath;
+        ProcessId = configuration.ProcessId;
+    }
+
     public void AddOnExitHandler(EventHandler onExit)
     {
         _onExit += onExit;
@@ -85,6 +107,9 @@ public sealed class BackendProcess : IAsyncDisposable
 
         try
         {
+            _startInfo.ArgumentList.Add("--pid");
+            _startInfo.ArgumentList.Add(ProcessId?.ToString() ?? "0");
+            
             _backend = Process.Start(_startInfo);
    
             if (_backend is null) return null;
