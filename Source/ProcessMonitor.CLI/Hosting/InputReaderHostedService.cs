@@ -73,7 +73,11 @@ public sealed class InputReaderHostedService : InputReaderService
                 continue;
             }
 
-            if (_state.Out.Length != 0) Console.WriteLine(_state.Out); _state.Out.Clear();
+            if (_state.Out.Length != 0) 
+            {
+                Console.WriteLine(_state.Out); 
+                _state.Out.Clear();
+            }
         }
 
         _logger.LogDebug("[Host][InputReader]: Terminating...");
