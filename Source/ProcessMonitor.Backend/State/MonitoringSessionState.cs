@@ -1,3 +1,5 @@
+using System;
+
 namespace ProcessMonitor.Backend.State;
 
 public sealed class MonitoringSessionState
@@ -5,6 +7,11 @@ public sealed class MonitoringSessionState
     private readonly object _lock = new();
 
     private int? _processId = null;
+
+    public MonitoringSessionState(int processId)
+    {
+        SetProcessId(processId);
+    }
 
     public int? ProcessId
     {
