@@ -16,6 +16,7 @@ using ProcessMonitor.Backend.Commands.Handlers;
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Shared.Client.Input.Args;
 
 namespace ProcessMonitor.Backend.Hosting;
 
@@ -26,7 +27,7 @@ public static class ProcessMonitorHostBuilder
         var builder = Host.CreateApplicationBuilder(args);
 
         ConfigureLogging(builder.Logging);
-        ConfigureServices(builder.Services);
+        ConfigureServices(args, builder.Services);
 
         return builder;
     }
@@ -40,9 +41,13 @@ public static class ProcessMonitorHostBuilder
         logging.AddDebug();
     }
 
-    private static void ConfigureServices(IServiceCollection services)
+    private static void ConfigureServices(string[] args, IServiceCollection services)
     {
-        services.AddSingleton<MonitoringSessionState>();
+        var argsParser = new ArgsParser();
+
+        argsParser.Parse(args);
+
+        services.AddSingleton(new MonitoringSessionState(argsParser.Configuration.ProcessId ?? 0));
 
         services.AddSingleton(Channel.CreateUnbounded<RawEvent>());
         services.AddSingleton(Channel.CreateUnbounded<ProcessMetricsSnapshot>());
