@@ -74,8 +74,8 @@ public sealed class EventMetricsEngine
         switch (rawEvent.Kind)
         {
             case RawEventKind.ContextSwitch:
+                acc.ContextSwitchesCount++;
                 ComputeCpuUsage((CSwitchTraceData)rawEvent.Source); break;
-
             case RawEventKind.ThreadStart:
                 _processRuntimeState.ThreadIds.Add(rawEvent.Source.ThreadID); break;
             case RawEventKind.ThreadStop:
