@@ -19,8 +19,7 @@ public sealed class ProcessMetricsSnapshot
 
     public DateTime TimestampUtc { get; set; }
 
-    // TODO: Implement per thread cpu usage handling in the processing stage
-    //public List<ThreadMetricsSnapshot> Threads { get; set; } = new();
+    public List<ThreadMetricsSnapshot> Threads { get; set; } = [];
 
     public override string ToString()
     {
