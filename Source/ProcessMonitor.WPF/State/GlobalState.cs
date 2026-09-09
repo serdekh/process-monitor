@@ -5,7 +5,7 @@ using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport.Framing;
-
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -20,6 +20,8 @@ public sealed class GlobalState : INotifyPropertyChanged
     public ModeState PreviousMode { get; private set; }
 
     private ModeState _currentMode = ModeState.Startup;
+
+    private ObservableCollection<ThreadMetricsSnapshot> _threadMetrics = [];
 
     public ModeState CurrentMode 
     {
@@ -62,14 +64,29 @@ public sealed class GlobalState : INotifyPropertyChanged
         { 
             if (_runtime != null)
             {
-                _runtime.LatestSnapshot = value; 
+                _runtime.LatestSnapshot = value;
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _threadMetrics.Clear();
+                    if (value is not null)
+                    {
+                        foreach (var thread in value.Threads)
+                        {
+                            _threadMetrics.Add(thread);
+                        }
+                    }
+                });
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(LatestSnapshotThreads));
                 OnPropertyChanged(nameof(LatestSnapshotCpuUsage));
                 OnPropertyChanged(nameof(LatestSnapshotSyscallsCount));
                 OnPropertyChanged(nameof(LatestSnapshotContextSwitchesCount));
             }
         } 
     }
+
+    public ObservableCollection<ThreadMetricsSnapshot> LatestSnapshotThreads =>_threadMetrics;
 
     public double LatestSnapshotCpuUsage
     {
