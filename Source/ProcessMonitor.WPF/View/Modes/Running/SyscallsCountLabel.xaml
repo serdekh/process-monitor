@@ -6,13 +6,28 @@
              xmlns:local="clr-namespace:ProcessMonitor.WPF.View.Modes.Running"
              xmlns:State="clr-namespace:ProcessMonitor.WPF.State"
              mc:Ignorable="d">
-    <TextBlock
-        Name="SyscallsCountLabelControl"
-        Width="160" 
-        Height="90"
-        TextAlignment="Center"
-        FontWeight="Bold"
-        FontSize="60"
-        Foreground="DarkGray"
-        Text="{Binding Source={x:Static State:GlobalState.Instance}, Path=LatestSnapshotSyscallsCount}"/>
+    <Grid Name="SyscallsCountLabelControl" Width="160" Height="90">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <TextBlock 
+            Grid.Row="0" 
+            TextAlignment="Center"
+            FontWeight="Bold"
+            FontSize="15"
+            Foreground="DarkSlateGray"
+            Background="Aquamarine"
+            Text="Syscalls Count"/>
+
+        <TextBlock
+            Grid.Row="1"
+            TextAlignment="Center"
+            FontWeight="Bold"
+            FontSize="15"
+            Foreground="White"
+            Background="LightSteelBlue"
+            Text="{Binding Source={x:Static State:GlobalState.Instance}, Path=LatestSnapshotSyscallsCount}"/>
+    </Grid>
 </UserControl>
