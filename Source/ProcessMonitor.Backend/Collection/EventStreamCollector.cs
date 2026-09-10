@@ -178,11 +178,10 @@ public sealed class EventStreamCollector(
         TryWriteEvent(data, kind);
     }
 
-    // TODO: Complete refactoring the error handling system
     private void HandleEvent(TraceEvent data)
     {
-        UpdateTargetProcess();
-
+        if (UpdateTargetProcess() is Failure<int, CollectionError, CollectionWarning> failure) return;
+        
         if (!HasTargetProcess) return;
 
         var kind = data.ToRawEventKind();
