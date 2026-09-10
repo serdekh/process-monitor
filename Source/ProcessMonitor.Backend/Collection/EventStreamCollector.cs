@@ -35,31 +35,34 @@ public sealed class EventStreamCollector(
 
     private readonly HashSet<int> _targetThreadIds = [];
 
-    private int _targetProcessId = -1;
+    private int? _targetProcessId = null;
 
     private bool HasTargetProcess => _targetProcessId > 0;
 
-    private Result<int, CollectionError, CollectionWarning> TryUpdateTargetProcess()
+    private Result<int, CollectionError, CollectionWarning> UpdateTargetProcess()
     {
-        var processId = _state.ProcessId ?? -1;
+        var processId = _state.ProcessId;
 
         if (processId == _targetProcessId)
         {
-            return new Success<int, CollectionError, CollectionWarning>(processId);
+            return new Success<int, CollectionError, CollectionWarning>(_targetThreadIds.Count);
         }
 
         _targetProcessId = processId;
         _targetThreadIds.Clear();
 
-        if (_targetProcessId > 0) return SeedExistingThreads(_targetProcessId);
-        
-        return new Success<int, CollectionError, CollectionWarning>(processId)
+        if (processId is null)
         {
-            Warnings =
-            [
-                new ProcessDoesNotExist(_targetProcessId)
-            ]
-        };
+            return new Success<int, CollectionError, CollectionWarning>(0)
+            {
+                Warnings =
+                [
+                    new NoTargetProcessConfigured()
+                ]
+            };
+        }
+
+        return SeedExistingThreads(processId.Value);
     }
 
     private Result<int, CollectionError, CollectionWarning> SeedExistingThreads(int processId)
@@ -87,7 +90,7 @@ public sealed class EventStreamCollector(
         {
             return new Failure<int, CollectionError, CollectionWarning>(
                 new ErrorChain<CollectionError>(
-                    new ThreadEnumerationFailed(processId, ex), null));
+                    new ThreadEnumerationFailed(processId, ex)));
         }
     }
 
@@ -178,7 +181,7 @@ public sealed class EventStreamCollector(
     // TODO: Complete refactoring the error handling system
     private void HandleEvent(TraceEvent data)
     {
-        TryUpdateTargetProcess();
+        UpdateTargetProcess();
 
         if (!HasTargetProcess) return;
 
