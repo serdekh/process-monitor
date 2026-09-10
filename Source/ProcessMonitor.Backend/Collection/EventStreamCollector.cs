@@ -13,7 +13,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Models.Errors.Collection;
+using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
+using ProcessMonitor.Shared.Models.Results;
 
 namespace ProcessMonitor.Backend.Collection;
 
@@ -36,30 +39,30 @@ public sealed class EventStreamCollector(
 
     private bool HasTargetProcess => _targetProcessId > 0;
 
-    private bool TryUpdateTargetProcess()
+    private Result<int, CollectionError, CollectionWarning> TryUpdateTargetProcess()
     {
         var processId = _state.ProcessId ?? -1;
 
-        if (processId == _targetProcessId) return false;
+        if (processId == _targetProcessId)
+        {
+            return new Success<int, CollectionError, CollectionWarning>(processId);
+        }
 
         _targetProcessId = processId;
         _targetThreadIds.Clear();
 
-        if (_targetProcessId <= 0)
+        if (_targetProcessId > 0) return SeedExistingThreads(_targetProcessId);
+        
+        return new Success<int, CollectionError, CollectionWarning>(processId)
         {
-            _logger.LogInformation("[Collection]: No target process configured.");
-
-            return true;
-        }
-
-        SeedExistingThreads(_targetProcessId);
-
-        _logger.LogInformation("[Collection]: Target process changed to PID {ProcessId}.", _targetProcessId);
-
-        return true;
+            Warnings =
+            [
+                new ProcessDoesNotExist(_targetProcessId)
+            ]
+        };
     }
 
-    private void SeedExistingThreads(int processId)
+    private Result<int, CollectionError, CollectionWarning> SeedExistingThreads(int processId)
     {
         try
         {
@@ -68,18 +71,23 @@ public sealed class EventStreamCollector(
             foreach (ProcessThread thread in process.Threads)
                 _targetThreadIds.Add(thread.Id);
 
-            _logger.LogDebug("[Collection]: Seeded {ThreadCount} existing threads for PID {ProcessId}.",
-                _targetThreadIds.Count,
-                processId);
+            return new Success<int, CollectionError, CollectionWarning>(_targetThreadIds.Count);
         }
         catch (ArgumentException)
         {
-            _logger.LogDebug(
-                "[Collection]: Process {ProcessId} does not exist.", processId);
+            return new Success<int, CollectionError, CollectionWarning>(0)
+            {
+                Warnings = 
+                [
+                    new ProcessDoesNotExist(processId)
+                ]  
+            };
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogDebug(ex, "[Collection]: Could not enumerate threads for PID {ProcessId}.", processId);
+            return new Failure<int, CollectionError, CollectionWarning>(
+                new ErrorChain<CollectionError>(
+                    new ThreadEnumerationFailed(processId, ex), null));
         }
     }
 
@@ -167,6 +175,7 @@ public sealed class EventStreamCollector(
         TryWriteEvent(data, kind);
     }
 
+    // TODO: Complete refactoring the error handling system
     private void HandleEvent(TraceEvent data)
     {
         TryUpdateTargetProcess();
