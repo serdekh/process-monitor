@@ -27,7 +27,7 @@ public static class ResultExtensions
                 },
 
             Failure<T, E, W> failure =>
-                new Failure<U, E, W>(failure.Error)
+                new Failure<U, E, W>(failure.Chain)
                 {
                     Warnings = failure.Warnings
                 },
@@ -50,7 +50,7 @@ public static class ResultExtensions
                     next(success.Value)),
 
             Failure<T, E, W> failure =>
-                new Failure<U, E, W>(failure.Error)
+                new Failure<U, E, W>(failure.Chain)
                 {
                     Warnings = failure.Warnings
                 },
