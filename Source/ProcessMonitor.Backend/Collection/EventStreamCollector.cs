@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using Microsoft.Diagnostics.Tracing.Session;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -16,270 +12,125 @@ using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
+using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Shared.Models.Results;
 
 namespace ProcessMonitor.Backend.Collection;
 
-public sealed class EventStreamCollector(
-    Channel<RawEvent> input,
-    ILogger<EventStreamCollector> logger,
-    IHostApplicationLifetime hostLifetime,
-    MonitoringSessionState state) : IEventCollector
+public sealed class EventStreamCollector : IEventCollector
 {
     public static string SessionName => "ProcessMonitor.Backend.TraceEventSession";
 
-    private readonly ChannelWriter<RawEvent> _writer = input.Writer;
-    private readonly ILogger<EventStreamCollector> _logger = logger;
-    private readonly IHostApplicationLifetime _hostLifetime = hostLifetime;
-    private readonly MonitoringSessionState _state = state;
+    private readonly ILogger<EventStreamCollector> _logger;
+    private readonly IHostApplicationLifetime _hostLifetime;
+    private readonly EventCollectorContext _ctx;
+    private readonly EventHandlerDispatcher _dispatcher;
 
-    private readonly HashSet<int> _targetThreadIds = [];
+    private Failure<None, CollectionError, CollectionWarning>? _initializationFailed = null;
 
-    private int? _targetProcessId = null;
-
-    private bool HasTargetProcess => _targetProcessId > 0;
-
-    private Result<int, CollectionError, CollectionWarning> UpdateTargetProcess()
+    public EventStreamCollector(
+        Channel<RawEvent> input,
+        ILogger<EventStreamCollector> logger,
+        IHostApplicationLifetime hostLifetime,
+        MonitoringSessionState state)
     {
-        var processId = _state.ProcessId;
+        _ctx = new EventCollectorContext(input, state);
+        _dispatcher = new EventHandlerDispatcher(_ctx);
 
-        if (processId == _targetProcessId)
-        {
-            return new Success<int, CollectionError, CollectionWarning>(_targetThreadIds.Count);
-        }
-
-        _targetProcessId = processId;
-        _targetThreadIds.Clear();
-
-        if (processId is null)
-        {
-            return new Success<int, CollectionError, CollectionWarning>(0)
-            {
-                Warnings =
-                [
-                    new NoTargetProcessConfigured()
-                ]
-            };
-        }
-
-        return SeedExistingThreads(processId.Value);
+        _logger = logger;
+        _hostLifetime = hostLifetime;
     }
 
-    private Result<int, CollectionError, CollectionWarning> SeedExistingThreads(int processId)
-    {
-        try
-        {
-            using var process = Process.GetProcessById(processId);
-
-            foreach (ProcessThread thread in process.Threads)
-                _targetThreadIds.Add(thread.Id);
-
-            return new Success<int, CollectionError, CollectionWarning>(_targetThreadIds.Count);
-        }
-        catch (ArgumentException)
-        {
-            return new Success<int, CollectionError, CollectionWarning>(0)
-            {
-                Warnings = 
-                [
-                    new ProcessDoesNotExist(processId)
-                ]  
-            };
-        }
-        catch (InvalidOperationException ex)
-        {
-            return new Failure<int, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new ThreadEnumerationFailed(processId, ex)));
-        }
-    }
-
-    private bool IsTargetProcessEvent(TraceEvent data)
-    {
-        return HasTargetProcess && data.ProcessID == _targetProcessId;
-    }
-
-    private bool IsTargetContextSwitch(CSwitchTraceData data)
-    {
-        return HasTargetProcess &&
-            (_targetThreadIds.Contains(data.OldThreadID) ||
-            _targetThreadIds.Contains(data.NewThreadID));
-    }
-
-    private bool TryWriteEvent(TraceEvent data, RawEventKind kind)
-    {
-        try
-        {
-            var rawEvent = new RawEvent(data.Clone(), kind);
-
-            if (_writer.TryWrite(rawEvent)) return true;
-
-            _logger.LogWarning("[Collection]: Input channel rejected {EventKind} event.", kind.AsString());
-
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[Collection]: Failed to enqueue {EventKind} event.", kind.AsString());
-
-            _hostLifetime.StopApplication();
-
-            return false;
-        }
-    }
-
-    private void HandleThreadStart(ThreadTraceData data)
-    {
-        if (!IsTargetProcessEvent(data)) return;
-
-        _targetThreadIds.Add(data.ThreadID);
-
-        TryWriteEvent(data, RawEventKind.ThreadStart);
-    }
-
-    private void HandleThreadDCStart(ThreadTraceData data)
-    {
-        if (!IsTargetProcessEvent(data)) return;
-
-        _targetThreadIds.Add(data.ThreadID);
-
-        TryWriteEvent(data, RawEventKind.ThreadDCStart);
-    }
-
-    private void HandleThreadStop(ThreadTraceData data)
-    {
-        if (!_targetThreadIds.Contains(data.ThreadID)) return;
-
-        TryWriteEvent(data, RawEventKind.ThreadStop);
-
-        _targetThreadIds.Remove(data.ThreadID);
-    }
-
-    private void HandleThreadDCEnd(ThreadTraceData data)
-    {
-        if (!_targetThreadIds.Contains(data.ThreadID)) return;
-
-        TryWriteEvent(data, RawEventKind.ThreadDCEnd);
-
-        _targetThreadIds.Remove(data.ThreadID);
-    }
-
-    private void HandleContextSwitch(CSwitchTraceData data)
-    {
-        if (!IsTargetContextSwitch(data)) return;
-
-        TryWriteEvent(data, RawEventKind.ContextSwitch);
-    }
-
-    private void HandleSyscall(TraceEvent data, RawEventKind kind)
-    {
-        if (!IsTargetProcessEvent(data)) return;
-
-        TryWriteEvent(data, kind);
-    }
-
-    private void HandleEvent(TraceEvent data)
-    {
-        if (UpdateTargetProcess() is Failure<int, CollectionError, CollectionWarning> failure) return;
-        
-        if (!HasTargetProcess) return;
-
-        var kind = data.ToRawEventKind();
-
-        switch (kind)
-        {
-            case RawEventKind.ThreadStart:
-                if (data is ThreadTraceData threadStart) HandleThreadStart(threadStart);
-                break;
-
-            case RawEventKind.ThreadDCStart:
-                if (data is ThreadTraceData threadDcStart) HandleThreadDCStart(threadDcStart);
-                break;
-
-            case RawEventKind.ThreadStop:
-                if (data is ThreadTraceData threadStop) HandleThreadStop(threadStop);
-                break;
-
-            case RawEventKind.ThreadDCEnd:
-                if (data is ThreadTraceData threadDcEnd) HandleThreadDCEnd(threadDcEnd);
-                break;
-
-            case RawEventKind.ContextSwitch:
-                if (data is CSwitchTraceData contextSwitch) HandleContextSwitch(contextSwitch);
-                break;
-
-            case RawEventKind.SyscallEnter:
-                HandleSyscall(data, RawEventKind.SyscallEnter);
-                break;
-
-            case RawEventKind.SyscallExit:
-                break;
-
-            case RawEventKind.Undefined:
-            
-            default: break;
-        }
-    }
-
-    public async Task RunAsync(CancellationToken ct)
+    private Success<None, CollectionError, CollectionWarning> StopOldSession()
     {
         using var oldSession = new TraceEventSession(SessionName);
 
         _logger.LogDebug("[Collection]: Stopping previously created {SessionName} session.", SessionName);
 
         oldSession.Stop();
+        
+        return new Success<None, CollectionError, CollectionWarning>(new None());
+    }
 
-        if (TraceEventSession.IsElevated() != true)
+    private Result<None, CollectionError, CollectionWarning> IsElevated()
+    {
+        if (TraceEventSession.IsElevated() == true)
         {
-            _logger.LogError("[Collection]: Could only run as administrator.");
-
-            _hostLifetime.StopApplication();
-
-            return;
+            return new Success<None, CollectionError, CollectionWarning>(new None());
         }
 
-        using var session = new TraceEventSession(SessionName);
+        return new Failure<None, CollectionError, CollectionWarning>(
+            new ErrorChain<CollectionError>(
+                new CouldOnlyRunAsAdministrator()));
+    }
+
+    private TraceEventSession InitializeSession()
+    {
+        var session = new TraceEventSession(SessionName);
 
         var kernelKeywords =
-              KernelTraceEventParser.Keywords.Process
+            KernelTraceEventParser.Keywords.Process
             | KernelTraceEventParser.Keywords.Thread
             | KernelTraceEventParser.Keywords.ContextSwitch
             | KernelTraceEventParser.Keywords.SystemCall;
 
         session.EnableKernelProvider(kernelKeywords);
 
-        session.Source.Kernel.All += HandleEvent;
-
-        _logger.LogInformation("[Collection]: Event collection started.");
-
-        var processingTask = Task.Run(
-            () => session.Source.Process(),
-            CancellationToken.None);
-
-        try
+        session.Source.Kernel.All += (data) =>
         {
-            await Task.Delay(Timeout.InfiniteTimeSpan, ct);
-        }
-        catch (OperationCanceledException)
-            when (ct.IsCancellationRequested)
+            var dispatchingResult = _dispatcher.DispatchEvent(data);
+
+            if (dispatchingResult is Failure<None, CollectionError, CollectionWarning> failure)
+            {
+                _initializationFailed = new Failure<None, CollectionError, CollectionWarning>(
+                    new ErrorChain<CollectionError>(
+                        new InitializationError(), failure.Chain));
+                
+                session.Stop(); 
+            }
+        };
+
+        return session;
+    }
+
+    private async Task<Result<None, CollectionError, CollectionWarning>> ProcessEventsAsync(TraceEventSession session, CancellationToken ct)
+    {
+        using (session) 
         {
-        }
-        finally
-        {
-            session.Stop();
+            var processingTask = Task.Run(session.Source.Process, CancellationToken.None);
 
             try
             {
-                await processingTask;
+                while (!ct.IsCancellationRequested && _initializationFailed is null)
+                {
+                    await Task.Delay(100, ct);
+                }
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) {}
+            finally
             {
-                _logger.LogDebug(ex, "[Collection]: TraceEvent processing terminated.");
+                session.Stop();
+                await processingTask;
+                _ctx.TryCompleteWriting();
             }
 
-            _writer.TryComplete();
+            if (_initializationFailed is not null)
+            {
+                return _initializationFailed;
+            }
 
-            _logger.LogInformation("[Collection]: Terminated.");
+            return new Success<None, CollectionError, CollectionWarning>(new None());
         }
+    }
+
+    public async Task<Result<None, CollectionError, CollectionWarning>> RunAsync(CancellationToken ct)
+    {
+        StopOldSession();
+
+        if (IsElevated() is Failure<None, CollectionError, CollectionWarning> failure) return failure;
+        
+        var session = InitializeSession();
+        
+        return await ProcessEventsAsync(session, ct);
     }
 }
