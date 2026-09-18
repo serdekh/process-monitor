@@ -43,7 +43,7 @@ public sealed class EventCollectorContextMock : IEventCollectorContext
         throw new NotImplementedException();
     }
 
-    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent e)
+    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(ITraceEvent e)
     {
         throw new NotImplementedException();
     }
