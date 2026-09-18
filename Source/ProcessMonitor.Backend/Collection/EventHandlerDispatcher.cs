@@ -14,9 +14,9 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 {
     private readonly Dictionary<RawEventKind, EventHandlerFunc> _handlers;
 
-    private readonly EventCollectorContext _ctx;
+    private readonly IEventCollectorContext _ctx;
 
-    public EventHandlerDispatcher(EventCollectorContext ctx)
+    public EventHandlerDispatcher(IEventCollectorContext ctx)
     {
         _ctx = ctx;
 
