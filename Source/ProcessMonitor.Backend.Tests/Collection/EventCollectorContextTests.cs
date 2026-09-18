@@ -3,6 +3,15 @@ using ProcessMonitor.Backend.Tests.Fixtures.Collection;
 using ProcessMonitor.Backend.Tests.Mockers;
 using Moq;
 using ProcessMonitor.Backend.Models.Collection;
+using System.Threading.Channels;
+using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Models.Warnings.Collection;
+using ProcessMonitor.Backend.State;
+using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Backend.Models.Errors.Collection;
+using Microsoft.Diagnostics.Tracing;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
@@ -186,6 +195,36 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         // Assert
         Assert.False(actual);
     }
+
+    [Fact]
+    public void TryWriteRawEvent_ReturnsWarning_WhenChannelIsFull()
+    {
+        // Arrange
+        var options = new BoundedChannelOptions(1) 
+        { 
+            FullMode = BoundedChannelFullMode.Wait
+        };
+        
+        var channel = Channel.CreateBounded<RawEvent>(options);
+        var writer = channel.Writer;
+
+        var expectedKind = RawEventKind.Undefined;
+        writer.TryWrite(new RawEvent(null, expectedKind)); 
+
+        var eventCollectorContext = new EventCollectorContext(channel, new MonitoringSessionState(1));
+
+        var fakeEvent = new Mock<ITraceEvent>();
+        fakeEvent.Setup(e => e.GetRawEventKind()).Returns(expectedKind);
+        fakeEvent.Setup(e => e.CloneAsRawEvent()).Returns(new RawEvent(null!, expectedKind));
+
+        // Act
+        var result = eventCollectorContext.TryWriteRawEvent(fakeEvent.Object);
+
+        // Assert
+        Assert.True(result is Success<None, CollectionError, CollectionWarning>);
+        Assert.Contains(result.Warnings, w => w is EventWriteRejected);
+    }
+
 
     // TODO: Add tests for TryWriteRawEvent
     // TODO: ADD tests for TryUpdateTargetProcess
