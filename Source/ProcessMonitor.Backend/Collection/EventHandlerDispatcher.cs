@@ -10,11 +10,11 @@ using ProcessMonitor.Shared.Models.Results;
 
 namespace ProcessMonitor.Backend.Collection;
 
-public sealed class EventHandlerDispatcher
+public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 {
-    private Dictionary<RawEventKind, EventHandlerFunc> _handlers;
+    private readonly Dictionary<RawEventKind, EventHandlerFunc> _handlers;
 
-    private EventCollectorContext _ctx;
+    private readonly EventCollectorContext _ctx;
 
     public EventHandlerDispatcher(EventCollectorContext ctx)
     {
@@ -56,7 +56,7 @@ public sealed class EventHandlerDispatcher
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleEvent(Func<bool> isRelevant, Action handler, TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleEvent(Func<bool> isRelevant, Action handler, TraceEvent data)
     {
         if (!isRelevant())
         {
@@ -79,7 +79,7 @@ public sealed class EventHandlerDispatcher
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleThreadStart(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadStart(TraceEvent data)
     {
         return HandleEvent
         (
@@ -89,7 +89,7 @@ public sealed class EventHandlerDispatcher
         );
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleThreadDCStart(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadDCStart(TraceEvent data)
     {
         return HandleEvent
         (
@@ -99,7 +99,7 @@ public sealed class EventHandlerDispatcher
         );
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleThreadStop(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadStop(TraceEvent data)
     {
         return HandleEvent
         (
@@ -109,7 +109,7 @@ public sealed class EventHandlerDispatcher
         );
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleThreadDCEnd(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadDCEnd(TraceEvent data)
     {
         return HandleEvent
         (
@@ -119,7 +119,7 @@ public sealed class EventHandlerDispatcher
         );
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleContextSwitch(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleContextSwitch(TraceEvent data)
     {
         return HandleEvent
         (
@@ -129,7 +129,7 @@ public sealed class EventHandlerDispatcher
         );
     }
 
-    private Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(TraceEvent data)
     {
         return HandleEvent
         (
@@ -139,7 +139,7 @@ public sealed class EventHandlerDispatcher
         );
     }    
     
-    private Result<None, CollectionError, CollectionWarning> HandleUndefined(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleUndefined(TraceEvent data)
     {
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }

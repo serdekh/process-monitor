@@ -11,20 +11,20 @@ public interface IEventHandlerDispatcher
 {
     public Result<None, CollectionError, CollectionWarning> DispatchEvent(TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleEvent(
+    public Result<None, CollectionError, CollectionWarning> HandleEvent(
         Func<bool> isRelevant, Action handler, TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleThreadStart(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleThreadStart(TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleThreadDCStart(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleThreadDCStart(TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleThreadStop(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleThreadStop(TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleThreadDCEnd(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleThreadDCEnd(TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleContextSwitch(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleContextSwitch(TraceEvent data);
 
-    protected Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(TraceEvent data);
     
-    protected Result<None, CollectionError, CollectionWarning> HandleUndefined(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> HandleUndefined(TraceEvent data);
 }
