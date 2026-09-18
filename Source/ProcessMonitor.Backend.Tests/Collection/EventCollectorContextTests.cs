@@ -1,7 +1,10 @@
 using Microsoft.Diagnostics.Tracing;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Tests.Fixtures.Collection;
 using ProcessMonitor.Backend.Tests.Mockers;
+using Moq;
+using ProcessMonitor.Backend.Models.Collection;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
@@ -81,6 +84,20 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
 
         // Act
         var actual = _ctx.IsEventRelevantToProcessId(e);
+
+        // Assert
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void IsContextSwitchRelevantToProcessId_ReturnsFalseWhenProcessIdIsNull()
+    {
+        // Arrange
+        _ctx.ProcessId = null;
+        var fakeEvent = new Mock<IContextSwitchEvent>();
+
+        // Act
+        var actual = _ctx.IsContextSwitchRelevantToProcessId(fakeEvent.Object);
 
         // Assert
         Assert.False(actual);
