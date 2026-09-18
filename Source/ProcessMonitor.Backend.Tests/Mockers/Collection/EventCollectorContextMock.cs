@@ -1,6 +1,7 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using ProcessMonitor.Backend.Collection;
+using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Shared.Models;
@@ -16,9 +17,11 @@ public sealed class EventCollectorContextMock : IEventCollectorContext
 
     public bool HasProcessId => ProcessId > 0;
 
-    public bool IsContextSwitchRelevantToProcessId(CSwitchTraceData e)
+    public bool IsContextSwitchRelevantToProcessId(IContextSwitchEvent e)
     {
-        throw new NotImplementedException();
+        return HasProcessId &&
+            (ProcessThreadIds.Contains(e.OldThreadID) ||
+            ProcessThreadIds.Contains(e.NewThreadID));
     }
 
     public bool IsEventRelevantToProcessId(TraceEvent e)
