@@ -2,6 +2,6 @@ namespace ProcessMonitor.Backend.Models.Collection;
 
 public interface IContextSwitchEvent
 {
-    int OldThreadID { get; }
-    int NewThreadID { get; }
+    public int OldThreadID { get; }
+    public int NewThreadID { get; }
 }
