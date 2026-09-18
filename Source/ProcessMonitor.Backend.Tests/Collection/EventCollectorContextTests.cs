@@ -9,6 +9,7 @@ using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Backend.Models.Errors.Collection;
+using System;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
@@ -270,6 +271,23 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.Same(expectedException, actualError.Exception);
     }
 
+    [Fact]
+    public void TrySeedExistingThreads_ReturnsSuccess_WhenNoProcessIsCreated()
+    {
+        // Act
+        var result = _ctx.TrySeedExistingThreads(-1);
+
+        // Assert
+        Assert.True(result is Success<int, CollectionError, CollectionWarning>);
+
+        var success = (Success<int, CollectionError, CollectionWarning>)result;
+
+        Assert.NotEmpty(success.Warnings);
+        var warning = success.Warnings[0];
+
+        Assert.True(warning is ProcessDoesNotExist(-1));
+    }
+
     // TODO: Adding tests for the following methods requires
     // creating a running process to avoid an exception being
     // thrown. Another option is to add an interface to encapsulate
@@ -281,7 +299,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     // intrinsic properties such as the the preconfigured threads
     // in order to confidently test the TrySeedExistingThreads 
     // method and the TryUpdateTargetProcess one which depends on it
-    
+
         // TODO: ADD tests for TryUpdateTargetProcess
         // TODO: ADD tests for TrySeedExistingThreads
 }
