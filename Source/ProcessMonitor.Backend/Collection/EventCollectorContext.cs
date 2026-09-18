@@ -117,7 +117,7 @@ public sealed class EventCollectorContext(
                 Warnings = [new ProcessDoesNotExist(processId)]  
             };
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
             return new Failure<int, CollectionError, CollectionWarning>(
                 new ErrorChain<CollectionError>(
