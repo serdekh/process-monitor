@@ -1,17 +1,14 @@
+using Moq;
+using System.Threading.Channels;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Tests.Fixtures.Collection;
-using ProcessMonitor.Backend.Tests.Mockers;
-using Moq;
 using ProcessMonitor.Backend.Models.Collection;
-using System.Threading.Channels;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Backend.Models.Errors.Collection;
-using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
@@ -273,6 +270,18 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.Same(expectedException, actualError.Exception);
     }
 
-    // TODO: ADD tests for TryUpdateTargetProcess
-    // TODO: ADD tests for TrySeedExistingThreads
+    // TODO: Adding tests for the following methods requires
+    // creating a running process to avoid an exception being
+    // thrown. Another option is to add an interface to encapsulate
+    // the processes lookup and mock it but it would be bring more
+    // unnecessary complexity. 
+
+    // Thus these two methods would need to be executed in a 
+    // specialized environment with a process having expected
+    // intrinsic properties such as the the preconfigured threads
+    // in order to confidently test the TrySeedExistingThreads 
+    // method and the TryUpdateTargetProcess one which depends on it
+    
+        // TODO: ADD tests for TryUpdateTargetProcess
+        // TODO: ADD tests for TrySeedExistingThreads
 }
