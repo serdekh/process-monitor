@@ -1,5 +1,3 @@
-using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Tests.Fixtures.Collection;
 using ProcessMonitor.Backend.Tests.Mockers;
@@ -14,7 +12,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     private readonly IEventCollectorContext _ctx = fixture.Context;
 
     [Fact]
-    public void HasProcessId_ReturnsFalseWhenProcessIdIsNull()
+    public void HasProcessId_ReturnsFalse_WhenProcessIdIsNull()
     {
         // Arrange
         _ctx.ProcessId = null;
@@ -27,7 +25,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     }
 
     [Fact]
-    public void HasProcessId_ReturnsTrueWhenProcessIdIsNotNull()
+    public void HasProcessId_ReturnsTrue_WhenProcessIdIsNotNull()
     {
         // Arrange
         var random = new Random();
@@ -42,55 +40,59 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     }
 
     [Fact]
-    public void IsEventRelevantToProcessId_ReturnsFalseWhenProcessIdIsNull()
+    public void IsEventRelevantToProcessId_ReturnsFalse_WhenProcessIdIsNull()
     {
         // Arrange
         _ctx.ProcessId = null;
-        var e = new TraceEventMock();
+        var fakeEvent = new Mock<ITraceEvent>();
 
         // Act
-        var actual = _ctx.IsEventRelevantToProcessId(e);
+        var actual = _ctx.IsEventRelevantToProcessId(fakeEvent.Object);
 
         // Assert
         Assert.False(actual);
     }
 
     [Fact]
-    public void IsEventRelevantToProcessId_ReturnsTrueWhenProcessIdsAreEqual()
+    public void IsEventRelevantToProcessId_ReturnsTrue_WhenProcessIdsAreEqual()
     {
         // Arrange
         var random = new Random();
         var randomId = random.Next(1, 1000);
 
         _ctx.ProcessId = randomId;
-        var e = new TraceEventMock(randomId);
+        var fakeEvent = new Mock<ITraceEvent>();
+
+        fakeEvent.Setup(e => e.ProcessId).Returns(randomId);
 
         // Act
-        var actual = _ctx.IsEventRelevantToProcessId(e);
+        var actual = _ctx.IsEventRelevantToProcessId(fakeEvent.Object);
 
         // Assert
         Assert.True(actual);
     }
 
     [Fact]
-    public void IsEventRelevantToProcessId_ReturnsFalseWhenProcessIdsAreNotEqual()
+    public void IsEventRelevantToProcessId_ReturnsFalse_WhenProcessIdsAreNotEqual()
     {
         // Arrange
         var random = new Random();
         var randomId = random.Next(1, 1000);
 
-        _ctx.ProcessId = randomId + 1;
-        var e = new TraceEventMock(randomId);
+        _ctx.ProcessId = randomId;
+        var fakeEvent = new Mock<ITraceEvent>();
+
+        fakeEvent.Setup(e => e.ProcessId).Returns(randomId + 1);
 
         // Act
-        var actual = _ctx.IsEventRelevantToProcessId(e);
+        var actual = _ctx.IsEventRelevantToProcessId(fakeEvent.Object);
 
         // Assert
         Assert.False(actual);
     }
 
     [Fact]
-    public void IsContextSwitchRelevantToProcessId_ReturnsFalseWhenProcessIdIsNull()
+    public void IsContextSwitchRelevantToProcessId_ReturnsFalse_WhenProcessIdIsNull()
     {
         // Arrange
         _ctx.ProcessId = null;
