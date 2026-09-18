@@ -23,7 +23,7 @@ public sealed class EventCollectorContextMock : IEventCollectorContext
 
     public bool IsEventRelevantToProcessId(TraceEvent e)
     {
-        throw new NotImplementedException();
+        return HasProcessId && e.ProcessID == ProcessId;
     }
 
     public bool TryCompleteWriting()
