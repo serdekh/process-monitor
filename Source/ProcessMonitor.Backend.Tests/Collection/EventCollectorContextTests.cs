@@ -1,5 +1,7 @@
+using Microsoft.Diagnostics.Tracing;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Tests.Fixtures.Collection;
+using ProcessMonitor.Backend.Tests.Mockers;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
@@ -36,7 +38,54 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.True(actual);
     }
 
-    // TODO: Add tests for IsEventRelevantToProcessId
+    [Fact]
+    public void IsEventRelevantToProcessId_ReturnsFalseWhenProcessIdIsNull()
+    {
+        // Arrange
+        _ctx.ProcessId = null;
+        var e = new TraceEventMock();
+
+        // Act
+        var actual = _ctx.IsEventRelevantToProcessId(e);
+
+        // Assert
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void IsEventRelevantToProcessId_ReturnsTrueWhenProcessIdsAreEqual()
+    {
+        // Arrange
+        var random = new Random();
+        var randomId = random.Next(1, 1000);
+
+        _ctx.ProcessId = randomId;
+        var e = new TraceEventMock(randomId);
+
+        // Act
+        var actual = _ctx.IsEventRelevantToProcessId(e);
+
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void IsEventRelevantToProcessId_ReturnsFalseWhenProcessIdsAreNotEqual()
+    {
+        // Arrange
+        var random = new Random();
+        var randomId = random.Next(1, 1000);
+
+        _ctx.ProcessId = randomId + 1;
+        var e = new TraceEventMock(randomId);
+
+        // Act
+        var actual = _ctx.IsEventRelevantToProcessId(e);
+
+        // Assert
+        Assert.False(actual);
+    }
+
     // TODO: Add tests for IsContextSwitchRelevantToProcessId
     // TODO: Add tests for TryWriteRawEvent
     // TODO: ADD tests for TryUpdateTargetProcess
