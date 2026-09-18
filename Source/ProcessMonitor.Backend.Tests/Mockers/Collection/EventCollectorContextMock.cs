@@ -1,5 +1,4 @@
 using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
@@ -24,9 +23,9 @@ public sealed class EventCollectorContextMock : IEventCollectorContext
             ProcessThreadIds.Contains(e.NewThreadID));
     }
 
-    public bool IsEventRelevantToProcessId(TraceEvent e)
+    public bool IsEventRelevantToProcessId(ITraceEvent e)
     {
-        return HasProcessId && e.ProcessID == ProcessId;
+        return HasProcessId && e.ProcessId == ProcessId;
     }
 
     public bool TryCompleteWriting()
