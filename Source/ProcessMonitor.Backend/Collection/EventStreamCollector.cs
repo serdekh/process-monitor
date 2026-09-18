@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 using Microsoft.Diagnostics.Tracing.Parsers;
 using Microsoft.Diagnostics.Tracing.Session;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Models;
@@ -22,7 +21,6 @@ public sealed class EventStreamCollector : IEventCollector
     public static string SessionName => "ProcessMonitor.Backend.TraceEventSession";
 
     private readonly ILogger<EventStreamCollector> _logger;
-    private readonly IHostApplicationLifetime _hostLifetime;
     private readonly EventCollectorContext _ctx;
     private readonly EventHandlerDispatcher _dispatcher;
 
@@ -31,14 +29,12 @@ public sealed class EventStreamCollector : IEventCollector
     public EventStreamCollector(
         Channel<RawEvent> input,
         ILogger<EventStreamCollector> logger,
-        IHostApplicationLifetime hostLifetime,
         MonitoringSessionState state)
     {
         _ctx = new EventCollectorContext(input, state);
         _dispatcher = new EventHandlerDispatcher(_ctx);
 
         _logger = logger;
-        _hostLifetime = hostLifetime;
     }
 
     private Success<None, CollectionError, CollectionWarning> StopOldSession()
