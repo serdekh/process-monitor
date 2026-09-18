@@ -9,6 +9,7 @@ namespace ProcessMonitor.Backend.Tests.Collection;
 public class EventCollectorContextTests(EventCollectorContextFixture fixture) 
     : IClassFixture<EventCollectorContextFixture>
 {
+    private readonly Random _random = new();
     private readonly IEventCollectorContext _ctx = fixture.Context;
 
     [Fact]
@@ -28,8 +29,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     public void HasProcessId_ReturnsTrue_WhenProcessIdIsNotNull()
     {
         // Arrange
-        var random = new Random();
-        var randomId = random.Next(0, 10000);
+        var randomId = _random.Next(0, 10000);
         _ctx.ProcessId = randomId;
 
         // Act
@@ -57,8 +57,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     public void IsEventRelevantToProcessId_ReturnsTrue_WhenProcessIdsAreEqual()
     {
         // Arrange
-        var random = new Random();
-        var randomId = random.Next(1, 1000);
+        var randomId = _random.Next(1, 1000);
 
         _ctx.ProcessId = randomId;
         var fakeEvent = new Mock<ITraceEvent>();
@@ -76,8 +75,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     public void IsEventRelevantToProcessId_ReturnsFalse_WhenProcessIdsAreNotEqual()
     {
         // Arrange
-        var random = new Random();
-        var randomId = random.Next(1, 1000);
+        var randomId = _random.Next(1, 1000);
 
         _ctx.ProcessId = randomId;
         var fakeEvent = new Mock<ITraceEvent>();
@@ -105,7 +103,90 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.False(actual);
     }
 
-    // TODO: Add tests for IsContextSwitchRelevantToProcessId
+    [Fact]
+    public void IsContextSwitchRelevantToProcessId_ReturnsTrue_WhenOldThreadIdIsInHashSet()
+    {
+        // Arrange
+        var randomOldThreadId = _random.Next(1, 1000);
+
+        _ctx.ProcessId = 42;
+        _ctx.ProcessThreadIds = [randomOldThreadId];
+
+        var fakeEvent = new Mock<IContextSwitchEvent>();
+
+        fakeEvent.Setup(e => e.OldThreadID).Returns(randomOldThreadId);
+
+        // Act
+        var actual = _ctx.IsContextSwitchRelevantToProcessId(fakeEvent.Object);
+
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void IsContextSwitchRelevantToProcessId_ReturnsTrue_WhenNewThreadIdIsInHashSet()
+    {
+        // Arrange
+        var randomNewThreadId = _random.Next(1, 1000);
+
+        _ctx.ProcessId = 42;
+        _ctx.ProcessThreadIds = [randomNewThreadId];
+
+        var fakeEvent = new Mock<IContextSwitchEvent>();
+
+        fakeEvent.Setup(e => e.NewThreadID).Returns(randomNewThreadId);
+
+        // Act
+        var actual = _ctx.IsContextSwitchRelevantToProcessId(fakeEvent.Object);
+
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void IsContextSwitchRelevantToProcessId_ReturnsTrue_WhenEitherThreadIdIsInHashSet()
+    {
+        // Arrange
+        var randomOldThreadId = _random.Next(1, 1000);
+        var randomNewThreadId = _random.Next(1, 1000);
+
+        _ctx.ProcessId = 42;
+        _ctx.ProcessThreadIds = [randomOldThreadId, randomNewThreadId];
+
+        var fakeEvent = new Mock<IContextSwitchEvent>();
+
+        fakeEvent.Setup(e => e.OldThreadID).Returns(randomOldThreadId);
+        fakeEvent.Setup(e => e.NewThreadID).Returns(randomNewThreadId);
+
+        // Act
+        var actual = _ctx.IsContextSwitchRelevantToProcessId(fakeEvent.Object);
+
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void IsContextSwitchRelevantToProcessId_ReturnsFalse_WhenNeitherThreadIdIsInHashSet()
+    {
+        // Arrange
+        var randomOldThreadId = _random.Next(1, 1000);
+        var randomNewThreadId = _random.Next(1, 1000);
+
+        _ctx.ProcessId = 42;
+        _ctx.ProcessThreadIds = [randomOldThreadId + 1, randomNewThreadId + 1];
+
+        var fakeEvent = new Mock<IContextSwitchEvent>();
+
+        fakeEvent.Setup(e => e.OldThreadID).Returns(randomOldThreadId);
+        fakeEvent.Setup(e => e.NewThreadID).Returns(randomNewThreadId);
+
+        // Act
+        var actual = _ctx.IsContextSwitchRelevantToProcessId(fakeEvent.Object);
+
+        // Assert
+        Assert.False(actual);
+    }
+
     // TODO: Add tests for TryWriteRawEvent
     // TODO: ADD tests for TryUpdateTargetProcess
     // TODO: ADD tests for TrySeedExistingThreads
