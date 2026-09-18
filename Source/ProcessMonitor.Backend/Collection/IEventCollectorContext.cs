@@ -23,7 +23,7 @@ public interface IEventCollectorContext
 
     public bool IsContextSwitchRelevantToProcessId(IContextSwitchEvent e);
 
-    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent e);
+    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(ITraceEvent e);
 
     public Result<None, CollectionError, CollectionWarning> TryUpdateTargetProcess();
 

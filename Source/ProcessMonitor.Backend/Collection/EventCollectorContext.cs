@@ -41,13 +41,13 @@ public sealed class EventCollectorContext(
             ProcessThreadIds.Contains(e.NewThreadID));
     }
 
-    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(ITraceEvent e)
     {
-        var kind = data.ToRawEventKind();
+        var kind = e.GetRawEventKind();
 
         try
         {
-            var rawEvent = new RawEvent(data.Clone(), kind);
+            var rawEvent = e.CloneAsRawEvent();
 
             if (_writer.TryWrite(rawEvent)) 
             {
