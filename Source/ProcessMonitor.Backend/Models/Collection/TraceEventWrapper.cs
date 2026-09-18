@@ -4,7 +4,9 @@ namespace ProcessMonitor.Backend.Models.Collection;
 
 public class TraceEventWrapper(TraceEvent data) : ITraceEvent
 {
-    private readonly TraceEvent _data = data;
+    public int ProcessId => data.ProcessID;
 
-    public int ProcessId => _data.ProcessID;
+    public RawEvent CloneAsRawEvent() => new(data, data.ToRawEventKind());
+
+    public RawEventKind GetRawEventKind() => data.ToRawEventKind();
 }
