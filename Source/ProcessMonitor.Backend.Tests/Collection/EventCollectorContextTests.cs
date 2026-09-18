@@ -197,6 +197,28 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     }
 
     [Fact]
+    public void TryWriteRawEvent_ReturnsSuccess_WhenChannelHasSpace()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+
+        var eventCollectorContext = new EventCollectorContext(channel, new MonitoringSessionState(42));
+
+        var fakeEvent = new Mock<ITraceEvent>();
+        var expectedKind = RawEventKind.Undefined;
+
+        fakeEvent.Setup(e => e.GetRawEventKind()).Returns(expectedKind);
+        fakeEvent.Setup(e => e.CloneAsRawEvent()).Returns(new RawEvent(null, expectedKind));
+
+        // Act
+        var result = eventCollectorContext.TryWriteRawEvent(fakeEvent.Object);
+
+        //Assert
+        Assert.True(result is Success<None, CollectionError, CollectionWarning>);
+        Assert.Empty(result.Warnings);
+    }
+
+    [Fact]
     public void TryWriteRawEvent_ReturnsWarning_WhenChannelIsFull()
     {
         // Arrange
@@ -225,8 +247,32 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.Contains(result.Warnings, w => w is EventWriteRejected);
     }
 
+    [Fact]
+    public void TryWriteRawEvent_ReturnsFailure_WhenCloningFails()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
 
-    // TODO: Add tests for TryWriteRawEvent
+        var eventCollectorContext = new EventCollectorContext(channel, new MonitoringSessionState(42));
+
+        var fakeEvent = new Mock<ITraceEvent>();
+        var expectedException = new InsufficientMemoryException();
+
+        fakeEvent.Setup(e => e.CloneAsRawEvent()).Throws(expectedException);
+
+        // Act
+        var result = eventCollectorContext.TryWriteRawEvent(fakeEvent.Object);
+
+        // Assert
+        Assert.True(result is Failure<None, CollectionError, CollectionWarning>);
+
+        var failure = (Failure<None, CollectionError, CollectionWarning>)result;
+        var actualError = failure.Chain.Error as EventWriteFailed;
+
+        Assert.NotNull(actualError);
+        Assert.Same(expectedException, actualError.Exception);
+    }
+
     // TODO: ADD tests for TryUpdateTargetProcess
     // TODO: ADD tests for TrySeedExistingThreads
 }
