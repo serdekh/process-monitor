@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Diagnostics.Tracing;
+using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
@@ -40,7 +41,7 @@ public sealed class EventHandlerDispatcher
                     new EventDispatchingFailed(), failure.Chain));
         }
         
-        if (!_ctx.HasTargetProcess)
+        if (!_ctx.HasProcessId)
         {
             return new Success<None, CollectionError, CollectionWarning>(new None());
         }
@@ -82,8 +83,8 @@ public sealed class EventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsTargetProcessEvent(data),
-            () => _ctx.TargetThreadIds.Add(data.ThreadID),
+            () => _ctx.IsEventRelevantToProcessId(data),
+            () => _ctx.ProcessThreadIds.Add(data.ThreadID),
             data
         );
     }
@@ -92,8 +93,8 @@ public sealed class EventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsTargetProcessEvent(data),
-            () => _ctx.TargetThreadIds.Add(data.ThreadID),
+            () => _ctx.IsEventRelevantToProcessId(data),
+            () => _ctx.ProcessThreadIds.Add(data.ThreadID),
             data
         );
     }
@@ -102,8 +103,8 @@ public sealed class EventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.TargetThreadIds.Contains(data.ThreadID),
-            () => _ctx.TargetThreadIds.Remove(data.ThreadID),
+            () => _ctx.ProcessThreadIds.Contains(data.ThreadID),
+            () => _ctx.ProcessThreadIds.Remove(data.ThreadID),
             data
         );
     }
@@ -112,8 +113,8 @@ public sealed class EventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.TargetThreadIds.Contains(data.ThreadID),
-            () => _ctx.TargetThreadIds.Remove(data.ThreadID),
+            () => _ctx.ProcessThreadIds.Contains(data.ThreadID),
+            () => _ctx.ProcessThreadIds.Remove(data.ThreadID),
             data
         );
     }
@@ -122,7 +123,7 @@ public sealed class EventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsTargetContextSwitch(data),
+            () => _ctx.IsContextSwitchRelevantToProcessId((CSwitchTraceData)data),
             () => {},
             data
         );
@@ -132,7 +133,7 @@ public sealed class EventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsTargetProcessEvent(data),
+            () => _ctx.IsEventRelevantToProcessId(data),
             () => {},
             data
         );

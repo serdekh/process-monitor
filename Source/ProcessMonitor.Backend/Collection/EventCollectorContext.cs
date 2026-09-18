@@ -15,23 +15,35 @@ namespace ProcessMonitor.Backend.Collection;
 
 public sealed class EventCollectorContext(
     Channel<RawEvent> input,
-    MonitoringSessionState state)
+    MonitoringSessionState state) : IEventCollectorContext
 {
     private readonly ChannelWriter<RawEvent> _writer = input.Writer;
     private readonly MonitoringSessionState _state = state;
 
-    public HashSet<int> TargetThreadIds { get; set; } = [];
+    public HashSet<int> ProcessThreadIds { get; set; } = [];
 
-    public int? TargetProcessId { get; set; } = null;
+    public int? ProcessId { get; set; } = null;
 
-    public bool HasTargetProcess => TargetProcessId > 0;
+    public bool HasProcessId => ProcessId > 0;
 
     public bool TryCompleteWriting() => _writer.TryComplete();
+
+    public bool IsEventRelevantToProcessId(TraceEvent e)
+    {
+        return HasProcessId && e.ProcessID == ProcessId;
+    }
+
+    public bool IsContextSwitchRelevantToProcessId(CSwitchTraceData e)
+    {
+        return HasProcessId &&
+            (ProcessThreadIds.Contains(e.OldThreadID) ||
+            ProcessThreadIds.Contains(e.NewThreadID));
+    }
 
     public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent data)
     {
         var kind = data.ToRawEventKind();
-        
+
         try
         {
             var rawEvent = new RawEvent(data.Clone(), kind);
@@ -54,31 +66,17 @@ public sealed class EventCollectorContext(
         }
     }  
 
-    public bool IsTargetProcessEvent(TraceEvent data)
-    {
-        return HasTargetProcess && data.ProcessID == TargetProcessId;
-    }
-
-    public bool IsTargetContextSwitch(TraceEvent data)
-    {
-        if (data is not CSwitchTraceData cSwitch) return false;
-
-        return HasTargetProcess &&
-            (TargetThreadIds.Contains(cSwitch.OldThreadID) ||
-            TargetThreadIds.Contains(cSwitch.NewThreadID));
-    }
-
     public Result<None, CollectionError, CollectionWarning> TryUpdateTargetProcess()
     {
         var processId = _state.ProcessId;
 
-        if (processId == TargetProcessId)
+        if (processId == ProcessId)
         {
             return new Success<None, CollectionError, CollectionWarning>(new None());
         }
 
-        TargetProcessId = processId;
-        TargetThreadIds.Clear();
+        ProcessId = processId;
+        ProcessThreadIds.Clear();
 
         if (processId is null)
         {
@@ -98,7 +96,7 @@ public sealed class EventCollectorContext(
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
-    private Result<int, CollectionError, CollectionWarning> TrySeedExistingThreads(int processId)
+    public Result<int, CollectionError, CollectionWarning> TrySeedExistingThreads(int processId)
     {
         try
         {
@@ -106,10 +104,10 @@ public sealed class EventCollectorContext(
 
             foreach (ProcessThread thread in process.Threads)
             {
-                TargetThreadIds.Add(thread.Id);
+                ProcessThreadIds.Add(thread.Id);
             }
 
-            return new Success<int, CollectionError, CollectionWarning>(TargetThreadIds.Count);
+            return new Success<int, CollectionError, CollectionWarning>(ProcessThreadIds.Count);
         }
         catch (ArgumentException)
         {
