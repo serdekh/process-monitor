@@ -28,8 +28,10 @@ public sealed class EventCollectorContext(
 
     public bool TryCompleteWriting() => _writer.TryComplete();
 
-    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent data, RawEventKind kind)
+    public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent data)
     {
+        var kind = data.ToRawEventKind();
+        
         try
         {
             var rawEvent = new RawEvent(data.Clone(), kind);

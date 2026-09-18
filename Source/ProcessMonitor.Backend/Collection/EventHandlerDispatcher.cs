@@ -66,7 +66,7 @@ public sealed class EventHandlerDispatcher
 
         var kind = data.ToRawEventKind();
 
-        var writeEventResult = _ctx.TryWriteRawEvent(data, kind);
+        var writeEventResult = _ctx.TryWriteRawEvent(data);
 
         if (writeEventResult is Failure<None, CollectionError, CollectionWarning> failure)
         {
