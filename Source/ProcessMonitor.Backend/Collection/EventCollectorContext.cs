@@ -29,9 +29,9 @@ public sealed class EventCollectorContext(
 
     public bool TryCompleteWriting() => _writer.TryComplete();
 
-    public bool IsEventRelevantToProcessId(TraceEvent e)
+    public bool IsEventRelevantToProcessId(ITraceEvent e)
     {
-        return HasProcessId && e.ProcessID == ProcessId;
+        return HasProcessId && e.ProcessId == ProcessId;
     }
 
     public bool IsContextSwitchRelevantToProcessId(IContextSwitchEvent e)

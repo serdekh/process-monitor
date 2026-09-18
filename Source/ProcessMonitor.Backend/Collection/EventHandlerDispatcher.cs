@@ -84,7 +84,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsEventRelevantToProcessId(data),
+            () => _ctx.IsEventRelevantToProcessId(new TraceEventWrapper(data)),
             () => _ctx.ProcessThreadIds.Add(data.ThreadID),
             data
         );
@@ -94,7 +94,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsEventRelevantToProcessId(data),
+            () => _ctx.IsEventRelevantToProcessId(new TraceEventWrapper(data)),
             () => _ctx.ProcessThreadIds.Add(data.ThreadID),
             data
         );
@@ -135,7 +135,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
     {
         return HandleEvent
         (
-            () => _ctx.IsEventRelevantToProcessId(data),
+            () => _ctx.IsEventRelevantToProcessId(new TraceEventWrapper(data)),
             () => {},
             data
         );

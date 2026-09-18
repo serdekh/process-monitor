@@ -19,7 +19,7 @@ public interface IEventCollectorContext
 
     public bool TryCompleteWriting();
 
-    public bool IsEventRelevantToProcessId(TraceEvent e);
+    public bool IsEventRelevantToProcessId(ITraceEvent e);
 
     public bool IsContextSwitchRelevantToProcessId(IContextSwitchEvent e);
 
