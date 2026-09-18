@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
+using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Shared.Models;
@@ -20,7 +21,7 @@ public interface IEventCollectorContext
 
     public bool IsEventRelevantToProcessId(TraceEvent e);
 
-    public bool IsContextSwitchRelevantToProcessId(CSwitchTraceData e);
+    public bool IsContextSwitchRelevantToProcessId(IContextSwitchEvent e);
 
     public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(TraceEvent e);
 
