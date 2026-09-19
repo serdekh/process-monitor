@@ -49,6 +49,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 
         var kind = e.GetRawEventKind();
 
+        // TODO: Handle failure case for the EventHandleFunc
         if (_handlers.TryGetValue(kind, out EventHandlerFunc? value))
         {
             value(e.Data);
