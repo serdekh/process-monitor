@@ -1,12 +1,9 @@
-using System.Threading.Channels;
-using Microsoft.Diagnostics.Tracing.Parsers.MicrosoftWindowsTCPIP;
 using Moq;
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
-using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Shared.Models.Results;
 
@@ -15,7 +12,6 @@ namespace ProcessMonitor.Backend.Tests.Collection;
 public class EventHandlerDispatcherTests
 {
     // TODO: Add tests for 
-        //DispatchEvent;
         //HandleEvent
         //HandleThreadStart(TraceEvent data);
         //HandleThreadDCStart(TraceEvent data);
