@@ -83,4 +83,25 @@ public class EventHandlerDispatcherTests
         // Assert
         Assert.True(result is Success<None, CollectionError, CollectionWarning>);
     }
+
+    [Fact]
+    public void DispatchEvent_ReturnsSuccess_WhenHappyPath()
+    {
+        // Arrange
+        var fakeEvent = new Mock<ITraceEvent>();
+        var fakeCtx = new Mock<IEventCollectorContext>();
+        var fakeCtxSuccessTryUpdateTargetProcess = new Success<None, CollectionError, CollectionWarning>(new None());
+
+        fakeCtx.Setup(e => e.TryUpdateTargetProcess()).Returns(fakeCtxSuccessTryUpdateTargetProcess);
+        fakeCtx.Setup(e => e.HasProcessId).Returns(true);
+        fakeEvent.Setup(e => e.GetRawEventKind()).Returns(RawEventKind.ContextSwitch);
+
+        var dispatcher = new EventHandlerDispatcher(fakeCtx.Object);
+
+        // Act
+        var result = dispatcher.DispatchEvent(fakeEvent.Object);
+
+        // Assert
+        Assert.True(result is Success<None, CollectionError, CollectionWarning>);
+    }
 }
