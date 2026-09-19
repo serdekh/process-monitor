@@ -37,7 +37,7 @@ public class EventHandlerDispatcherTests
     // }
 
     [Fact]
-    public void DispatchEvent_ReturnsFailure_WhenSeedingExistingThreadsFails()
+    public void DispatchEvent_ReturnsFailure_WhenUpdatingProcessIdFails()
     {
         // Arrange
         var expectedProcessId = 42;
