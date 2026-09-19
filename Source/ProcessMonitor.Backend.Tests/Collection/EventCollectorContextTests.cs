@@ -9,7 +9,6 @@ using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Backend.Models.Errors.Collection;
-using System;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
