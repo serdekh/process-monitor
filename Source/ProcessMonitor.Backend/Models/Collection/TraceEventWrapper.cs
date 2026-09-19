@@ -6,6 +6,8 @@ public class TraceEventWrapper(TraceEvent data) : ITraceEvent
 {
     public int ProcessId => data.ProcessID;
 
+    public TraceEvent Data => data;
+
     public RawEvent CloneAsRawEvent() => new(data, data.ToRawEventKind());
 
     public RawEventKind GetRawEventKind() => data.ToRawEventKind();

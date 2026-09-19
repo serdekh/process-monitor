@@ -1,3 +1,5 @@
+using Microsoft.Diagnostics.Tracing;
+
 namespace ProcessMonitor.Backend.Models.Collection;
 
 public interface ITraceEvent
@@ -7,4 +9,6 @@ public interface ITraceEvent
     RawEventKind GetRawEventKind();
 
     RawEvent CloneAsRawEvent();
+
+    public TraceEvent Data { get; }
 }
