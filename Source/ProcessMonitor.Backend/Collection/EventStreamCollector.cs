@@ -8,6 +8,7 @@ using Microsoft.Diagnostics.Tracing.Session;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
@@ -74,7 +75,7 @@ public sealed class EventStreamCollector : IEventCollector
 
         session.Source.Kernel.All += (data) =>
         {
-            var dispatchingResult = _dispatcher.DispatchEvent(data);
+            var dispatchingResult = _dispatcher.DispatchEvent(new TraceEventWrapper(data));
 
             if (dispatchingResult is Failure<None, CollectionError, CollectionWarning> failure)
             {

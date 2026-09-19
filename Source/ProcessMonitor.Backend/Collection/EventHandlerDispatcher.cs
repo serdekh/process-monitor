@@ -33,7 +33,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
         };
     }
 
-    public Result<None, CollectionError, CollectionWarning> DispatchEvent(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> DispatchEvent(ITraceEvent e)
     {
         if (_ctx.TryUpdateTargetProcess() is Failure<None, CollectionError, CollectionWarning> failure)
         {
@@ -47,11 +47,11 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
             return new Success<None, CollectionError, CollectionWarning>(new None());
         }
 
-        var kind = data.ToRawEventKind();
+        var kind = e.GetRawEventKind();
 
         if (_handlers.TryGetValue(kind, out EventHandlerFunc? value))
         {
-            value(data);
+            value(e.Data);
         }
 
         return new Success<None, CollectionError, CollectionWarning>(new None());

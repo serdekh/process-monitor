@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Diagnostics.Tracing;
+using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Shared.Models;
@@ -9,7 +10,7 @@ namespace ProcessMonitor.Backend.Collection;
 
 public interface IEventHandlerDispatcher
 {
-    public Result<None, CollectionError, CollectionWarning> DispatchEvent(TraceEvent data);
+    public Result<None, CollectionError, CollectionWarning> DispatchEvent(ITraceEvent data);
 
     public Result<None, CollectionError, CollectionWarning> HandleEvent(
         Func<bool> isRelevant, Action handler, TraceEvent data);
