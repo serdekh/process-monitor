@@ -63,4 +63,24 @@ public class EventHandlerDispatcherTests
         var failure = (Failure<None, CollectionError, CollectionWarning>)result;
         Assert.True(failure.Chain.Error is EventDispatchingFailed);
     }
+
+    [Fact]
+    public void DispatchEvent_ReturnsSuccess_WhenEventCollectorContextHasNoProcessId()
+    {
+        // Arrange
+        var fakeEvent = new Mock<ITraceEvent>();
+        var fakeCtx = new Mock<IEventCollectorContext>();
+        var fakeCtxSuccessTryUpdateTargetProcess = new Success<None, CollectionError, CollectionWarning>(new None());
+
+        fakeCtx.Setup(e => e.TryUpdateTargetProcess()).Returns(fakeCtxSuccessTryUpdateTargetProcess);
+        fakeCtx.Setup(e => e.HasProcessId).Returns(false);
+
+        var dispatcher = new EventHandlerDispatcher(fakeCtx.Object);
+
+        // Act
+        var result = dispatcher.DispatchEvent(fakeEvent.Object);
+
+        // Assert
+        Assert.True(result is Success<None, CollectionError, CollectionWarning>);
+    }
 }
