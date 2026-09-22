@@ -241,8 +241,7 @@ public sealed class EventMetricsEngine(
 
     private void HandleRawEvent(RawEvent rawEvent)
     {
-        if (rawEvent.Source is null)
-            return;
+        if (!rawEvent.HasSource) return;
 
         switch (rawEvent.Kind)
         {
@@ -385,9 +384,9 @@ public sealed class EventMetricsEngine(
 
                 if (!HasTargetProcess) continue;
 
-                if (rawEvent.Source is null) continue;
+                if (!rawEvent.HasSource) continue;
 
-                var timestamp = rawEvent.Source.TimeStampRelativeMSec;
+                var timestamp = rawEvent.TimeStampRelativeMSec;
 
                 InitializeBucket(timestamp);
 
