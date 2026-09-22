@@ -297,7 +297,7 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         var channel = Channel.CreateUnbounded<RawEvent>();
         var state = new MonitoringSessionState(42);
         var ctx = new EventCollectorContext(channel, state);
-        var nonExistentProcessId = (new Random().Next(1, 100000) * 2) + 1;
+        var nonExistentProcessId = (_random.Next(1, 100000) * 2) + 1;
 
         // Act
         var result = ctx.TryGetProcessById(nonExistentProcessId);
@@ -334,6 +334,65 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.True(success.Value.Id == runningProcess.Id);
     }
 
+    [Fact]
+    public void TrySeedExistingThreads_ReturnsFailure_WhenProcessIdIsNegative()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+        var state = new MonitoringSessionState(42);
+        var ctx = new EventCollectorContext(channel, state);
+        var nonRunningProcess = -1;
+
+        // Act
+        var result = ctx.TrySeedExistingThreads(nonRunningProcess);
+
+        // Assert
+        Assert.True(result is Failure<int, CollectionError, CollectionWarning>);
+
+        var failure = (Failure<int, CollectionError, CollectionWarning>)result;
+
+        Assert.True(failure.Chain.Error is ThreadEnumerationFailed);
+        Assert.True(failure.Chain.Inner is not null && failure.Chain.Inner.Error is InvalidProcessId);
+    }
+
+    [Fact]
+    public void TrySeedExistingThreads_ReturnsFailure_WhenNoProcessIdIsFound()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+        var state = new MonitoringSessionState(42);
+        var ctx = new EventCollectorContext(channel, state);
+        var nonRunningProcess = (_random.Next(1, 100000) * 2) + 1;
+
+        // Act
+        var result = ctx.TrySeedExistingThreads(nonRunningProcess);
+
+        // Assert
+        Assert.True(result is Failure<int, CollectionError, CollectionWarning>);
+
+        var failure = (Failure<int, CollectionError, CollectionWarning>)result;
+
+        Assert.True(failure.Chain.Error is ThreadEnumerationFailed);
+        Assert.True(failure.Chain.Inner is not null && failure.Chain.Inner.Error is InvalidProcessId);
+    }
+
+    [Fact]
+    public void TrySeedExistingThreads_ReturnsSuccess_WhenProcessIsFound()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+        var state = new MonitoringSessionState(42);
+        var ctx = new EventCollectorContext(channel, state);
+        var runningProcess = Process.GetCurrentProcess();
+
+        // Act
+        var result = ctx.TrySeedExistingThreads(runningProcess.Id);
+
+        // Assert
+        Assert.True(result is Success<int, CollectionError, CollectionWarning>);
+
+        Assert.NotEmpty(ctx.ProcessThreadIds);
+    }
+
         // TODO: ADD tests for TryUpdateTargetProcess
-        // TODO: ADD tests for TrySeedExistingThreads
 }
