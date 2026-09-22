@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
+using System.Diagnostics;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
@@ -26,6 +25,10 @@ public interface IEventCollectorContext
     public Result<None, CollectionError, CollectionWarning> TryWriteRawEvent(ITraceEvent e);
 
     public Result<None, CollectionError, CollectionWarning> TryUpdateTargetProcess();
+
+    public Result<Process, CollectionError, CollectionWarning> TryGetProcessById(int processId);
+
+    public Success<None, CollectionError, CollectionWarning> AddThreadIdsAndDispose(Process process);
 
     public Result<int, CollectionError, CollectionWarning> TrySeedExistingThreads(int processId);
 }

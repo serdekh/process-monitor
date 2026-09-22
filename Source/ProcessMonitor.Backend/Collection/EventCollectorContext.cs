@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Channels;
-using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
@@ -97,31 +95,57 @@ public sealed class EventCollectorContext(
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
-    public Result<int, CollectionError, CollectionWarning> TrySeedExistingThreads(int processId)
+    public Result<Process, CollectionError, CollectionWarning> TryGetProcessById(int processId)
     {
+        if (processId < 0)
+        {
+            return new Failure<Process, CollectionError, CollectionWarning>(
+                new ErrorChain<CollectionError>(
+                    new InvalidProcessId(processId)));
+        }
+
         try
         {
-            using var process = Process.GetProcessById(processId);
+            var process = Process.GetProcessById(processId);
 
-            foreach (ProcessThread thread in process.Threads)
-            {
-                ProcessThreadIds.Add(thread.Id);
-            }
-
-            return new Success<int, CollectionError, CollectionWarning>(ProcessThreadIds.Count);
+            return new Success<Process, CollectionError, CollectionWarning>(process);
         }
-        catch (ArgumentException)
+        catch (Exception)
         {
-            return new Success<int, CollectionError, CollectionWarning>(0)
+            return new Failure<Process, CollectionError, CollectionWarning>(
+                new ErrorChain<CollectionError>(new InvalidProcessId(processId)))
             {
-                Warnings = [new ProcessDoesNotExist(processId)]  
+                Warnings = [new ProcessDoesNotExist(processId)]
             };
         }
-        catch (Exception ex)
+    }
+
+    public Success<None, CollectionError, CollectionWarning> AddThreadIdsAndDispose(Process process)
+    {
+        foreach (ProcessThread thread in process.Threads)
+        {
+            ProcessThreadIds.Add(thread.Id);
+        }
+
+        process.Dispose();
+
+        return new Success<None, CollectionError, CollectionWarning>(new None());
+    }
+
+    public Result<int, CollectionError, CollectionWarning> TrySeedExistingThreads(int processId)
+    {
+        var result = TryGetProcessById(processId)
+            .Bind(AddThreadIdsAndDispose);
+
+        if (result is Failure<None, CollectionError, CollectionWarning> failure)
         {
             return new Failure<int, CollectionError, CollectionWarning>(
                 new ErrorChain<CollectionError>(
-                    new ThreadEnumerationFailed(processId, ex)));
+                    new ThreadEnumerationFailed(
+                        processId, 
+                        new ArgumentException($"Invalid process id: {processId}")), failure.Chain));
         }
+
+        return new Success<int, CollectionError, CollectionWarning>(ProcessThreadIds.Count);
     }
 }
