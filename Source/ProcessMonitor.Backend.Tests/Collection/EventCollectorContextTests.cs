@@ -9,6 +9,7 @@ using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Backend.Models.Errors.Collection;
+using System.Diagnostics;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
@@ -271,33 +272,67 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     }
 
     [Fact]
-    public void TrySeedExistingThreads_ReturnsSuccess_WhenNoProcessIsCreated()
+    public void TryGetProcessById_ReturnsFailure_WhenProcessIdIsLessThanZero()
     {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+        var state = new MonitoringSessionState(42);
+        var ctx = new EventCollectorContext(channel, state);
+
         // Act
-        var result = _ctx.TrySeedExistingThreads(-1);
+        var result = ctx.TryGetProcessById(-10);
 
-        // Assert
-        Assert.True(result is Success<int, CollectionError, CollectionWarning>);
+        // Assert 
+        Assert.True(result is Failure<Process, CollectionError, CollectionWarning>);
 
-        var success = (Success<int, CollectionError, CollectionWarning>)result;
+        var failure = (Failure<Process, CollectionError, CollectionWarning>)result;
 
-        Assert.NotEmpty(success.Warnings);
-        var warning = success.Warnings[0];
-
-        Assert.True(warning is ProcessDoesNotExist(-1));
+        Assert.True(failure.Chain.Error is InvalidProcessId);
     }
 
-    // TODO: Adding tests for the following methods requires
-    // creating a running process to avoid an exception being
-    // thrown. Another option is to add an interface to encapsulate
-    // the processes lookup and mock it but it would be bring more
-    // unnecessary complexity. 
+    [Fact]
+    public void TryGetProcessById_ThrowsException_WhenNoProcessExistsById()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+        var state = new MonitoringSessionState(42);
+        var ctx = new EventCollectorContext(channel, state);
+        var nonExistentProcessId = (new Random().Next(1, 100000) * 2) + 1;
 
-    // Thus these two methods would need to be executed in a 
-    // specialized environment with a process having expected
-    // intrinsic properties such as the the preconfigured threads
-    // in order to confidently test the TrySeedExistingThreads 
-    // method and the TryUpdateTargetProcess one which depends on it
+        // Act
+        var result = ctx.TryGetProcessById(nonExistentProcessId);
+
+        // Assert 
+        Assert.True(result is Failure<Process, CollectionError, CollectionWarning>);
+
+        var failure = (Failure<Process, CollectionError, CollectionWarning>)result;
+
+        Assert.True(failure.Chain.Error is InvalidProcessId);
+
+        Assert.NotEmpty(failure.Warnings);
+
+        Assert.True(failure.Warnings[0] is ProcessDoesNotExist);
+    }
+
+    [Fact]
+    public void TryGetProcessById_ReturnsSuccess_WhenProcessIsFound()
+    {
+        // Arrange
+        var channel = Channel.CreateUnbounded<RawEvent>();
+        var state = new MonitoringSessionState(42);
+        var ctx = new EventCollectorContext(channel, state);
+        var runningProcess = Process.GetCurrentProcess();
+
+        // Act
+        var result = ctx.TryGetProcessById(runningProcess.Id);
+
+        // Assert 
+        Assert.True(result is Success<Process, CollectionError, CollectionWarning>);
+
+        var success = (Success<Process, CollectionError, CollectionWarning>)result;
+
+        Assert.True(success.Value.Id == runningProcess.Id);
+    }
 
         // TODO: ADD tests for TryUpdateTargetProcess
         // TODO: ADD tests for TrySeedExistingThreads
