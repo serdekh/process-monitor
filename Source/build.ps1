@@ -22,8 +22,8 @@ $buildArgs = @(
 
 function Log {
     param (
-        [string]$message,
-        [string]$type
+        [string]$type,
+        [string]$message
     )
 
     Write-Host "[ProcessMonitor][Build]: ${type}: $message."
@@ -56,7 +56,7 @@ function RunProject {
         "serverOnly"       { .\ProcessMonitor.Backend\bin\Debug\net9.0\ProcessMonitor.Backend.exe }
         "full"             { .\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.CLI.exe --path '.\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.Backend.exe' }
         "console"          { .\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.CLI.exe --path '.\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.Backend.exe' }
-        "desktop"          { LogWarning "running the desktop target is not implemented yet" }
+        "desktop"          { .\ProcessMonitor.WPF\bin\Debug\net9.0-windows\ProcessMonitor.WPF.exe --path '.\ProcessMonitor.CLI\bin\Debug\net9.0\ProcessMonitor.Backend.exe' }
         "desktopNoConsole" { LogWarning "running the desktopNoConsole target is not implemented yet" }
 
         default {
@@ -81,12 +81,12 @@ function BuildConsole {
 function BuildDesktop {
     BuildProject '.\ProcessMonitor.Backend' 'desktop (server)'
     BuildProject '.\ProcessMonitor.CLI' 'desktop (console-client)'
-    BuildProject '.\ProcessMonitor.WPF_Experimental' 'desktop (wpf-client)'
+    BuildProject '.\ProcessMonitor.WPF' 'desktop (wpf-client)'
 }
 
 function BuildDesktopNoConsole {
     BuildProject '.\ProcessMonitor.Backend' 'desktopNoConsole (server)'
-    BuildProject '.\ProcessMonitor.WPF_Experimental' 'desktopNoConsole (wpf-client)'
+    BuildProject '.\ProcessMonitor.WPF' 'desktopNoConsole (wpf-client)'
 }
 
 function BuildServerOnly {
