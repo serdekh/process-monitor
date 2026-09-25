@@ -76,6 +76,15 @@ Then click on the **Run** button and enjoy the collected process metrics window 
 </div>
 <br/>
 
+Alongside the **Running mode** window, you will see that a new process has launched. This is the `ProcessMonitor.Backend`!
+
+<div align="center">
+   <img src="./Images/Usage/runningBackendProcess.png" alt="'ProcessMonitor running server process'"/>
+</div>
+<br/>
+
+By default the server is configured to be visible once metrics calculations take place. This is because it makes it easier to debug. When the first release gets published, this feature will be removed and the server process will be running in the background. However, in some cases it might be necessary thus it will be considered to add a customization feature as soon as the later releases develop a mature configuration system. Yet this is a peek to the future. For now, the focus is not on that.
+
 > Note: The green bar represents the cpu usage. In this case the process was downloading a big file.
 
 > Note: The main issue with the metrics engine is visible here: no syscalls count are displayed. This is the main reason why the project is currently at the pre-release stage. This is a subject to change.
@@ -108,7 +117,7 @@ There is also the **?** button on the right corner which pops up a window for di
 
 The project is built on top of the **Client-Server model**. The UI and the metrics evaluation are split into two distinct applications. The UI project acts as a master and the server acts as its slave. When a user requests a new metric, the client side instantiates a server process. When the user stops the client application, the server process gets killed automatically.
 
-To facilitate communication between the processes, the **named pipes** are used. From the OS perspective, named pipes are a _file system_ and they implement the inter-process communication mechanism. They exist independently from the normal file systems like _exFAT32_ or _NTFS_ and this system in its core works parallel to the **socket** api found on most **UNIX** systems.
+To facilitate communication between the processes, the **named pipes** are used. From the OS perspective, named pipes are a [file system](https://en.wikipedia.org/wiki/File_system) and they implement the inter-process communication mechanism. They exist independently from the normal file systems like **exFAT32** or **NTFS** and this system in its core works parallel to the **socket** api found on most **UNIX** systems.
 
 In the closer look, both applications are composed of multiple layers with each layer having a dedicated purpose:
 
@@ -130,13 +139,34 @@ Note that both of these projects share the same layer dedicated for communicatio
 
 Both the server and the client define two pipes: first - for request/response pipeline, second - for telemetry. 
 
-The server creates a duplex pipe for the request/response pipeline and a one-way pipe for the telemetry since it only needs to send the metrics and not receive them.
+Both applications define a duplex connection configuration for the request/response pipeline.
 
-The client creates a one-way pipe for the request/response pipeline because it only sends the requests and does not handle server responses. This might be changed once the client becomes more robust to properly handle the server responses.
+For the telemetry, only the server is capable of generating them. It defines a write-only pipe whereas the clients
+define a read-only pipe to consume it.
 
 Both applications utilize the **IHost** interface to create a runtime execution environment where each service is controled and managed by a single host object. 
 
-Thus, architecturewise, the whole application acts like an (ASP.NET Core Minimal API)[https://learn.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-10.0&tabs=visual-studio] one with the only difference being on where the data traffic is travelling in (in case of this project, instead of moving through the web and the kestrel server, everything happends on a single machine via the named pipes).
+Thus, architecturewise, the whole application acts like an [**ASP.NET Core Minimal API**](https://learn.microsoft.com/en-us/aspnet/core/tutorials/min-web-api?view=aspnetcore-10.0&tabs=visual-studio) with the only difference being where the data traffic is travelling in (in case of this project, instead of moving through the web and the kestrel server, everything happens on a single machine via the named pipes).
+
+Note that in the repo there are more than two projects. Here is the list of them:
+
+- ProcessMonitor.Backend
+- _ProcessMonitor.Backend.Tests_
+- ProcessMonitor.CLI
+- ProcessMonitor.WPF
+- _ProcessMonitor.Shared_
+
+As the name suggests, the ProcessMonitor.Backend project implements the **server** part of the **client-server model**.
+
+Similarly, both the ProcessMonitor.CLI and ProcessMonitor.WPF projects implement the **client** part of the **client-server model**.
+
+_ProcessMonitor.Shared_ is a container project. It holds the implementations which are: 
+- Common between the projects (data transportation, protocol data structures, error handling models, etc.)
+- Not tied to a specific project (serialization, shell script parsing)
+
+_ProcessMonitor.Backend.Tests_ defines the basic testing for the server project. Currently the tests are only supported for a single project but in the future it is planned to extend the tests so that they cover the majority of the written code. 
+
+The tests are based on the [**xUnit Framework**](https://xunit.net/?tabs=cs).
 
 Important to note that the client defines a simple query language called **ProcessMonitor Query Language** or **PMQL** for short. It acts similar to how interpreted languages like **Python** or **JavaScript** are executed under the hood. 
 
@@ -207,5 +237,5 @@ Until then no contributuons are considered to be included.
 
 If you have any questions, you can ask me directly through my contact links
 
-[Telegram](https://t.me/SerhiiDekhtiarov)
-[Email](serhii.dekhtiarov.2004.work@gmail.com) 
+![Static Badge](https://img.shields.io/badge/Telegram-26A5E4?style=social&logo=telegram&link=https%3A%2F%2Ft.me%2FSerhiiDekhtiarov)
+![Static Badge](https://img.shields.io/badge/Gmail-26A5E4?style=social&logo=gmail&link=serhii.dekhtiarov.2004.work%40gmail.com)
