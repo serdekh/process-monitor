@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
@@ -15,6 +16,8 @@ public interface IEventCollectorContext
     public HashSet<int> ProcessThreadIds { get; set; } 
 
     public bool HasProcessId { get; }
+
+    public RawEvent? TryPeek();
 
     public bool TryCompleteWriting();
 

@@ -49,17 +49,22 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 
         var kind = e.GetRawEventKind();
 
-        // TODO: Handle failure case for the EventHandleFunc and then add 
-        // a test case that runs against it
         if (_handlers.TryGetValue(kind, out EventHandlerFunc? value))
         {
-            value(e.Data);
+            var result = value(e);
+
+            if (result is Failure<None, CollectionError, CollectionWarning> handlingFailure)
+            {
+                return new Failure<None, CollectionError, CollectionWarning>(
+                    new ErrorChain<CollectionError>(
+                        new EventDispatchingFailed(), handlingFailure.Chain));
+            }
         }
 
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleEvent(Func<bool> isRelevant, Action handler, TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleEvent(Func<bool> isRelevant, Action handler, ITraceEvent e)
     {
         if (!isRelevant())
         {
@@ -68,9 +73,9 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 
         handler();
 
-        var kind = data.ToRawEventKind();
+        var kind = e.GetRawEventKind();
 
-        var writeEventResult = _ctx.TryWriteRawEvent(new TraceEventWrapper(data));
+        var writeEventResult = _ctx.TryWriteRawEvent(e);
 
         if (writeEventResult is Failure<None, CollectionError, CollectionWarning> failure)
         {
@@ -82,68 +87,68 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleThreadStart(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadStart(ITraceEvent e)
     {
         return HandleEvent
         (
-            () => _ctx.IsEventRelevantToProcessId(new TraceEventWrapper(data)),
-            () => _ctx.ProcessThreadIds.Add(data.ThreadID),
-            data
+            () => _ctx.IsEventRelevantToProcessId(e),
+            () => _ctx.ProcessThreadIds.Add(e.Data.ThreadID),
+            e
         );
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleThreadDCStart(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadDCStart(ITraceEvent e)
     {
         return HandleEvent
         (
-            () => _ctx.IsEventRelevantToProcessId(new TraceEventWrapper(data)),
-            () => _ctx.ProcessThreadIds.Add(data.ThreadID),
-            data
+            () => _ctx.IsEventRelevantToProcessId(e),
+            () => _ctx.ProcessThreadIds.Add(e.Data.ThreadID),
+            e
         );
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleThreadStop(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadStop(ITraceEvent e)
     {
         return HandleEvent
         (
-            () => _ctx.ProcessThreadIds.Contains(data.ThreadID),
-            () => _ctx.ProcessThreadIds.Remove(data.ThreadID),
-            data
+            () => _ctx.ProcessThreadIds.Contains(e.Data.ThreadID),
+            () => _ctx.ProcessThreadIds.Remove(e.Data.ThreadID),
+            e
         );
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleThreadDCEnd(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleThreadDCEnd(ITraceEvent e)
     {
         return HandleEvent
         (
-            () => _ctx.ProcessThreadIds.Contains(data.ThreadID),
-            () => _ctx.ProcessThreadIds.Remove(data.ThreadID),
-            data
+            () => _ctx.ProcessThreadIds.Contains(e.Data.ThreadID),
+            () => _ctx.ProcessThreadIds.Remove(e.Data.ThreadID),
+            e
         );
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleContextSwitch(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleContextSwitch(ITraceEvent e)
     {
         return HandleEvent
         (
             () => _ctx.IsContextSwitchRelevantToProcessId(
-                new ContextSwitchEventWrapper((CSwitchTraceData)data)),
+                new ContextSwitchEventWrapper((CSwitchTraceData)e.Data)),
             () => {},
-            data
+            e
         );
     }
 
-    public Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(ITraceEvent e)
     {
         return HandleEvent
         (
-            () => _ctx.IsEventRelevantToProcessId(new TraceEventWrapper(data)),
+            () => _ctx.IsEventRelevantToProcessId(e),
             () => {},
-            data
+            e
         );
     }    
     
-    public Result<None, CollectionError, CollectionWarning> HandleUndefined(TraceEvent data)
+    public Result<None, CollectionError, CollectionWarning> HandleUndefined(ITraceEvent e)
     {
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }

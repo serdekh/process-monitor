@@ -25,6 +25,8 @@ public sealed class EventCollectorContext(
 
     public bool HasProcessId => ProcessId > 0;
 
+    public RawEvent? TryPeek() => input.Reader.TryPeek(out RawEvent e) ? e : null;
+
     public bool TryCompleteWriting() => _writer.TryComplete();
 
     public bool IsEventRelevantToProcessId(ITraceEvent e)
