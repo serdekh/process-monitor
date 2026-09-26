@@ -1,0 +1,430 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Страница-1" id="BMfCKHINI4Qv7Isb5Di3">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-9" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;strokeWidth=5;fillColor=#e6d0de;gradientColor=#d5739d;strokeColor=#996185;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;ProcessMonitor.Backend&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-10" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Hosting&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-11" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;State&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-12" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Collection&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-13" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Processing&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-14" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Commands&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="OjzyYeu-0M5Tfc4nLA5w-15" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Publishing&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="1160" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-1" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Transport&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="1500" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-2" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Models&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="1800" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-6" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="OjzyYeu-0M5Tfc4nLA5w-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-7" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="OjzyYeu-0M5Tfc4nLA5w-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-8" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="OjzyYeu-0M5Tfc4nLA5w-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-9" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="OjzyYeu-0M5Tfc4nLA5w-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-10" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="OjzyYeu-0M5Tfc4nLA5w-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-11" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="OjzyYeu-0M5Tfc4nLA5w-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-13" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="7qdx8V2ninTG3rhCgIZF-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="7qdx8V2ninTG3rhCgIZF-14" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="7qdx8V2ninTG3rhCgIZF-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Represents the entire ProcessMonitor.Backend project folder which is itself a part of the outer ProcessMonitor solution." id="7qdx8V2ninTG3rhCgIZF-17">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="250" y="40" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Provides the `IHost` application instance that configures background services for the other layers, asynchronous channels and the state singleton. This layer serves as the entry point and host builder acts as an orchestrator that keeps the application running until an interrupt triggers the cancellation token to request a shutdown" id="7qdx8V2ninTG3rhCgIZF-18">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="160" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="This layer provides a class for storing shared runtime state of the application which is used to determing whether the telemtry collection needs to start or not depending on the processId value" id="WrZqJatIKG-vzzKPaSVi-1">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="420" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="This layer is responsible for establishing the event tracing system (ETW) session, reading the raw events and filtering them" id="WrZqJatIKG-vzzKPaSVi-2">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="560" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="This layer takes the raw kernel events from the `Collection` layer and builds up the metrics snapshots. Those are then pushed into an async channel for further handling" id="WrZqJatIKG-vzzKPaSVi-3">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="730" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="The `Commands` layer is composed of classes that parse the commands pipe, route commands to handlers, execute commands, build responses and sends the result back to the command pipe" id="WrZqJatIKG-vzzKPaSVi-4">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="960" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="The Publishing layer is composed of two other layers: `Serialization` and `Transport`. It provides a combined and unified logic for determining where the telemetry should go to. This layer is then used to create a corresponding background service" id="WrZqJatIKG-vzzKPaSVi-5">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="1160" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="The `Transport` layer takes the serialized/deserialized C# types (telemetry metrics and commands) and sends or receives them from the established named pipe IPC connections depending on the data flow stage. This layer is not used directly, but by the `Publishing` and `Commands` layers via compositon" id="WrZqJatIKG-vzzKPaSVi-7">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="1500" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Provides the classes and interfaces that are used internally such as: `RawKernelEvent`, `ProcessMetricsSnapshot` and others " id="WrZqJatIKG-vzzKPaSVi-8">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="1800" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Contains configuration files for launching the hosted application" id="WrZqJatIKG-vzzKPaSVi-9">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="2000" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-12" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;CommandListenerHostedService&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-13" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;PublisherHostedService&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-14" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;EngineHostedService&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-15" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;b style=&quot;font-family: Verdana;&quot;&gt;CollectorHostedService&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-16" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;ProcessMonitorHostBuilder&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-18" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="WrZqJatIKG-vzzKPaSVi-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-19" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="WrZqJatIKG-vzzKPaSVi-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-20" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="WrZqJatIKG-vzzKPaSVi-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-21" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="WrZqJatIKG-vzzKPaSVi-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WrZqJatIKG-vzzKPaSVi-22" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="WrZqJatIKG-vzzKPaSVi-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="C# class that implements the `IHost` interface and configures the services, channels , the state. Used in the Program.cs file to start orchestrating the built application instance " id="WrZqJatIKG-vzzKPaSVi-23">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="250" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="C# class that derives from the `BackgroundService` class. Internally uses the `EventStreamCollector` for collecting raw kernel events" id="WrZqJatIKG-vzzKPaSVi-24">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="280" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="C# class that derives from the `BackgroundService` class. Internally uses the `IPCMetricsPublisher` for serializing/deserializing telemetry and command requests + raw bytes IPC transportation " id="WrZqJatIKG-vzzKPaSVi-25">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="340" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="C# class that derives from the `BackgroundService` class. Internally uses the `EventMetricsEngine` for reading raw kernel events and building the process metrics out of them" id="WrZqJatIKG-vzzKPaSVi-26">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="310" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="C# class that derives from the `BackgroundService` class. Internally uses the `CommandsController` for serializing and deserializng command requests and command responses. Also perfoms their transportation" id="WrZqJatIKG-vzzKPaSVi-28">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="370" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-1" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;MonitoringSessionState&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-2" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Class that represents the runtime state of the backend. It contains information such as process id to monitor or time quantum delay between sending next packet of metrics. This layer is controlled by the `Hosting` layer by creating a singleton instance of the state and keeping it alive until the entire system begins to exit" id="HN_6tBUxna2hnIAb3geS-3">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="510" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-4" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;EventStreamCollector&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-5" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;IEventCollector&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-6" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-7" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="An interface that describes an asynchronous action of reading an event stream. Used by the `EventStreamCollector` class and the `CollectorHostedService` as a generic reference to the collection layer implementation" id="HN_6tBUxna2hnIAb3geS-8">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="650" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that implements the `IEventCollector` interface. It provides logic for creating an ETW session, subscribing to the kernel provider and reading the `MonitoringSessionState` class" id="HN_6tBUxna2hnIAb3geS-9">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="690" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-10" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;EventMetricsEngine&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-11" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that reads the `Channel&lt;RawKernelEvent&gt;` provided by the `Collection` layer and outputs a new `Channel&lt;ProcessMetricsSnapshot&gt;` that represents a final uint of metrics and is used later by the `Transport` and `Serialization` layers. " id="HN_6tBUxna2hnIAb3geS-12">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="820" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-13" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;b style=&quot;font-family: Verdana;&quot;&gt;StopMonitoringHandler&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-14" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;StartMonitoringHandler&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1080" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-15" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;ICommandHandler&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-16" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;CommandRouter&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-17" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;CommandRegistry&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-18" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;CommandsController&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-19" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-20" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-21" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-22" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-23" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-24" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that is responsible for receiving the requests and sending the responses via the `Commands` pipe. Internally uses the serializes, transportation methods and a command router to achieve it." id="HN_6tBUxna2hnIAb3geS-25">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="960" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that maps a `CommandRequest` object to a specific instance of the `ICommandHandler` interface depending on a request&#39;s route and method. Used as a convenient internal logic for the `CommandRouter` class." id="HN_6tBUxna2hnIAb3geS-26">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="990" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that forwards `CommandRequest`s to the corresponding handlers and pushes the `CommandResponse` objects back to the pipe. Used as a part of the `CommandsController` internal implementation." id="HN_6tBUxna2hnIAb3geS-27">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1020" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="An interface that generally describes an anction of executing a request and building a response. Used by all the handler classes and the `CommandRouter` for a simplified request-response management." id="HN_6tBUxna2hnIAb3geS-28">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1050" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that handles a monitoring request by updating a process id value in the `State` layer. " id="HN_6tBUxna2hnIAb3geS-29">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1080" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="A class that represents a request to stop monitoring by setting the value of process id in the `State` layer to `null`." id="HN_6tBUxna2hnIAb3geS-30">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1110" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-31" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;IPCMetricsPublisher&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1280" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-32" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;IMetricsPublisher&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1250" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Describes a an action of taking a coputed telemetry snapshot and sending it to a client process." id="HN_6tBUxna2hnIAb3geS-35">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="550" y="1250" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Implements the `IMetricsPublisher` interface and provides the `IPC` implementation of sending the computed and serialized telemetry data stream." id="HN_6tBUxna2hnIAb3geS-36">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="550" y="1290" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-38" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="HN_6tBUxna2hnIAb3geS-39" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="HN_6tBUxna2hnIAb3geS-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PvKCoZL3XOZafnGP0z3r-19" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=5;gradientColor=#7ea6e0;fontSize=20;labelBorderColor=none;textShadow=0;labelBackgroundColor=none;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;Serialization&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="160" y="1330" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="The Publishing layer is composed of two other layers: `Serialization` and `Transport`. It provides a combined and unified logic for determining where the telemetry should go to. This layer is then used to create a corresponding background service" id="PvKCoZL3XOZafnGP0z3r-20">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="368" y="1330" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="PvKCoZL3XOZafnGP0z3r-21" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;IPCMetricsPublisher&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1450" as="geometry" />
+        </mxCell>
+        <mxCell id="PvKCoZL3XOZafnGP0z3r-22" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;IMessageSerializer&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1420" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Describes two actions of serializing and deserializng c# objects into and out of the bytes stream." id="PvKCoZL3XOZafnGP0z3r-23">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="550" y="1420" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Implements the `IMessageSerializer` interface for working specifically with the json file format used by the standard protocol." id="PvKCoZL3XOZafnGP0z3r-24">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="550" y="1460" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="PvKCoZL3XOZafnGP0z3r-25" edge="1" parent="1" source="PvKCoZL3XOZafnGP0z3r-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="PvKCoZL3XOZafnGP0z3r-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PvKCoZL3XOZafnGP0z3r-26" edge="1" parent="1" source="PvKCoZL3XOZafnGP0z3r-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="PvKCoZL3XOZafnGP0z3r-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-1" edge="1" parent="1" source="OjzyYeu-0M5Tfc4nLA5w-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=30;entryPerimeter=0;" target="PvKCoZL3XOZafnGP0z3r-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-5" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;IPCProtocolReader&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1750" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-6" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;b style=&quot;font-family: Verdana;&quot;&gt;IPCProtocolWriter&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1720" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-7" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;TelemetryTransport&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1690" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-8" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;CommandTransport&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1660" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-10" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;" value="&lt;b style=&quot;font-family: Verdana;&quot;&gt;ITelemetryTransport&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1630" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-11" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;ICommandTransport&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-12" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-13" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-14" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-15" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-16" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-17" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Provides a contract for sending and receiving byte streams for the `Commands` pipe." id="hqmHDTjT-p7fm8AnnKdr-18">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1600" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Provides a contract for sending byte streams for the `Telemetry` pipe." id="hqmHDTjT-p7fm8AnnKdr-19">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1630" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Implements the `ICommandTransport` interface for the `IPC`-message-sending based connection" id="hqmHDTjT-p7fm8AnnKdr-20">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1660" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Implements the `ITelemetryTransport` interface for the `IPC`-message-sending based connection" id="hqmHDTjT-p7fm8AnnKdr-21">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1690" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Directly talks to a named pipe and generates a frame of a serialized object." id="hqmHDTjT-p7fm8AnnKdr-22">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1720" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Directly talks to a named pipe and reads incoming frames from there." id="hqmHDTjT-p7fm8AnnKdr-23">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1750" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-24" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;ThreadRuntimeState&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1950" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-25" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;ProcessRuntimeState&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1920" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-26" parent="1" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;gradientColor=#97d077;" value="&lt;font face=&quot;Verdana&quot;&gt;&lt;b&gt;RawKernelEvent&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="250" x="280" y="1890" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Represents a raw kernel event emitted by the Windows Kernel Provider." id="hqmHDTjT-p7fm8AnnKdr-27">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1890" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Represents an aggregation object for intermediary calculations starting from receiving a `RawKernelEvent` and ending at generating the `ProcessMetricsSnapshot` instance." id="hqmHDTjT-p7fm8AnnKdr-28">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1920" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;b&gt;&lt;font face=&quot;Verdana&quot;&gt;?&lt;/font&gt;&lt;/b&gt;" tooltip="Similarly to the `ProcessRuntimeState`, this object is used for temporary computations and is also an internal dependency for the `ProcessRuntimeState` class" id="hqmHDTjT-p7fm8AnnKdr-30">
+          <mxCell parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#fad7ac;strokeColor=#b46504;" vertex="1">
+            <mxGeometry height="20" width="20" x="540" y="1950" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-31" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-32" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="hqmHDTjT-p7fm8AnnKdr-33" edge="1" parent="1" source="7qdx8V2ninTG3rhCgIZF-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=10;entryPerimeter=0;" target="hqmHDTjT-p7fm8AnnKdr-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

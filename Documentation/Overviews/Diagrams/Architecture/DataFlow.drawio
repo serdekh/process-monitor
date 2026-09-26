@@ -1,0 +1,187 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Страница-1" id="rIbzIyZ89cIiIR3FBDnD">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The project is client-server based. There is a backend and a client process. They connect with each other using inter-process communication, or IPC for short.&amp;nbsp;&lt;/font&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;There are two types of `IPC`: the one that merges the memory adress spaces of both process into a single one (aka the shared memory approach) and the message passing approach where both processes request an operating system to create a &#39;tunnel&#39; into which the requests and responses are pushed. The processes interact with each other through that &#39;tunnel&#39; using syscalls.&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The second approach is the one that is used in the ProcessMonitor application. Reason being since in the future an application could expand to handle a more sophisticated logic of having multiple frontends at the same time. Although right now only a single frontend is supported. The second approach makes it more data-safe since there is no problem of lock-guarding the shared memory space from a potential race condition. The only downside of this approach is in the overhead. The time and resources required for serializing, deserializing and transporting data is bigger then if it were directly read or written into a common memory space.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;In terms of the data flow, the ProcessMonitor projects interact using something that is called `Named pipes`. They provide a smooth mechanism for reading and writing data via the `IPC`. A complete file system and a driver (NPFS) are created to implement pipes. The projects are defining pipes and transmit data through them.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The ProcessMonitor.Backend project creates two pipes: a `Telemetry` pipe and a `Commands` pipe.&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The `Telemetry` pipe transmits the computed process metrics from a server to a client. The data flow one-directional. Only the server writes to it and the client simply connects and reads whatever comes in there.&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The `Commands` pipe is bi-directional. It is used as a separate data flow for a client to instruct a server to do something. A client generates a serialized protocol-formatted message and writes it to the pipe. A server is constantly reading for the requests and if a new one is pushed, the server routes it to a corresponding handler class, executes and pushes back a response. A client is capable of changing both the static configurations and the runtime state. The entire communication is based on a set of rules for the file formatting. Every message is internally a json file that contains meta information for the request, the client, the destination, the actual act of the request and an optional body.&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;When a final application is shipped, a user receives a bundle that contains both the ProcessMonitor.Backend and the ProcessMonitor.Frontend applications. The frontend one is the one a user is supposed to interact with. The ProcessMonitor.Backend starts indirectly when a user requests to start monitoring. Then the server starts up, creates two named pipes for the telemetry and commands, and the frontend application connects to those pipes.. When no more monitoring is required, the ProcessMonitor.Backend process is automatically shut down.&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font face=&quot;Helvetica&quot; style=&quot;font-size: 18px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;In this file you can see the data flow for both named pipes and the classes which handle each of the steps.&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="1080" width="760" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-6" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-4" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="&lt;b&gt;User&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="30" x="827" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-52" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-5" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;gradientColor=#97d077;strokeColor=#82b366;" value="&lt;b&gt;CLIENT&lt;/b&gt;" vertex="1">
+          <mxGeometry height="80" width="80" x="947" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-7" parent="1" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Do work shaitan&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="827" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-15" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Request Message" vertex="1">
+          <mxGeometry height="60" width="120" x="1047" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-18" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="J6JAWbxIwujR4Az4SgHR-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="IPCMessageSerializer&lt;div&gt;(Serialize Request)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1187" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-20" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="J6JAWbxIwujR4Az4SgHR-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-17" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="`Commands`&lt;div&gt;Pipe&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1327" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-22" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="CommandsContoller&lt;div&gt;(Read pipe&#39;s byte stream)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1467" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-25" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="CommandTransport&lt;div&gt;(Frame Request out of bytes stream)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1467" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-27" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="IPCMessageSerializer&lt;div&gt;(Deserialize Request)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1467" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-32" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="J6JAWbxIwujR4Az4SgHR-28">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-26" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="CommandRouter&lt;div&gt;(Routes Request)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1467" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-33" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-28" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CommandRegistry&lt;div&gt;(Maps Req-Handler)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1327" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-34" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-30">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="CommandHandler&lt;div&gt;(Creates Response)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1327" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-36" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-30" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="CommandRouter&lt;div&gt;(Routes Response)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1327" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-39" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-37">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-35" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="IPCMessageSerializer&lt;div&gt;(Serialize Response)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1187" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-40" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="J6JAWbxIwujR4Az4SgHR-38">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-37" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="CommandTransport&lt;div&gt;(Frame Response into bytes stream)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1187" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-42" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="J6JAWbxIwujR4Az4SgHR-41">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-38" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="CommandsContoller&lt;div&gt;(Write into pipe&#39;s byte stream)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1187" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-44" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-43">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-41" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="`Commands`&lt;div&gt;Pipe&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1047" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-46" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-45">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-43" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="IPCMessageSerializer&lt;div&gt;(Deserialize Response)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="1047" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-51" edge="1" parent="1" source="J6JAWbxIwujR4Az4SgHR-45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="J6JAWbxIwujR4Az4SgHR-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-45" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Response Message" vertex="1">
+          <mxGeometry height="60" width="120" x="1047" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="J6JAWbxIwujR4Az4SgHR-53" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font style=&quot;font-size: 20px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The `Commands` pipe data flow&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="1040" y="199" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-19" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-20" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;gradientColor=#97d077;strokeColor=#82b366;" value="&lt;b&gt;SERVER&lt;/b&gt;" vertex="1">
+          <mxGeometry height="80" width="80" x="827" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-35" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="MonitoringSessionState&lt;div&gt;(Stores processId)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="140" x="947" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-18" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-37" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-13" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="EventStreamCollector&lt;div&gt;(Reads events related to process id)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="140" x="947" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-22" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="0a6N4AqCsmsy6EPKpZwv-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Channel&amp;lt;RawKernelEvent&amp;gt;" vertex="1">
+          <mxGeometry height="17" width="200" x="1107" y="931.5" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-26" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="EventMetricsEngine&lt;div&gt;(Builds metrics from events)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="140" x="1137" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-30" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Channel&amp;lt;ProcessMetricsSnapshot&amp;gt;" vertex="1">
+          <mxGeometry height="17" width="200" x="1107" y="791.5" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-31" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-27" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="IPCMetricsPublisher&lt;div&gt;(Serializes and sends metrics)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="140" x="1327" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-38" edge="1" parent="1" source="0a6N4AqCsmsy6EPKpZwv-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="0a6N4AqCsmsy6EPKpZwv-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" value="`Telemetry` Pipe" vertex="1">
+          <mxGeometry height="60" width="140" x="1327" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-32" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#d5e8d4;gradientColor=#97d077;strokeColor=#82b366;" value="&lt;b&gt;CLIENT&lt;/b&gt;" vertex="1">
+          <mxGeometry height="80" width="80" x="1507" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="0a6N4AqCsmsy6EPKpZwv-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font style=&quot;font-size: 20px; background-color: light-dark(#ffffff, var(--ge-dark-color, #121212));&quot;&gt;The `Telemetry` pipe data flow&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="320" x="1041" y="730" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
