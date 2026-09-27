@@ -1,6 +1,6 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 using ProcessMonitor.Shared.Client.State;
 
@@ -91,7 +91,7 @@ public sealed class ArgsParser
             cursor = newCursor; count++;
         }
 
-        if (cursor >= _maxIterationCount) 
+        if (cursor >= _maxIterationCount)
             return new ArgumentOutOfRangeException($"The amount of parsing iterations exceeded the threshold of '{_maxIterationCount}' loops");
 
         return null;

@@ -1,10 +1,10 @@
 using System;
-using System.Text.Json;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.Json;
 
-using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Client.Input.Lexing;
+using ProcessMonitor.Shared.Protocol;
 
 namespace ProcessMonitor.Shared.Client.Input.Transpiling;
 
@@ -42,7 +42,7 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
             Operations.Add(op);
 
             return (cursor + 1, null);
-        } 
+        }
         catch (Exception ex)
         {
             return (cursor + 1, ex);
@@ -101,8 +101,8 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
                 Operations.Add(new CommandOperation(CommandOperationType.ConnectToBackendProcess, slice, null));
 
                 return (cursor + 1, AddSendRequestOperation(slice, "post", "monitoring", new { version = 0.1, requestId = _requestId, pid = 0 }));
-                
-            } 
+
+            }
             catch (Exception ex)
             {
                 return (cursor + 1, ex);
@@ -219,24 +219,24 @@ public sealed class CommandDispatchersCollection(List<CommandOperation> operatio
         return (cursor + 1, new InvalidOperationException($"Command name was not recognized"));
     }
 
-    public (int, Exception?) DispatchGetCommand(IReadOnlyList<TokenSlice> tokens, int cursor) 
+    public (int, Exception?) DispatchGetCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
         => DispatchNoArgumentCommand(tokens, cursor, CommandOperationType.PrintRuntimeConfig);
 
-    public (int, Exception?) DispatchHelpCommand(IReadOnlyList<TokenSlice> tokens, int cursor) 
+    public (int, Exception?) DispatchHelpCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
         => DispatchNoArgumentCommand(tokens, cursor, CommandOperationType.PrintHelp);
 
-    public (int, Exception?) DispatchCreateCommand(IReadOnlyList<TokenSlice> tokens, int cursor) 
+    public (int, Exception?) DispatchCreateCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
         => DispatchNoArgumentCommand(tokens, cursor, CommandOperationType.CreateBackendProcess);
 
-    public (int, Exception?) DispatchDeleteCommand(IReadOnlyList<TokenSlice> tokens, int cursor) 
+    public (int, Exception?) DispatchDeleteCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
         => DispatchNoArgumentCommand(tokens, cursor, CommandOperationType.KillBackendProcess);
 
-    public (int, Exception?) DispatchStatusCommand(IReadOnlyList<TokenSlice> tokens, int cursor) 
+    public (int, Exception?) DispatchStatusCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
         => DispatchNoArgumentCommand(tokens, cursor, CommandOperationType.PrintStatus);
 
-    public (int, Exception?) DispatchConnectCommand(IReadOnlyList<TokenSlice> tokens, int cursor) 
+    public (int, Exception?) DispatchConnectCommand(IReadOnlyList<TokenSlice> tokens, int cursor)
         => DispatchNoArgumentCommand(tokens, cursor, CommandOperationType.ConnectToBackendProcess);
-} 
+}
 
 public sealed class CommandTranspiler
 {
@@ -253,16 +253,16 @@ public sealed class CommandTranspiler
         _dispatchers = new Dictionary<Commands, Func<IReadOnlyList<TokenSlice>, int, (int, Exception?)>>()
         {
             [Commands.Set] = _dispatchersCollection.DispatchSetCommand,
-            [Commands.Get] = _dispatchersCollection.DispatchGetCommand,  
-            [Commands.Help] = _dispatchersCollection.DispatchHelpCommand,  
-            [Commands.Stop] = _dispatchersCollection.DispatchStopCommand,  
+            [Commands.Get] = _dispatchersCollection.DispatchGetCommand,
+            [Commands.Help] = _dispatchersCollection.DispatchHelpCommand,
+            [Commands.Stop] = _dispatchersCollection.DispatchStopCommand,
             [Commands.Exit] = _dispatchersCollection.DispatchExitCommand,
             [Commands.Start] = _dispatchersCollection.DispatchStartCommand,
-            [Commands.Create] = _dispatchersCollection.DispatchCreateCommand,  
-            [Commands.Delete] = _dispatchersCollection.DispatchDeleteCommand,  
-            [Commands.Status] = _dispatchersCollection.DispatchStatusCommand,  
-            [Commands.Connect] = _dispatchersCollection.DispatchConnectCommand,  
-            [Commands.Unknown] = _dispatchersCollection.DispatchUnknownCommand,  
+            [Commands.Create] = _dispatchersCollection.DispatchCreateCommand,
+            [Commands.Delete] = _dispatchersCollection.DispatchDeleteCommand,
+            [Commands.Status] = _dispatchersCollection.DispatchStatusCommand,
+            [Commands.Connect] = _dispatchersCollection.DispatchConnectCommand,
+            [Commands.Unknown] = _dispatchersCollection.DispatchUnknownCommand,
         };
     }
 

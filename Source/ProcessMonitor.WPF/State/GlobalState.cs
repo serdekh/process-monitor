@@ -1,15 +1,16 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+
+using Microsoft.Extensions.Options;
 
 using ProcessMonitor.Shared.Client.State;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport.Framing;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace ProcessMonitor.WPF.State;
 
@@ -21,9 +22,9 @@ public sealed class GlobalState : INotifyPropertyChanged
 
     private ModeState _currentMode = ModeState.Startup;
 
-    private ObservableCollection<ThreadMetricsSnapshot> _threadMetrics = [];
+    private readonly ObservableCollection<ThreadMetricsSnapshot> _threadMetrics = [];
 
-    public ModeState CurrentMode 
+    public ModeState CurrentMode
     {
         get { return _currentMode; }
         set
@@ -57,11 +58,11 @@ public sealed class GlobalState : INotifyPropertyChanged
         }
     }
 
-    public ProcessMetricsSnapshot? LatestSnapshot 
+    public ProcessMetricsSnapshot? LatestSnapshot
     {
-        get { return _runtime?.LatestSnapshot; } 
-        set 
-        { 
+        get { return _runtime?.LatestSnapshot; }
+        set
+        {
             if (_runtime != null)
             {
                 _runtime.LatestSnapshot = value;
@@ -83,10 +84,10 @@ public sealed class GlobalState : INotifyPropertyChanged
                 OnPropertyChanged(nameof(LatestSnapshotSyscallsCount));
                 OnPropertyChanged(nameof(LatestSnapshotContextSwitchesCount));
             }
-        } 
+        }
     }
 
-    public ObservableCollection<ThreadMetricsSnapshot> LatestSnapshotThreads =>_threadMetrics;
+    public ObservableCollection<ThreadMetricsSnapshot> LatestSnapshotThreads => _threadMetrics;
 
     public double LatestSnapshotCpuUsage
     {
@@ -120,7 +121,7 @@ public sealed class GlobalState : INotifyPropertyChanged
         }
     }
 
-    public int LatestSnapshotContextSwitchesCount 
+    public int LatestSnapshotContextSwitchesCount
     {
         get
         {
@@ -242,7 +243,7 @@ public sealed class GlobalState : INotifyPropertyChanged
         {
             body = JsonSerializer.SerializeToElement(new { version = 0.1, requestId = LatestRequestId, pid = Runtime.Configuration.ProcessId });
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             return ex;
         }

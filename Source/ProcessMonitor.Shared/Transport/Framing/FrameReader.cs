@@ -10,17 +10,17 @@ public sealed class FrameReader : IFrameReader
     private static async Task<Exception?> TryReadExactAsync(Stream stream, byte[] buffer, int totalBytesToRead, CancellationToken ct)
     {
         if (ct.IsCancellationRequested) return new OperationCanceledException("Cancellation requested");
-        
+
         if (stream is null) return new OperationCanceledException("No stream instance was initialized");
 
         if (!stream.CanRead) return new InvalidOperationException("Stream does not support reading");
-        
+
         int totalBytesRead = 0;
 
         while (totalBytesRead < totalBytesToRead)
         {
             int bytesLeft = totalBytesToRead - totalBytesRead;
-            
+
             try
             {
                 int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesLeft), ct);
@@ -41,7 +41,7 @@ public sealed class FrameReader : IFrameReader
     public async Task<(byte[], Exception?)> TryReadFrameAsync(Stream stream, CancellationToken ct)
     {
         if (ct.IsCancellationRequested) return ([], new OperationCanceledException("Cancellation requested"));
-        
+
         if (stream is null) return ([], new OperationCanceledException("No stream instance was initialized"));
 
         if (!stream.CanRead) return ([], new InvalidOperationException("The stream does not support reading"));
@@ -64,7 +64,7 @@ public sealed class FrameReader : IFrameReader
         }
 
         if (length <= 0) return (Array.Empty<byte>(), new ArgumentException("Value of message length prefix is less than zero"));
-        
+
         var message = new byte[length];
 
         var messageReadingException = await TryReadExactAsync(stream, message, length, ct);

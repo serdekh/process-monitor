@@ -3,8 +3,8 @@ using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Client.Utils;
+using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Transport.Framing;
 
@@ -31,14 +31,14 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
     private readonly IMessageSerializer _serializer;
 
     public TransportClient(
-        string serverName, 
-        string pipeName, 
-        PipeDirection direction, 
+        string serverName,
+        string pipeName,
+        PipeDirection direction,
         PipeOptions options,
         IFrameWriter frameWriter,
         IFrameReader frameReader,
         BackendProcess backendProcess,
-        IMessageSerializer serializer) 
+        IMessageSerializer serializer)
     {
         _frameWriter = frameWriter;
         _frameReader = frameReader;
@@ -101,11 +101,11 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
         if (_pipeDirection == PipeDirection.In) return new InvalidOperationException("Client stream only supports reading");
 
         byte[] messageBytes;
- 
+
         (messageBytes, var serializationException) = _serializer.TrySerialize(message);
 
         if (serializationException is not null) return serializationException;
-        
+
         return await _frameWriter.TryWriteFrameAsync(_client, messageBytes, ct);
     }
 
@@ -133,7 +133,7 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
 
         return (envelope, null);
     }
-    
+
     public async Task DeinitializeAsync()
     {
         if (_backendProcess.IsRunning)

@@ -11,9 +11,9 @@ public partial class SettingsOption : UserControl
     }
 
     public static readonly RoutedEvent PropertyValueChangedEvent = EventManager.RegisterRoutedEvent(
-        "PropertyValueChanged", 
+        "PropertyValueChanged",
         RoutingStrategy.Bubble,
-        typeof(RoutedEventHandler), 
+        typeof(RoutedEventHandler),
         typeof(SettingsOption));
 
     public event RoutedEventHandler PropertyValueChanged
@@ -23,11 +23,11 @@ public partial class SettingsOption : UserControl
     }
 
     public static readonly DependencyProperty PropertyNameProperty =
-        DependencyProperty.Register("PropertyName", typeof(string), typeof(SettingsOption), 
+        DependencyProperty.Register("PropertyName", typeof(string), typeof(SettingsOption),
             new PropertyMetadata("Option"));
 
     public static readonly DependencyProperty PropertyValueProperty =
-        DependencyProperty.Register("PropertyValue", typeof(string), typeof(SettingsOption), 
+        DependencyProperty.Register("PropertyValue", typeof(string), typeof(SettingsOption),
             new PropertyMetadata(string.Empty, OnPropertyValueChanged));
 
     public string PropertyName

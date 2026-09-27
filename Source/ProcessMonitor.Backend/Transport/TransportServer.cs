@@ -22,10 +22,10 @@ public sealed class TransportServer : ITransportServer
     }
 
     public TransportServer(
-        string pipeName, 
-        PipeDirection direction, 
-        int maxNumberOfServerInstances, 
-        PipeTransmissionMode transmissionMode, 
+        string pipeName,
+        PipeDirection direction,
+        int maxNumberOfServerInstances,
+        PipeTransmissionMode transmissionMode,
         PipeOptions options) : this()
     {
         TryInitialize(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options);
@@ -43,16 +43,16 @@ public sealed class TransportServer : ITransportServer
             return ex;
         }
     }
- 
+
     public async Task<Exception?> TryConnectAsync(CancellationToken ct)
     {
         if (ct.IsCancellationRequested) return new OperationCanceledException("Cancellation requested");
 
         if (_server is null) return new InvalidOperationException("No server instance was initialized");
-        
+
         try
         {
-            await _server.WaitForConnectionAsync(ct);   
+            await _server.WaitForConnectionAsync(ct);
             return null;
         }
         catch (Exception ex)
@@ -74,7 +74,7 @@ public sealed class TransportServer : ITransportServer
 
         return await _frameReader.TryReadFrameAsync(_server, ct);
     }
-    
+
     public async Task DeinitializeAsync()
     {
         if (_server is null) return;

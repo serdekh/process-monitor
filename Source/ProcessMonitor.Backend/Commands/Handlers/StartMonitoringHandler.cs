@@ -36,10 +36,10 @@ public sealed class StartMonitoringHandler : ICommandHandler
         if (requestBody is null)
         {
             envelope.Payload.StatusCode = 415;
-            
+
             envelope.Payload.Message = "No body with the process id was provided";
 
-            (MessageEnvelope<CommandResponse>, Exception?) response = 
+            (MessageEnvelope<CommandResponse>, Exception?) response =
                 (envelope, new ArgumentException(envelope.Payload.Message));
 
             return Task.FromResult(response);
@@ -51,7 +51,7 @@ public sealed class StartMonitoringHandler : ICommandHandler
 
             envelope.Payload.Message = "The body is missing the 'pid' property name";
 
-            (MessageEnvelope<CommandResponse>, Exception?) response = 
+            (MessageEnvelope<CommandResponse>, Exception?) response =
                 (envelope, new ArgumentException(envelope.Payload.Message));
 
             return Task.FromResult(response);
@@ -63,7 +63,7 @@ public sealed class StartMonitoringHandler : ICommandHandler
 
             envelope.Payload.Message = "The value of the 'pid' property is not a 32-bit signed integer";
 
-            (MessageEnvelope<CommandResponse>, Exception?) response = 
+            (MessageEnvelope<CommandResponse>, Exception?) response =
                 (envelope, new ArgumentException(envelope.Payload.Message));
 
             return Task.FromResult(response);

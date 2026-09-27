@@ -124,7 +124,7 @@ public sealed class EventMetricsEngine(
                     });
             }
 
-            _logger.LogDebug("[Processing]: Seeded {ThreadCount} threads for PID {ProcessId}.", 
+            _logger.LogDebug("[Processing]: Seeded {ThreadCount} threads for PID {ProcessId}.",
                 _threads.Count,
                 processId);
         }
@@ -246,30 +246,30 @@ public sealed class EventMetricsEngine(
         switch (rawEvent.Kind)
         {
             case RawEventKind.ContextSwitch:
-            {
-                if (rawEvent.Source is CSwitchTraceData contextSwitch)
-                    HandleContextSwitch(contextSwitch);
+                {
+                    if (rawEvent.Source is CSwitchTraceData contextSwitch)
+                        HandleContextSwitch(contextSwitch);
 
-                break;
-            }
+                    break;
+                }
 
             case RawEventKind.ThreadStart:
             case RawEventKind.ThreadDCStart:
-            {
-                if (rawEvent.Source is ThreadTraceData threadStart)
-                    HandleThreadStart(threadStart);
+                {
+                    if (rawEvent.Source is ThreadTraceData threadStart)
+                        HandleThreadStart(threadStart);
 
-                break;
-            }
+                    break;
+                }
 
             case RawEventKind.ThreadStop:
             case RawEventKind.ThreadDCEnd:
-            {
-                if (rawEvent.Source is ThreadTraceData threadStop)
-                    HandleThreadStop(threadStop);
+                {
+                    if (rawEvent.Source is ThreadTraceData threadStop)
+                        HandleThreadStop(threadStop);
 
-                break;
-            }
+                    break;
+                }
 
             case RawEventKind.SyscallEnter:
                 HandleSyscallEnter();

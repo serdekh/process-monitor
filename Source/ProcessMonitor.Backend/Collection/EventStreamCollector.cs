@@ -45,7 +45,7 @@ public sealed class EventStreamCollector : IEventCollector
         _logger.LogDebug("[Collection]: Stopping previously created {SessionName} session.", SessionName);
 
         oldSession.Stop();
-        
+
         return new Success<None, CollectionError, CollectionWarning>(new None());
     }
 
@@ -82,8 +82,8 @@ public sealed class EventStreamCollector : IEventCollector
                 _initializationFailed = new Failure<None, CollectionError, CollectionWarning>(
                     new ErrorChain<CollectionError>(
                         new InitializationError(), failure.Chain));
-                
-                session.Stop(); 
+
+                session.Stop();
             }
         };
 
@@ -92,7 +92,7 @@ public sealed class EventStreamCollector : IEventCollector
 
     private async Task<Result<None, CollectionError, CollectionWarning>> ProcessEventsAsync(TraceEventSession session, CancellationToken ct)
     {
-        using (session) 
+        using (session)
         {
             var processingTask = Task.Run(session.Source.Process, CancellationToken.None);
 
@@ -103,7 +103,7 @@ public sealed class EventStreamCollector : IEventCollector
                     await Task.Delay(100, ct);
                 }
             }
-            catch (OperationCanceledException) {}
+            catch (OperationCanceledException) { }
             finally
             {
                 session.Stop();
@@ -125,9 +125,9 @@ public sealed class EventStreamCollector : IEventCollector
         StopOldSession();
 
         if (IsElevated() is Failure<None, CollectionError, CollectionWarning> failure) return failure;
-        
+
         var session = InitializeSession();
-        
+
         return await ProcessEventsAsync(session, ct);
     }
 }

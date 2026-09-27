@@ -14,14 +14,14 @@ namespace ProcessMonitor.Backend.Hosting;
 
 public sealed class CollectorHostedService : BackgroundService
 {
-    private ILogger<CollectorHostedService> _logger;
+    private readonly ILogger<CollectorHostedService> _logger;
 
-    private IEventCollector _collector;
+    private readonly IEventCollector _collector;
 
     public CollectorHostedService(
         ILogger<CollectorHostedService> logger,
         IEventCollector collector)
-    { 
+    {
         _logger = logger;
         _collector = collector;
     }
@@ -33,9 +33,9 @@ public sealed class CollectorHostedService : BackgroundService
             _logger.LogInformation("[Host][Collection]: Could not start the service: cancellation requested");
             return;
         }
-        
+
         _logger.LogInformation("[Host][Collection]: Starting...");
-        
+
         var collectionResult = await _collector.RunAsync(ct);
 
         foreach (var warning in collectionResult.Warnings)
@@ -46,11 +46,11 @@ public sealed class CollectorHostedService : BackgroundService
         if (collectionResult is Failure<None, CollectionError, CollectionWarning> failure)
         {
             for (var it = failure.Chain; it is not null; it = it.Inner)
-            { 
+            {
                 _logger.LogError("[Host][Collection]: {}", it.Error);
             }
         }
-        
+
         _logger.LogInformation("[Host][Collection]: Terminated");
     }
 }

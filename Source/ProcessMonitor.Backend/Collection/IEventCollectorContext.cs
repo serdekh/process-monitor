@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
@@ -13,7 +14,7 @@ public interface IEventCollectorContext
 {
     public int? ProcessId { get; set; }
 
-    public HashSet<int> ProcessThreadIds { get; set; } 
+    public HashSet<int> ProcessThreadIds { get; set; }
 
     public bool HasProcessId { get; }
 

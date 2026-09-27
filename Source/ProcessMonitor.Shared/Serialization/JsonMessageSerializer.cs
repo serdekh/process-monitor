@@ -6,9 +6,9 @@ namespace ProcessMonitor.Shared.Serialization;
 public sealed class JsonMessageSerializer : IMessageSerializer
 {
     public (byte[], Exception?) TrySerialize<T>(T message)
-    {   
+    {
         byte[] messageBytes;
-        
+
         try
         {
             messageBytes = JsonSerializer.SerializeToUtf8Bytes(message);
@@ -28,7 +28,7 @@ public sealed class JsonMessageSerializer : IMessageSerializer
 
             if (result is null)
             {
-                return (default, new InvalidOperationException("Message is corrupted"));    
+                return (default, new InvalidOperationException("Message is corrupted"));
             }
 
             return (result, null);

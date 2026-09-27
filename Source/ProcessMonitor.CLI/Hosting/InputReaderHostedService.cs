@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
-using ProcessMonitor.Shared.Client.State;
+using ProcessMonitor.Shared.Client.Hosting.Services;
+using ProcessMonitor.Shared.Client.Input.Interpretation;
 using ProcessMonitor.Shared.Client.Input.Lexing;
 using ProcessMonitor.Shared.Client.Input.Transpiling;
-using ProcessMonitor.Shared.Client.Input.Interpretation;
-using ProcessMonitor.Shared.Client.Hosting.Services;
+using ProcessMonitor.Shared.Client.State;
 
 namespace ProcessMonitor.CLI.Hosting;
 
@@ -47,7 +47,7 @@ public sealed class InputReaderHostedService : InputReaderService
         var transpilingException = _transpiler.Transpile(_lexer.Tokens);
 
         if (transpilingException is not null) return transpilingException;
-        
+
         return await Task.Run(async () => await _interpreter.Interpret(_transpiler.Operations));
     }
 
@@ -73,9 +73,9 @@ public sealed class InputReaderHostedService : InputReaderService
                 continue;
             }
 
-            if (_state.Out.Length != 0) 
+            if (_state.Out.Length != 0)
             {
-                Console.WriteLine(_state.Out); 
+                Console.WriteLine(_state.Out);
                 _state.Out.Clear();
             }
         }

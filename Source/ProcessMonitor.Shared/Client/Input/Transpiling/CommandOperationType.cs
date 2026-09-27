@@ -10,6 +10,6 @@ public enum CommandOperationType
     PrintStatus,
     ConnectToBackendProcess,
     PrintRuntimeConfig,
-    SendRequest,    
+    SendRequest,
     Unknown,
 }

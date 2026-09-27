@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace ProcessMonitor.Shared.Client.Input.Lexing;
 
@@ -15,9 +15,9 @@ public sealed class CommandLexer
         if (ct.IsCancellationRequested) return new OperationCanceledException();
 
         string? input = null;
-        
+
         Console.Write("procmon>");
-        
+
         try
         {
             await Task.Run(() => input = Console.ReadLine(), ct);
@@ -39,7 +39,7 @@ public sealed class CommandLexer
             row++;
             col = 1;
         }
-        else if (c != '\r') 
+        else if (c != '\r')
         {
             col++;
         }
@@ -92,7 +92,7 @@ public sealed class CommandLexer
 
                     Tokens.Add(slice);
                 }
-                
+
                 startIndex = i + 1;
 
                 if (i < sourceSpan.Length)

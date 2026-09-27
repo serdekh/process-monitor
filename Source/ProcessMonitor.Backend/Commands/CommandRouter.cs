@@ -33,7 +33,7 @@ public sealed class CommandRouter(IServiceProvider sp, CommandRegistry registry)
     {
         var route = $"{request.Payload.Route}/{request.Payload.Method}";
 
-        (var handlerType, var handlerAcquirementException)= _registry.GetHandler(route);
+        (var handlerType, var handlerAcquirementException) = _registry.GetHandler(route);
 
         if (handlerAcquirementException is not null) return (new MessageEnvelope<CommandResponse>(), handlerAcquirementException);
 
@@ -43,6 +43,6 @@ public sealed class CommandRouter(IServiceProvider sp, CommandRegistry registry)
 
         if (handler is null) return GetError404(route);
 
-        return  await handler.HandleAsync(request, ct);
+        return await handler.HandleAsync(request, ct);
     }
 }

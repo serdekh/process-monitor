@@ -1,6 +1,9 @@
 using System.Threading.Channels;
+
 using Microsoft.Diagnostics.Tracing;
+
 using Moq;
+
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Collection;
@@ -22,14 +25,14 @@ public class EventHandlerDispatcherTests
 
         var fakeEvent = new Mock<ITraceEvent>();
         var fakeCtx = new Mock<IEventCollectorContext>();
-        var fakeCtxFailure = 
+        var fakeCtxFailure =
             new Failure<None, CollectionError, CollectionWarning>(
                 new ErrorChain<CollectionError>(
                     new ProcessIdUpdateFailed(), null));
 
         fakeCtx.Setup(e => e.ProcessId).Returns(expectedProcessId);
         fakeCtx.Setup(e => e.TryUpdateTargetProcess()).Returns(fakeCtxFailure);
-        
+
         var dispatcher = new EventHandlerDispatcher(fakeCtx.Object);
 
         // Act
@@ -90,7 +93,7 @@ public class EventHandlerDispatcherTests
         // Arrange
         var input = Channel.CreateUnbounded<RawEvent>();
         var state = new MonitoringSessionState(42);
-        var action = new Action(() => {});
+        var action = new Action(() => { });
 
         var fakeEvent = new Mock<ITraceEvent>();
         fakeEvent.Setup(e => e.GetRawEventKind()).Returns(RawEventKind.Undefined);
@@ -109,9 +112,9 @@ public class EventHandlerDispatcherTests
     public void HandleEvent_ReturnsFailure_WhenTryWriteRawEventFails()
     {
         // Arrange
-        var action = new Action(() => {});
+        var action = new Action(() => { });
 
-        var fakeFailure = 
+        var fakeFailure =
             new Failure<None, CollectionError, CollectionWarning>(
                 new ErrorChain<CollectionError>(
                     new EventWriteFailed(new InvalidOperationException(), RawEventKind.Undefined)));
@@ -139,7 +142,7 @@ public class EventHandlerDispatcherTests
     public void HandleEvent_ReturnsSuccess_WhenIsNotRelevant()
     {
         // Arrange
-        var action = new Action(() => {});
+        var action = new Action(() => { });
 
         var fakeEvent = new Mock<ITraceEvent>();
 

@@ -1,7 +1,7 @@
-﻿using ProcessMonitor.WPF.State;
-
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+
+using ProcessMonitor.WPF.State;
 
 namespace ProcessMonitor.WPF.View.Modes.Settings;
 

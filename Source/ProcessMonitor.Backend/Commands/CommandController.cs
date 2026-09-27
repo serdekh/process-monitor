@@ -29,13 +29,13 @@ public sealed class CommandController(ILogger<CommandController> logger,
         if (ct.IsCancellationRequested) return;
 
         _logger.LogInformation("Command listening: Waiting for a client...");
-    
+
         var initializationException = _transport.TryInitialize(
-            pipeName:                   "ProcessMonitor.Pipes.Commands",
-            direction:                  PipeDirection.InOut,
+            pipeName: "ProcessMonitor.Pipes.Commands",
+            direction: PipeDirection.InOut,
             maxNumberOfServerInstances: 1,
-            transmissionMode:           PipeTransmissionMode.Byte,
-            options:                    PipeOptions.Asynchronous);
+            transmissionMode: PipeTransmissionMode.Byte,
+            options: PipeOptions.Asynchronous);
 
         if (initializationException is not null)
         {
@@ -52,12 +52,12 @@ public sealed class CommandController(ILogger<CommandController> logger,
         }
 
         _logger.LogInformation("Command listening: Client connected successfully.");
-    
+
         while (!ct.IsCancellationRequested)
         {
             (var bytes, var readingException) = await _transport.TryReadAsync(ct); if (readingException is not null)
             {
-                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", readingException.Message);                       
+                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", readingException.Message);
                 break;
             }
 
@@ -65,35 +65,36 @@ public sealed class CommandController(ILogger<CommandController> logger,
             {
                 _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.", deserializationException.Message);
                 break;
-            } if (request is null)
+            }
+            if (request is null)
             {
                 _logger.LogError("Command listening: The request has been corrupted. Stop.");
                 break;
             }
-                
+
             (var response, var routingException) = await _router.TryRouteAsync(request, ct); if (routingException is not null)
             {
-                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", routingException.Message);                       
+                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", routingException.Message);
                 break;
             }
-        
+
             (var responseBytes, var serializationException) = _serializer.TrySerialize(response); if (serializationException is not null)
             {
                 _logger.LogError("Command listening: Failed to serialize a response object. Stop.");
                 break;
             }
-            
+
             var writingException = await _transport.TryWriteAsync(responseBytes, ct); if (writingException is not null)
             {
                 _logger.LogError("Command listening: Failed to write a message: {}. Stop.", writingException.Message);
                 break;
             }
-        }    
+        }
 
         _logger.LogInformation("Command listening: Terminating...");
 
-        await _transport.DeinitializeAsync();       
+        await _transport.DeinitializeAsync();
 
-        _logger.LogInformation("Command listening: Terminated."); 
+        _logger.LogInformation("Command listening: Terminated.");
     }
 }

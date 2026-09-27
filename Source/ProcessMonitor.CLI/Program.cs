@@ -31,7 +31,7 @@ internal class Program
             Console.WriteLine($"[ProcessMonitor]: error: Failed to initialize the application: {builder.Failed.Message}.");
             return;
         }
-        
+
         await builder.RunAsync();
     }
 }

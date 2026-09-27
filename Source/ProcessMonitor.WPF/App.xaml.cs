@@ -1,7 +1,7 @@
-﻿using ProcessMonitor.Shared.Client.Input.Args;
-using ProcessMonitor.WPF.State;
+﻿using System.Windows;
 
-using System.Windows;
+using ProcessMonitor.Shared.Client.Input.Args;
+using ProcessMonitor.WPF.State;
 
 namespace ProcessMonitor.WPF;
 

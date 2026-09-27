@@ -2,8 +2,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Shared.Client.State;
 using ProcessMonitor.Shared.Client.Hosting.Services;
+using ProcessMonitor.Shared.Client.State;
 
 namespace ProcessMonitor.CLI.Hosting;
 

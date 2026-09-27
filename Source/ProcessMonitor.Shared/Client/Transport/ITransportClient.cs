@@ -17,6 +17,6 @@ public interface ITransportClient
     public Task<Exception?> TryWriteAsync<T>(MessageEnvelope<T> message, CancellationToken ct);
 
     public Task<(MessageEnvelope<T>, Exception?)> TryReadAsync<T>(CancellationToken ct);
-    
+
     public Task DeinitializeAsync();
 }

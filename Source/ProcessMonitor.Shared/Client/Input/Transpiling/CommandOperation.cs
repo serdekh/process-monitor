@@ -8,5 +8,5 @@ public struct CommandOperation(CommandOperationType Type, TokenSlice SourceToken
 
     public TokenSlice SourceToken { get; set; } = SourceToken;
 
-    public object? Argument {get; set; } = Argument; 
+    public object? Argument { get; set; } = Argument;
 }

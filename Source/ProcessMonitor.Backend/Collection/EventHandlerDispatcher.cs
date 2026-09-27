@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
+
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
@@ -41,7 +43,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
                 new ErrorChain<CollectionError>(
                     new EventDispatchingFailed(), failure.Chain));
         }
-        
+
         if (!_ctx.HasProcessId)
         {
             return new Success<None, CollectionError, CollectionWarning>(new None());
@@ -133,7 +135,7 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
         (
             () => _ctx.IsContextSwitchRelevantToProcessId(
                 new ContextSwitchEventWrapper((CSwitchTraceData)e.Data)),
-            () => {},
+            () => { },
             e
         );
     }
@@ -143,11 +145,11 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
         return HandleEvent
         (
             () => _ctx.IsEventRelevantToProcessId(e),
-            () => {},
+            () => { },
             e
         );
-    }    
-    
+    }
+
     public Result<None, CollectionError, CollectionWarning> HandleUndefined(ITraceEvent e)
     {
         return new Success<None, CollectionError, CollectionWarning>(new None());

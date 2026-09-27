@@ -1,4 +1,5 @@
 using System.Threading.Channels;
+
 using ProcessMonitor.Backend.Collection;
 using ProcessMonitor.Backend.Models;
 using ProcessMonitor.Backend.State;
@@ -13,7 +14,7 @@ public class EventCollectorContextFixture
     {
         Context = new EventCollectorContext
         (
-            Channel.CreateUnbounded<RawEvent>(), 
+            Channel.CreateUnbounded<RawEvent>(),
             new MonitoringSessionState(42)
         );
     }

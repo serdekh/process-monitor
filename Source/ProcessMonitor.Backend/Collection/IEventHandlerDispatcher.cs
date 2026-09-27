@@ -1,5 +1,7 @@
 using System;
+
 using Microsoft.Diagnostics.Tracing;
+
 using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
@@ -26,6 +28,6 @@ public interface IEventHandlerDispatcher
     public Result<None, CollectionError, CollectionWarning> HandleContextSwitch(ITraceEvent data);
 
     public Result<None, CollectionError, CollectionWarning> HandleSyscallEnter(ITraceEvent data);
-    
+
     public Result<None, CollectionError, CollectionWarning> HandleUndefined(ITraceEvent data);
 }

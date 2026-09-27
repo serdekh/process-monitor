@@ -1,29 +1,28 @@
 using System.Threading.Channels;
 
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-using ProcessMonitor.Backend.State;
-using ProcessMonitor.Backend.Commands;
-using ProcessMonitor.Backend.Transport;
-using ProcessMonitor.Backend.Publishing;
-using ProcessMonitor.Backend.Processing;
 using ProcessMonitor.Backend.Collection;
+using ProcessMonitor.Backend.Commands;
 using ProcessMonitor.Backend.Commands.Handlers;
-
-using ProcessMonitor.Shared.Snapshots;
-using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Processing;
+using ProcessMonitor.Backend.Publishing;
+using ProcessMonitor.Backend.State;
+using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Shared.Client.Input.Args;
+using ProcessMonitor.Shared.Serialization;
+using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Hosting;
 
 public static class ProcessMonitorHostBuilder
 {
     public static HostApplicationBuilder Create(string[] args)
-    { 
+    {
         var builder = Host.CreateApplicationBuilder(args);
 
         ConfigureLogging(builder.Logging);
@@ -59,7 +58,7 @@ public static class ProcessMonitorHostBuilder
         services.AddSingleton<EventMetricsEngine>();
 
         services.AddSingleton<IMetricsPublisher, IPCMetricsPublisher>();
-        
+
         services.AddTransient<StartMonitoringHandler>();
         services.AddTransient<StopMonitoringHandler>();
 
@@ -73,4 +72,4 @@ public static class ProcessMonitorHostBuilder
         services.AddHostedService<PublisherHostedService>();
         services.AddHostedService<CommandListenerHostedService>();
     }
-} 
+}

@@ -18,7 +18,7 @@ public sealed class FrameWriter : IFrameWriter
         try
         {
             var messageLength = BitConverter.GetBytes(message.Length);
-            
+
             await stream.WriteAsync(messageLength, ct);
 
             await stream.WriteAsync(message, ct);

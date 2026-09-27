@@ -1,9 +1,10 @@
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Diagnostics;
-using System.ComponentModel;
 using System.Threading.Tasks;
+
 using ProcessMonitor.Shared.Client.State;
 
 namespace ProcessMonitor.Shared.Client.Utils;
@@ -16,9 +17,9 @@ public sealed class BackendProcess : IAsyncDisposable
 
     private EventHandler? _onExit = null;
 
-    public string? Path 
-    { 
-        get { return _startInfo.FileName; } 
+    public string? Path
+    {
+        get { return _startInfo.FileName; }
         set { _startInfo.FileName = value; }
     }
 
@@ -28,7 +29,7 @@ public sealed class BackendProcess : IAsyncDisposable
         get { return _processId; }
         set { _processId = value; }
     }
-    
+
 
     public bool HasExited
     {
@@ -43,11 +44,11 @@ public sealed class BackendProcess : IAsyncDisposable
     }
 
     public bool IsRunning
-    { 
+    {
         get
         {
             _backend?.Refresh();
-            return _backend is not null && !_backend.HasExited; 
+            return _backend is not null && !_backend.HasExited;
         }
     }
 
@@ -91,7 +92,7 @@ public sealed class BackendProcess : IAsyncDisposable
     public Exception? TryCreate()
     {
         if (_startInfo.FileName == string.Empty) return new InvalidOperationException("No filepath to backend process was specified");
-        
+
         if (_backend is not null)
         {
             if (HasExited)
@@ -109,11 +110,11 @@ public sealed class BackendProcess : IAsyncDisposable
         {
             _startInfo.ArgumentList.Add("--pid");
             _startInfo.ArgumentList.Add(ProcessId?.ToString() ?? "0");
-            
+
             _backend = Process.Start(_startInfo);
-   
+
             if (_backend is null) return null;
-            
+
             _backend.EnableRaisingEvents = true;
 
             if (_onExit is not null) _backend.Exited += _onExit;
@@ -151,7 +152,7 @@ public sealed class BackendProcess : IAsyncDisposable
             var taskKillInfo = new ProcessStartInfo
             {
                 FileName = "taskkill.exe",
-                Arguments = $"/PID {_backend.Id} /T", 
+                Arguments = $"/PID {_backend.Id} /T",
                 CreateNoWindow = true,
                 UseShellExecute = false
             };
@@ -162,7 +163,7 @@ public sealed class BackendProcess : IAsyncDisposable
 
             using var cts = new CancellationTokenSource(delay);
             await _backend.WaitForExitAsync(cts.Token);
-            
+
             return null;
         }
         catch (Exception ex)

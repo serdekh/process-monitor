@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Channels;
-using ProcessMonitor.Backend.Models;
-using ProcessMonitor.Backend.Models.Collection;
+
 using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Shared.Models.Results;
 
 namespace ProcessMonitor.Backend.Collection;
@@ -49,14 +50,14 @@ public sealed class EventCollectorContext(
         {
             var rawEvent = e.CloneAsRawEvent();
 
-            if (_writer.TryWrite(rawEvent)) 
+            if (_writer.TryWrite(rawEvent))
             {
                 return new Success<None, CollectionError, CollectionWarning>(new None());
             }
 
             return new Success<None, CollectionError, CollectionWarning>(new None())
             {
-                Warnings = [ new EventWriteRejected(kind)]
+                Warnings = [new EventWriteRejected(kind)]
             };
         }
         catch (Exception ex)
@@ -65,7 +66,7 @@ public sealed class EventCollectorContext(
                 new ErrorChain<CollectionError>(
                     new EventWriteFailed(ex, kind)));
         }
-    }  
+    }
 
     public Result<None, CollectionError, CollectionWarning> TryUpdateTargetProcess()
     {
@@ -144,7 +145,7 @@ public sealed class EventCollectorContext(
             return new Failure<int, CollectionError, CollectionWarning>(
                 new ErrorChain<CollectionError>(
                     new ThreadEnumerationFailed(
-                        processId, 
+                        processId,
                         new ArgumentException($"Invalid process id: {processId}")), failure.Chain));
         }
 

@@ -1,6 +1,6 @@
-﻿using ProcessMonitor.WPF.State;
+﻿using System.Windows.Controls;
 
-using System.Windows.Controls;
+using ProcessMonitor.WPF.State;
 
 namespace ProcessMonitor.WPF.View.Common;
 

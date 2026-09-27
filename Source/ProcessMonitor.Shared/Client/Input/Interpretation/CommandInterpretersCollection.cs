@@ -1,18 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
+using ProcessMonitor.Shared.Client.Input.Transpiling;
+using ProcessMonitor.Shared.Client.State;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Snapshots;
-using ProcessMonitor.Shared.Client.State;
-using ProcessMonitor.Shared.Client.Input.Transpiling;
 
 namespace ProcessMonitor.Shared.Client.Input.Interpretation;
 
 public sealed class CommandInterpretersCollection
 {
-    private Dictionary<CommandOperationType, Func<ClientApplicationState, CommandOperation, Task<Exception?>>> _interpreters;
+    private readonly Dictionary<CommandOperationType, Func<ClientApplicationState, CommandOperation, Task<Exception?>>> _interpreters;
 
     public CommandInterpretersCollection()
     {
@@ -46,7 +46,7 @@ public sealed class CommandInterpretersCollection
         {
             var connectionException = await applicationState.TelemetryPipe.TryConnectAsync(applicationState.CancellationToken);
 
-            if (connectionException is not null) 
+            if (connectionException is not null)
             {
                 await applicationState.Backend.DisposeAsync();
                 await applicationState.CommandsPipe.DeinitializeAsync();
@@ -70,7 +70,7 @@ public sealed class CommandInterpretersCollection
             return new Exception("Failed to connected to the 'Telemetry' pipe");
         }
 
-        _ = Task.Run(async () => 
+        _ = Task.Run(async () =>
         {
             (var envelope, var envelopeReadingException) = await applicationState.TelemetryPipe.TryReadAsync<ProcessMetricsSnapshot>(applicationState.CancellationToken);
 
@@ -92,7 +92,7 @@ public sealed class CommandInterpretersCollection
     private async Task<Exception?> InterpretCreateCommand(ClientApplicationState applicationState, CommandOperation op)
     {
         if (applicationState.Backend.IsRunning) return null;
-            
+
         var backendCreationException = applicationState.Backend.TryCreate();
 
         if (backendCreationException is not null) return backendCreationException;
@@ -108,7 +108,7 @@ public sealed class CommandInterpretersCollection
 
         var telemetryInitException = applicationState.TelemetryPipe.TryInitialize();
 
-        if (telemetryInitException is not null) 
+        if (telemetryInitException is not null)
         {
             await applicationState.Backend.DisposeAsync();
             await applicationState.CommandsPipe.DeinitializeAsync();
@@ -245,16 +245,16 @@ public sealed class CommandInterpretersCollection
 
     private Task<Exception?> InterpretStatusCommand(ClientApplicationState applicationState, CommandOperation op)
     {
-        var backendStatus = applicationState.Backend.HasExited 
-            ? "exited" 
-            : (applicationState.Backend.IsRunning 
+        var backendStatus = applicationState.Backend.HasExited
+            ? "exited"
+            : (applicationState.Backend.IsRunning
                 ? "running"
                 : "not-running");
 
-        var commandsPipeStatus = applicationState.CommandsPipe.IsConnected() 
+        var commandsPipeStatus = applicationState.CommandsPipe.IsConnected()
             ? "connected" : "not-connected";
 
-        var telemetryPipeStatus = applicationState.TelemetryPipe.IsConnected() 
+        var telemetryPipeStatus = applicationState.TelemetryPipe.IsConnected()
             ? "connected" : "not-connected";
 
         applicationState.Out.Append
@@ -272,12 +272,12 @@ public sealed class CommandInterpretersCollection
     {
         if (!applicationState.Backend.IsRunning) return null;
 
-        if (!applicationState.CommandsPipe.IsConnected()) 
+        if (!applicationState.CommandsPipe.IsConnected())
             return new InvalidOperationException("No connection via 'Commands' pipe was established");
 
         Debug.Assert(op.Argument is not null, "All argument validation should've been completed at transpiling step.");
 
-        return await Task.Run(async() =>
+        return await Task.Run(async () =>
         {
             var writingException = await applicationState.CommandsPipe.TryWriteAsync((MessageEnvelope<CommandRequest>)op.Argument, applicationState.CancellationToken);
 
@@ -300,7 +300,7 @@ public sealed class CommandInterpretersCollection
 
     public async Task<Exception?> RunAsync(ClientApplicationState applicationState, CommandOperation op)
     {
-        if (!_interpreters.TryGetValue(op.Type, out Func<ClientApplicationState, CommandOperation, Task<Exception?>>? interpreter)) 
+        if (!_interpreters.TryGetValue(op.Type, out Func<ClientApplicationState, CommandOperation, Task<Exception?>>? interpreter))
             return await InterpretUnknownCommand(applicationState, op);
 
         return await interpreter(applicationState, op);

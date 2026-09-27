@@ -8,9 +8,9 @@ namespace ProcessMonitor.Backend.Transport;
 public interface ITransportServer
 {
     public Exception? TryInitialize(
-        string pipeName, 
-        PipeDirection direction, 
-        int maxNumberOfServerInstances, 
+        string pipeName,
+        PipeDirection direction,
+        int maxNumberOfServerInstances,
         PipeTransmissionMode transmissionMode,
         PipeOptions options);
 
@@ -19,6 +19,6 @@ public interface ITransportServer
     public Task<Exception?> TryWriteAsync(byte[] message, CancellationToken ct);
 
     public Task<(byte[], Exception?)> TryReadAsync(CancellationToken ct);
-    
+
     public Task DeinitializeAsync();
 }

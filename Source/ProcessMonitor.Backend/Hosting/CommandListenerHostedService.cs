@@ -10,7 +10,7 @@ namespace ProcessMonitor.Backend.Hosting;
 
 public sealed class CommandListenerHostedService : BackgroundService
 {
-    private ILogger<CommandListenerHostedService> _logger;
+    private readonly ILogger<CommandListenerHostedService> _logger;
 
     private readonly CommandController _controller;
 
@@ -24,7 +24,7 @@ public sealed class CommandListenerHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        if (ct.IsCancellationRequested) 
+        if (ct.IsCancellationRequested)
         {
             _logger.LogInformation("[Host][Commands]: Could not start the service: cancellation requested.");
             return;

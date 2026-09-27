@@ -30,10 +30,10 @@ public sealed class StopMonitoringHandler(MonitoringSessionState state) : IComma
         if (requestBody is null)
         {
             envelope.Payload.StatusCode = 415;
-            
+
             envelope.Payload.Message = "No body with the process id was provided";
 
-            (MessageEnvelope<CommandResponse>, Exception?) response = 
+            (MessageEnvelope<CommandResponse>, Exception?) response =
                 (envelope, new ArgumentException(envelope.Payload.Message));
 
             return Task.FromResult(response);

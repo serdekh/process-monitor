@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Transport;
-
-using ProcessMonitor.Shared.Snapshots;
-using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Protocol;
+using ProcessMonitor.Shared.Serialization;
+using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Publishing;
 
@@ -21,7 +20,7 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
     private readonly ILogger<IPCMetricsPublisher> _logger;
 
     public IPCMetricsPublisher(
-        IMessageSerializer serializer, 
+        IMessageSerializer serializer,
         ITransportServer transport,
         ILogger<IPCMetricsPublisher> logger)
     {
@@ -67,7 +66,7 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
     public async Task PublishAsync(ProcessMetricsSnapshot snapshot, CancellationToken ct)
     {
         if (ct.IsCancellationRequested)
-        {   
+        {
             _logger.LogError("[Publishing]: Could not publish telemetry metrics: cancellation requested.");
             return;
         }

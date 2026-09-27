@@ -1,8 +1,8 @@
-﻿using ProcessMonitor.WPF.State;
-using ProcessMonitor.WPF.Services;
-
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+
+using ProcessMonitor.WPF.Services;
+using ProcessMonitor.WPF.State;
 
 namespace ProcessMonitor.WPF.View.Modes.Startup;
 

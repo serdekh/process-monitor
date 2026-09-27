@@ -1,19 +1,21 @@
-using Moq;
+using System.Diagnostics;
 using System.Threading.Channels;
+
+using Moq;
+
 using ProcessMonitor.Backend.Collection;
-using ProcessMonitor.Backend.Tests.Fixtures.Collection;
-using ProcessMonitor.Backend.Models.Collection;
 using ProcessMonitor.Backend.Models;
+using ProcessMonitor.Backend.Models.Collection;
+using ProcessMonitor.Backend.Models.Errors.Collection;
 using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
-using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Backend.Tests.Fixtures.Collection;
 using ProcessMonitor.Shared.Models;
-using ProcessMonitor.Backend.Models.Errors.Collection;
-using System.Diagnostics;
+using ProcessMonitor.Shared.Models.Results;
 
 namespace ProcessMonitor.Backend.Tests.Collection;
 
-public class EventCollectorContextTests(EventCollectorContextFixture fixture) 
+public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     : IClassFixture<EventCollectorContextFixture>
 {
     private readonly Random _random = new();
@@ -220,16 +222,16 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
     public void TryWriteRawEvent_ReturnsWarning_WhenChannelIsFull()
     {
         // Arrange
-        var options = new BoundedChannelOptions(1) 
-        { 
+        var options = new BoundedChannelOptions(1)
+        {
             FullMode = BoundedChannelFullMode.Wait
         };
-        
+
         var channel = Channel.CreateBounded<RawEvent>(options);
         var writer = channel.Writer;
 
         var expectedKind = RawEventKind.Undefined;
-        writer.TryWrite(new RawEvent(null, expectedKind)); 
+        writer.TryWrite(new RawEvent(null, expectedKind));
 
         var eventCollectorContext = new EventCollectorContext(channel, new MonitoringSessionState(1));
 
@@ -394,5 +396,5 @@ public class EventCollectorContextTests(EventCollectorContextFixture fixture)
         Assert.NotEmpty(ctx.ProcessThreadIds);
     }
 
-        // TODO: ADD tests for TryUpdateTargetProcess
+    // TODO: ADD tests for TryUpdateTargetProcess
 }

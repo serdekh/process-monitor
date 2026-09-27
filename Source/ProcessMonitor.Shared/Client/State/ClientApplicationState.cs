@@ -1,16 +1,16 @@
 using System;
-using System.Text;
 using System.IO.Pipes;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using ProcessMonitor.Shared.Snapshots;
+using Microsoft.Extensions.Options;
+
+using ProcessMonitor.Shared.Client.Transport;
 using ProcessMonitor.Shared.Client.Utils;
 using ProcessMonitor.Shared.Serialization;
-using ProcessMonitor.Shared.Client.Transport;
+using ProcessMonitor.Shared.Snapshots;
 using ProcessMonitor.Shared.Transport.Framing;
-
-using Microsoft.Extensions.Options;
 
 namespace ProcessMonitor.Shared.Client.State;
 
@@ -24,7 +24,7 @@ public sealed class ClientApplicationState : IAsyncDisposable
 
     public ITransportClient CommandsPipe { get; }
 
-    public ITransportClient TelemetryPipe { get; } 
+    public ITransportClient TelemetryPipe { get; }
 
     public CancellationToken CancellationToken { get; set; }
 
@@ -40,8 +40,8 @@ public sealed class ClientApplicationState : IAsyncDisposable
     public async ValueTask DisposeAsync() => await Cleanup();
 
     public ClientApplicationState(
-        IFrameWriter frameWriter, 
-        IFrameReader frameReader, 
+        IFrameWriter frameWriter,
+        IFrameReader frameReader,
         IMessageSerializer serializer,
         IOptions<ClientApplicationConfiguration> configuration)
     {

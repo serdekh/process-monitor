@@ -1,12 +1,11 @@
 using System.Threading;
-using System.Threading.Tasks;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Publishing;
-
 using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Hosting;
@@ -25,7 +24,7 @@ public sealed class PublisherHostedService : BackgroundService
     {
         _input = input.Reader;
         _publisher = publisher;
-        _logger =logger;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)

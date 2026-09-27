@@ -1,7 +1,7 @@
-﻿using ProcessMonitor.WPF.Services;
-using ProcessMonitor.WPF.State;
+﻿using System.Windows.Controls;
 
-using System.Windows.Controls;
+using ProcessMonitor.WPF.Services;
+using ProcessMonitor.WPF.State;
 
 namespace ProcessMonitor.WPF.View.Modes.Settings;
 
@@ -15,7 +15,7 @@ public partial class TargetPIDOption : UserControl
     private void TargetProcessId_PropertyValueChanged(object sender, System.Windows.RoutedEventArgs e)
     {
         if (sender is not SettingsOption optionControl) return;
-        
+
         var rawProcessId = optionControl.PropertyValue;
 
         try

@@ -9,8 +9,8 @@ namespace ProcessMonitor.Backend;
 internal class Program
 {
     public static async Task Main(string[] args)
-    { 
-        var host = ProcessMonitorHostBuilder 
+    {
+        var host = ProcessMonitorHostBuilder
             .Create(args)
             .Build();
 

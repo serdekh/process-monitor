@@ -2,15 +2,15 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 
+using ProcessMonitor.Shared.Client.Hosting.Services;
+using ProcessMonitor.Shared.Client.Input.Args;
 using ProcessMonitor.Shared.Client.State;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Transport.Framing;
-using ProcessMonitor.Shared.Client.Input.Args;
-using ProcessMonitor.Shared.Client.Hosting.Services;
 
 namespace ProcessMonitor.Shared.Client.Hosting;
 
@@ -40,7 +40,7 @@ public sealed class ClientHostBuilder
     }
 
     public ClientHostBuilder Build()
-    { 
+    {
         if (Failed is not null || Builder is null) return this;
 
         ClientHost = Builder.Build();
@@ -96,7 +96,7 @@ public sealed class ClientHostBuilder
 
         Builder.Services.AddHostedService<TInputReader>();
 
-        return this; 
+        return this;
     }
 
     public ClientHostBuilder UseRenderer<TRenderer>() where TRenderer : RendererService
@@ -105,6 +105,6 @@ public sealed class ClientHostBuilder
 
         Builder.Services.AddHostedService<TRenderer>();
 
-        return this; 
+        return this;
     }
 }
