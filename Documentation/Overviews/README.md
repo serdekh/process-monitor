@@ -61,7 +61,7 @@ The whole project itself is composed of a solution (.sln file) that contains sev
   - defines a console client application. It is used for testing and as a fall-back option in case the desktop application crashes or not configured to be executed. It provides a simple shell system in which a user can type different commands and manipulate with the **_Server_** process.
 
 - **ProcessMonitor.Shared**
-  - defines a collection of models and services which are not tightly coupled to a specific project and can be reused without reimplementing the same logic multiple times. Th*is includes the **IPC** data transmission abstractions, the **_Client_** application configuration and the shell script.
+  - defines a collection of models and services which are not tightly coupled to a specific project and can be reused without reimplementing the same logic multiple times. This includes the **IPC** data transmission abstractions, the **_Client_** application configuration and the shell script.
 
 - **ProcessMonitor.WPF**
   - defines a **_Client_** project based on the **Windows Presentation Framework**. It works identically to the **ProcessMonitor.CLI** project but with a convenient **GUI** interface. It uses the **ProcessMonitor.Shared** project to define a global state object which manipulates the **UI** in a responsive manner. Every user component in the project acts against that static global state.
