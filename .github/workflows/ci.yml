@@ -34,6 +34,9 @@ jobs:
       - name: Restore
         run: dotnet restore Source/ProcessMonitor.sln
 
+      - name: Verify Code Formatting
+        run: dotnet format .\Source\ProcessMonitor.Backend\ --verify-no-changes --report .\artifacts\format-report.json
+
       - name: Build
         run: dotnet build Source/ProcessMonitor.Backend/ProcessMonitor.Backend.csproj ` --configuration Release --no-restore
 
