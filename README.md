@@ -7,6 +7,7 @@
 
    ## Client-server based desktop application for process diagnosis 
 
+   [![CI](https://github.com/serdekh/process-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/serdekh/process-monitor/actions/workflows/ci.yml)
    ![GitHub commits since latest release](https://img.shields.io/github/commits-since/serdekh/process-monitor/latest?include_prereleases)
    ![GitHub last commit](https://img.shields.io/github/last-commit/serdekh/process-monitor)
    ![GitHub License](https://img.shields.io/github/license/serdekh/process-monitor)
