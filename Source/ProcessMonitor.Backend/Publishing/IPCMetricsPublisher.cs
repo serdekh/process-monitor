@@ -36,13 +36,7 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
 
     public async Task InitializeAsync(CancellationToken ct)
     {
-        var initializationException = _transport.TryInitialize(
-            "ProcessMonitor.Pipes.Telemetry",
-            PipeDirection.Out,
-            1,
-            PipeTransmissionMode.Byte,
-            PipeOptions.Asynchronous
-        );
+        var initializationException = _transport.TryInitialize(TransportServerOptions.CreateDefault());
 
         if (initializationException is not null)
         {

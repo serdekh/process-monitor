@@ -30,12 +30,7 @@ public sealed class CommandController(ILogger<CommandController> logger,
 
         _logger.LogInformation("Command listening: Waiting for a client...");
 
-        var initializationException = _transport.TryInitialize(
-            pipeName: "ProcessMonitor.Pipes.Commands",
-            direction: PipeDirection.InOut,
-            maxNumberOfServerInstances: 1,
-            transmissionMode: PipeTransmissionMode.Byte,
-            options: PipeOptions.Asynchronous);
+        var initializationException = _transport.TryInitialize(TransportServerOptions.CreateDefault());
 
         if (initializationException is not null)
         {
