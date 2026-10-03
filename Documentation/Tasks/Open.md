@@ -12,9 +12,12 @@ All the open tasks can be subdivided into the following groups:
 <hr>
 
 `Fix`
-- Refactor the 'Transport' layer
-  - The server currently uses a prototype version of the 'Transport' layer. It has to be refactored to support a strongly typed Result value for the returns instead of the nullable exceptions. And it also needs to he properly designed to be testable with interfaces.
+- Refactor the engine and the collector to work together in a more clear way
+  - Today I had to figure out the problem of the backend which caused no snapshots to show up. I found out that the problem was a mix of everything related with the events. Both the fact that I don't clone them and a silly mistake in a boolean property. It is visible that certain properties of the engine and the collector are shared and in the best case scenario both layers would rely on the same monitoring state object that provides enough context. In order to find out if such merge of contexts is possible, first the engine has to be broken down into modules. Just like the 'Collection' layer. Then the modules would need to get examined properly. After that, take a look at what they are and try to define a better version of the 'MonitoringSessionState' class to fit it in.
 
+`Fix`
+- Add more convenience to work with Results by introducing factors without the need to type generic init all over the places. Also apply for of that style to make some functions bindable.
+ 
 `Fix`
 - Refactor IHost instance initialization
   - From the developer's perspective, the project is built using a clunky but
@@ -29,13 +32,6 @@ All the open tasks can be subdivided into the following groups:
   namings, unclear binding and overgrowing global state class. Consider 
   taking a look at the code and find out how to reorganize it to be less 
   chaotic and more suitable for injecting custom style templates.
-
-`Fix`
-- Incorporate the new Result type to the Backend
-  - Right now the application is based on the nullable Exception pattern.
-  This is working but it makes it awkward to propagate the errors further.
-  To make the application easier to extend from the logging perspective, 
-  rewrite the code so that it uses the functional approach more.
 
 `Fix`
 - Improve README.md 
