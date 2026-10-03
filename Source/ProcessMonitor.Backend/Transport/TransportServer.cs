@@ -28,14 +28,21 @@ public sealed class TransportServer : ITransportServer
         PipeTransmissionMode transmissionMode,
         PipeOptions options) : this()
     {
-        TryInitialize(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options);
+        var serverOptions = new TransportServerOptions(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options);
+        TryInitialize(serverOptions);
     }
 
-    public Exception? TryInitialize(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode mode, PipeOptions options)
+    public Exception? TryInitialize(TransportServerOptions options)
     {
         try
         {
-            _server = new NamedPipeServerStream(pipeName, direction, maxNumberOfServerInstances, mode, options);
+            _server = new NamedPipeServerStream(
+                options.PipeName, 
+                options.Direction, 
+                options.MaxNumberOfServerInstances, 
+                options.Mode, 
+                options.Options);
+
             return null;
         }
         catch (Exception ex)

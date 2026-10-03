@@ -1,5 +1,4 @@
 using System;
-using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,12 +6,7 @@ namespace ProcessMonitor.Backend.Transport;
 
 public interface ITransportServer
 {
-    public Exception? TryInitialize(
-        string pipeName,
-        PipeDirection direction,
-        int maxNumberOfServerInstances,
-        PipeTransmissionMode transmissionMode,
-        PipeOptions options);
+    public Exception? TryInitialize(TransportServerOptions options);
 
     public Task<Exception?> TryConnectAsync(CancellationToken ct);
 
