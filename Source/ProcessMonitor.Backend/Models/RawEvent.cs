@@ -4,7 +4,7 @@ namespace ProcessMonitor.Backend.Models;
 
 public struct RawEvent(TraceEvent? e, RawEventKind kind)
 {
-    public bool HasSource { get; init; } = e is null;
+    public bool HasSource { get; init; } = e is not null;
 
     public TraceEvent? Source { get; set; } = e;
 

@@ -1,13 +1,13 @@
-using System;
-using System.IO;
-using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using ProcessMonitor.Backend.Models.Errors.Transport;
+using ProcessMonitor.Backend.Models.Warnings.Transport;
 using ProcessMonitor.Backend.Transport;
-
+using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 
@@ -30,19 +30,21 @@ public sealed class CommandController(ILogger<CommandController> logger,
 
         _logger.LogInformation("Command listening: Waiting for a client...");
 
-        var initializationException = _transport.TryInitialize(TransportServerOptions.CreateDefault());
+        var initializationResult = _transport.TryInitialize(TransportServerOptions.CreateDefaultCommandsPipe());
 
-        if (initializationException is not null)
+        if (initializationResult is Failure<None, TransportError, TransportWarning> initializationFailure)
         {
-            _logger.LogError("Command listening: Failed to initialize a server stream: {}.", initializationException.Message);
+            _logger.LogError("Command listening: Failed to initialize a server stream: {}.",
+                initializationFailure.Chain.Error.ToString());
             return;
         }
 
-        var connectionException = await _transport.TryConnectAsync(ct);
+        var connectionResult = await _transport.TryConnectAsync(ct);
 
-        if (connectionException is not null)
+        if (connectionResult is Failure<None, TransportError, TransportWarning> connectionFailure)
         {
-            _logger.LogError("Command listening: Failed to connect to a client: {}.", connectionException.Message);
+            _logger.LogError("Command listening: Failed to connect to a client: {}.",
+                connectionFailure.Chain.Error.ToString());
             return;
         }
 
@@ -50,11 +52,16 @@ public sealed class CommandController(ILogger<CommandController> logger,
 
         while (!ct.IsCancellationRequested)
         {
-            (var bytes, var readingException) = await _transport.TryReadAsync(ct); if (readingException is not null)
+            var readingResult = await _transport.TryReadAsync(ct);
+
+            if (readingResult is Failure<byte[], TransportError, TransportWarning> readingFailure)
             {
-                _logger.LogError("Command listening: Could not read from the client: {}. Stop.", readingException.Message);
+                _logger.LogError("Command listening: Could not read from the client: {}. Stop.",
+                    readingFailure.Chain.Error.ToString());
                 break;
             }
+
+            var bytes = ((Success<byte[], TransportError, TransportWarning>)readingResult).Value;
 
             (var request, var deserializationException) = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes); if (deserializationException is not null)
             {
@@ -79,16 +86,24 @@ public sealed class CommandController(ILogger<CommandController> logger,
                 break;
             }
 
-            var writingException = await _transport.TryWriteAsync(responseBytes, ct); if (writingException is not null)
+            var writingResult = await _transport.TryWriteAsync(responseBytes, ct);
+
+            if (writingResult is Failure<None, TransportError, TransportWarning> writingFailure)
             {
-                _logger.LogError("Command listening: Failed to write a message: {}. Stop.", writingException.Message);
+                _logger.LogError("Command listening: Failed to write a message: {}. Stop.",
+                    writingFailure.Chain.Error.ToString());
                 break;
             }
         }
 
         _logger.LogInformation("Command listening: Terminating...");
 
-        await _transport.DeinitializeAsync();
+        var deinitializationResult = await _transport.DeinitializeAsync();
+
+        foreach (var warning in deinitializationResult.Warnings)
+        {
+            _logger.LogWarning("Command listening: {}", warning.ToString());
+        }
 
         _logger.LogInformation("Command listening: Terminated.");
     }

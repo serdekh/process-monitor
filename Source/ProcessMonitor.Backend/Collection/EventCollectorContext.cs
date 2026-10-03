@@ -10,6 +10,7 @@ using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Collection;
 
@@ -22,9 +23,9 @@ public sealed class EventCollectorContext(
 
     public HashSet<int> ProcessThreadIds { get; set; } = [];
 
-    public int? ProcessId { get; set; } = null;
+    public int? ProcessId { get; set; } = state.ProcessId;
 
-    public bool HasProcessId => ProcessId > 0;
+    public bool HasProcessId => ProcessId is not null;
 
     public RawEvent? TryPeek() => input.Reader.TryPeek(out RawEvent e) ? e : null;
 

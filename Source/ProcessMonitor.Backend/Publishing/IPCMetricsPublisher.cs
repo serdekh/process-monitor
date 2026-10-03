@@ -1,11 +1,14 @@
 using System;
-using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using ProcessMonitor.Backend.Models.Errors.Transport;
+using ProcessMonitor.Backend.Models.Warnings.Transport;
 using ProcessMonitor.Backend.Transport;
+using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Snapshots;
@@ -36,19 +39,21 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
 
     public async Task InitializeAsync(CancellationToken ct)
     {
-        var initializationException = _transport.TryInitialize(TransportServerOptions.CreateDefault());
+        var initializationResult = _transport.TryInitialize(TransportServerOptions.CreateDefaultTelemetryPipe());
 
-        if (initializationException is not null)
+        if (initializationResult is Failure<None, TransportError, TransportWarning> initializationFailure)
         {
-            _logger.LogError("[Publishing]: Failed to initialize a telemetry server stream: {}", initializationException.Message);
+            _logger.LogError("[Publishing]: Failed to initialize a telemetry server stream: {}",
+                initializationFailure.Chain.Error.ToString());
             return;
         }
 
-        var connectionException = await _transport.TryConnectAsync(ct);
+        var connectionResult = await _transport.TryConnectAsync(ct);
 
-        if (connectionException is not null)
+        if (connectionResult is Failure<None, TransportError, TransportWarning> connectionFailure)
         {
-            _logger.LogError("[Publishing]: Failed to connect via the telemetry pipe: {}", connectionException.Message);
+            _logger.LogError("[Publishing]: Failed to connect via the telemetry pipe: {}",
+                connectionFailure.Chain.Error.ToString());
         }
     }
 
@@ -79,11 +84,12 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
             return;
         }
 
-        var writingException = await _transport.TryWriteAsync(messageBytes, ct);
+        var writingResult = await _transport.TryWriteAsync(messageBytes, ct);
 
-        if (writingException is not null)
+        if (writingResult is Failure<None, TransportError, TransportWarning> writingFailure)
         {
-            _logger.LogError("[Publishing]: Could not write a message envelope: {}.", writingException.Message);
+            _logger.LogError("[Publishing]: Could not write a message envelope: {}.",
+                writingFailure.Chain.Error.ToString());
         }
     }
 }

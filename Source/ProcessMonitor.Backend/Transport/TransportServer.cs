@@ -3,6 +3,10 @@ using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ProcessMonitor.Backend.Models.Errors.Transport;
+using ProcessMonitor.Backend.Models.Warnings.Transport;
+using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Shared.Models.Results;
 using ProcessMonitor.Shared.Transport.Framing;
 
 namespace ProcessMonitor.Backend.Transport;
@@ -32,59 +36,99 @@ public sealed class TransportServer : ITransportServer
         TryInitialize(serverOptions);
     }
 
-    public Exception? TryInitialize(TransportServerOptions options)
+    public Result<None, TransportError, TransportWarning> TryInitialize(TransportServerOptions options)
     {
         try
         {
             _server = new NamedPipeServerStream(
-                options.PipeName, 
-                options.Direction, 
-                options.MaxNumberOfServerInstances, 
-                options.Mode, 
+                options.PipeName,
+                options.Direction,
+                options.MaxNumberOfServerInstances,
+                options.Mode,
                 options.Options);
 
-            return null;
+            return new Success<None, TransportError, TransportWarning>(new None());
         }
         catch (Exception ex)
         {
-            return ex;
+            return new Failure<None, TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportInitializationError(ex)));
         }
     }
 
-    public async Task<Exception?> TryConnectAsync(CancellationToken ct)
+    public async Task<Result<None, TransportError, TransportWarning>> TryConnectAsync(CancellationToken ct)
     {
-        if (ct.IsCancellationRequested) return new OperationCanceledException("Cancellation requested");
+        if (ct.IsCancellationRequested)
+        {
+            return new Success<None, TransportError, TransportWarning>(new None())
+            {
+                Warnings = [new TransportCanceledWarning()]
+            };
+        }
 
-        if (_server is null) return new InvalidOperationException("No server instance was initialized");
+        if (_server is null)
+        {
+            return new Failure<None, TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportServerIsNotInitializedError()));
+        }
 
         try
         {
             await _server.WaitForConnectionAsync(ct);
-            return null;
+            return new Success<None, TransportError, TransportWarning>(new None());
         }
         catch (Exception ex)
         {
-            return ex;
+            return new Failure<None, TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportConnectionError(ex)));
         }
     }
 
-    public async Task<Exception?> TryWriteAsync(byte[] message, CancellationToken ct)
+    public async Task<Result<None, TransportError, TransportWarning>> TryWriteAsync(byte[] message, CancellationToken ct)
     {
-        if (_server is null) return new InvalidOperationException("No server instance was initialized");
+        if (_server is null)
+        {
+            return new Failure<None, TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportServerIsNotInitializedError()));
+        }
 
-        return await _frameWriter.TryWriteFrameAsync(_server, message, ct);
+        var frameWritingException = await _frameWriter.TryWriteFrameAsync(_server, message, ct);
+
+        return frameWritingException is null
+            ? new Success<None, TransportError, TransportWarning>(new None())
+            : new Failure<None, TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportWritingError(frameWritingException)));
     }
 
-    public async Task<(byte[], Exception?)> TryReadAsync(CancellationToken ct)
+    public async Task<Result<byte[], TransportError, TransportWarning>> TryReadAsync(CancellationToken ct)
     {
-        if (_server is null) return ([], new InvalidOperationException("No server instance was initialized"));
+        if (_server is null)
+        {
+            return new Failure<byte[], TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportServerIsNotInitializedError()));
+        }
 
-        return await _frameReader.TryReadFrameAsync(_server, ct);
+        var (bytes, frameReadingException) = await _frameReader.TryReadFrameAsync(_server, ct);
+
+        return frameReadingException is null
+            ? new Success<byte[], TransportError, TransportWarning>(bytes)
+            : new Failure<byte[], TransportError, TransportWarning>(
+                new ErrorChain<TransportError>(
+                    new TransportWritingError(frameReadingException)));
     }
 
-    public async Task DeinitializeAsync()
+    public async Task<Success<None, TransportError, TransportWarning>> DeinitializeAsync()
     {
-        if (_server is null) return;
+        if (_server is null) return new Success<None, TransportError, TransportWarning>(new None())
+        {
+            Warnings = [new TransportServerIsNotInitializedWarning()]
+        };
 
         try
         {
@@ -97,5 +141,7 @@ public sealed class TransportServer : ITransportServer
             _server = null;
         }
         catch { }
+
+        return new Success<None, TransportError, TransportWarning>(new None());
     }
 }

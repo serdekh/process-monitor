@@ -8,7 +8,7 @@ public class TraceEventWrapper(TraceEvent data) : ITraceEvent
 
     public TraceEvent Data => data;
 
-    public RawEvent CloneAsRawEvent() => new(data, data.ToRawEventKind());
+    public RawEvent CloneAsRawEvent() => new(data.Clone(), data.ToRawEventKind());
 
     public RawEventKind GetRawEventKind() => data.ToRawEventKind();
 }
