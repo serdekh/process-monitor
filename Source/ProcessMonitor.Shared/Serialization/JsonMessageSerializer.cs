@@ -1,41 +1,47 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
+
+using ProcessMonitor.Shared.Models.Errors.Serialization;
+using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Models.Warnings.Serialization;
 
 namespace ProcessMonitor.Shared.Serialization;
 
 public sealed class JsonMessageSerializer : IMessageSerializer
 {
-    public (byte[], Exception?) TrySerialize<T>(T message)
+    public Result<byte[], SerializationError, SerializationWarning> TrySerialize<T>(T message)
     {
         byte[] messageBytes;
 
         try
         {
             messageBytes = JsonSerializer.SerializeToUtf8Bytes(message);
-            return (messageBytes, null);
+            return new Success<byte[], SerializationError, SerializationWarning>(messageBytes);
         }
         catch (Exception ex)
         {
-            return (Array.Empty<byte>(), ex);
+            return new Failure<byte[], SerializationError, SerializationWarning>(
+                new ErrorChain<SerializationError>(
+                    new SerializationNotSupportedError(ex)));
         }
     }
 
-    public (T?, Exception?) TryDeserialize<T>(byte[] message)
+    public Result<T?, SerializationError, SerializationWarning> TryDeserialize<T>(byte[] message)
     {
         try
         {
             var result = JsonSerializer.Deserialize<T>(message);
 
-            if (result is null)
-            {
-                return (default, new InvalidOperationException("Message is corrupted"));
-            }
+            IReadOnlyList<SerializationWarning> warnings = result is null ? [new SerializationJsonIsNullWarning()] : [];
 
-            return (result, null);
+            return new Success<T?, SerializationError, SerializationWarning>(result) { Warnings = warnings };
         }
         catch (Exception ex)
         {
-            return (default, ex);
+            return new Failure<T?, SerializationError, SerializationWarning>(
+                new ErrorChain<SerializationError>(
+                    new DeserializationError<T>(ex)));
         }
     }
 }
