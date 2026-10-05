@@ -8,7 +8,9 @@ using ProcessMonitor.Backend.Models.Errors.Transport;
 using ProcessMonitor.Backend.Models.Warnings.Transport;
 using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Shared.Models.Errors.Serialization;
 using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Models.Warnings.Serialization;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Snapshots;
@@ -76,13 +78,15 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
             Payload = snapshot
         };
 
-        (var messageBytes, var serializationException) = _serializer.TrySerialize(envelope);
+        var serializationResult = _serializer.TrySerialize(envelope);
 
-        if (serializationException is not null)
+        if (serializationResult is Failure<byte[], SerializationError, SerializationWarning> failure)
         {
-            _logger.LogError("[Publishing]: Could not serialize a message envelope: {}.", serializationException.Message);
+            _logger.LogError("[Publishing]: Could not serialize a message envelope: {}.", failure.Chain.Error.ToString());
             return;
         }
+
+        var messageBytes = ((Success<byte[], SerializationError, SerializationWarning>)serializationResult).Value;
 
         var writingResult = await _transport.TryWriteAsync(messageBytes, ct);
 

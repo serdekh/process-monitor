@@ -7,7 +7,9 @@ using ProcessMonitor.Backend.Models.Errors.Transport;
 using ProcessMonitor.Backend.Models.Warnings.Transport;
 using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Shared.Models;
+using ProcessMonitor.Shared.Models.Errors.Serialization;
 using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Models.Warnings.Serialization;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 
@@ -63,11 +65,17 @@ public sealed class CommandController(ILogger<CommandController> logger,
 
             var bytes = ((Success<byte[], TransportError, TransportWarning>)readingResult).Value;
 
-            (var request, var deserializationException) = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes); if (deserializationException is not null)
+            var deserializingResult = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes);
+
+            if (deserializingResult is Failure<MessageEnvelope<CommandRequest>?, SerializationError, SerializationWarning> deserializingFailure)
             {
-                _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.", deserializationException.Message);
+                _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.",
+                    deserializingFailure.Chain.Error.ToString());
                 break;
             }
+
+            var request = ((Success<MessageEnvelope<CommandRequest>?, SerializationError, SerializationWarning>)deserializingResult).Value;
+
             if (request is null)
             {
                 _logger.LogError("Command listening: The request has been corrupted. Stop.");
@@ -80,11 +88,16 @@ public sealed class CommandController(ILogger<CommandController> logger,
                 break;
             }
 
-            (var responseBytes, var serializationException) = _serializer.TrySerialize(response); if (serializationException is not null)
+            var serializingResult = _serializer.TrySerialize(response);
+
+            if (serializingResult is Failure<byte[], SerializationError, SerializationWarning> serializngFailure)
             {
-                _logger.LogError("Command listening: Failed to serialize a response object. Stop.");
+                _logger.LogError("Command listening: Failed to serialize a response object: {}. Stop.",
+                    serializngFailure.Chain.Error.ToString());
                 break;
             }
+
+            var responseBytes = ((Success<byte[], SerializationError, SerializationWarning>)serializingResult).Value;
 
             var writingResult = await _transport.TryWriteAsync(responseBytes, ct);
 
