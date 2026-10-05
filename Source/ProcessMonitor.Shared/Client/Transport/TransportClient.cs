@@ -1,9 +1,13 @@
 using System;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 
 using ProcessMonitor.Shared.Client.Utils;
+using ProcessMonitor.Shared.Models.Errors.Serialization;
+using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Models.Warnings.Serialization;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 using ProcessMonitor.Shared.Transport.Framing;
@@ -100,13 +104,15 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
 
         if (_pipeDirection == PipeDirection.In) return new InvalidOperationException("Client stream only supports reading");
 
-        byte[] messageBytes;
+        var serializationResult = _serializer.TrySerialize(message);
 
-        (messageBytes, var serializationException) = _serializer.TrySerialize(message);
-
-        if (serializationException is not null) return serializationException;
-
-        return await _frameWriter.TryWriteFrameAsync(_client, messageBytes, ct);
+        // TODO: Fix this clunky error once everything gets migrated towards a new Result-based handling
+        return serializationResult switch
+        {
+            Failure<byte[], SerializationError, SerializationWarning> failure => new ArgumentException(failure.Chain.Error.ToString()),
+            Success<byte[], SerializationError, SerializationWarning> success => await _frameWriter.TryWriteFrameAsync(_client, success.Value, ct),
+            _ => throw new UnreachableException("Result type only supports failure and success values"),
+        };
     }
 
     public async Task<(MessageEnvelope<T>, Exception?)> TryReadAsync<T>(CancellationToken ct)
@@ -125,9 +131,14 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
 
         if (frameReadingException is not null) return (new MessageEnvelope<T>(), frameReadingException);
 
-        (var envelope, var deserializationException) = _serializer.TryDeserialize<MessageEnvelope<T>>(payload);
+        var deserializationResult = _serializer.TryDeserialize<MessageEnvelope<T>>(payload);
 
-        if (deserializationException is not null) return (new MessageEnvelope<T>(), deserializationException);
+        if (deserializationResult is Failure<MessageEnvelope<T>?, SerializationError, SerializationWarning> failure)
+        {
+            return (new MessageEnvelope<T>(), new ArgumentException(failure.Chain.Error.ToString()));
+        }
+
+        var envelope = ((Success<MessageEnvelope<T>?, SerializationError, SerializationWarning>)deserializationResult).Value;
 
         if (envelope is null) return (new MessageEnvelope<T>(), new ArgumentException("Could not deserialize envelope"));
 
