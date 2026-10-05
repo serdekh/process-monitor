@@ -6,13 +6,6 @@
 
 ## Navigation
 
-Every task belongs into one of the following groups:
+The tasks are defined in a [**_single file_**](./Open.md).
 
-- [**_Closed_**](./Closed.md)
-  - Marks completed tasks.
-
-- [**_InProcess_**](./InProcess.md)
-  - Contains the tasks which are currently being worked on.
-
-- [**_Open_**](./Open.md)
-  - Contains the ideas for the future and the issues.
+Everything is defined in the priority order: what should be done first is therefore listed as first 
