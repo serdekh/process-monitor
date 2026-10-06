@@ -47,13 +47,11 @@ public sealed class TransportServer : ITransportServer
                 options.Mode,
                 options.Options);
 
-            return new Success<None, TransportError, TransportWarning>(new None());
+            return Result.Success<None, TransportError, TransportWarning>(None.New());
         }
         catch (Exception ex)
         {
-            return new Failure<None, TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportInitializationError(ex)));
+            return Result.Failure<None, TransportError, TransportWarning>(new TransportInitializationError(ex));
         }
     }
 
@@ -69,21 +67,17 @@ public sealed class TransportServer : ITransportServer
 
         if (_server is null)
         {
-            return new Failure<None, TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportServerIsNotInitializedError()));
+            return Result.Failure<None, TransportError, TransportWarning>(new TransportServerIsNotInitializedError());
         }
 
         try
         {
             await _server.WaitForConnectionAsync(ct);
-            return new Success<None, TransportError, TransportWarning>(new None());
+            return new Success<None, TransportError, TransportWarning>(None.New());
         }
         catch (Exception ex)
         {
-            return new Failure<None, TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportConnectionError(ex)));
+            return Result.Failure<None, TransportError, TransportWarning>(new TransportConnectionError(ex));
         }
     }
 
@@ -91,44 +85,36 @@ public sealed class TransportServer : ITransportServer
     {
         if (_server is null)
         {
-            return new Failure<None, TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportServerIsNotInitializedError()));
+            return Result.Failure<None, TransportError, TransportWarning>(new TransportServerIsNotInitializedError());
         }
 
         var frameWritingException = await _frameWriter.TryWriteFrameAsync(_server, message, ct);
 
         return frameWritingException is null
-            ? new Success<None, TransportError, TransportWarning>(new None())
-            : new Failure<None, TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportWritingError(frameWritingException)));
+            ? Result.Success<None, TransportError, TransportWarning>(None.New())
+            : Result.Failure<None, TransportError, TransportWarning>(new TransportWritingError(frameWritingException));
     }
 
     public async Task<Result<byte[], TransportError, TransportWarning>> TryReadAsync(CancellationToken ct)
     {
         if (_server is null)
         {
-            return new Failure<byte[], TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportServerIsNotInitializedError()));
+            return Result.Failure<byte[], TransportError, TransportWarning>(new TransportServerIsNotInitializedError());
         }
 
         var (bytes, frameReadingException) = await _frameReader.TryReadFrameAsync(_server, ct);
 
         return frameReadingException is null
-            ? new Success<byte[], TransportError, TransportWarning>(bytes)
-            : new Failure<byte[], TransportError, TransportWarning>(
-                new ErrorChain<TransportError>(
-                    new TransportWritingError(frameReadingException)));
+            ? Result.Success<byte[], TransportError, TransportWarning>(bytes)
+            : Result.Failure<byte[], TransportError, TransportWarning>(new TransportWritingError(frameReadingException));
     }
 
     public async Task<Success<None, TransportError, TransportWarning>> DeinitializeAsync()
     {
-        if (_server is null) return new Success<None, TransportError, TransportWarning>(new None())
+        if (_server is null)
         {
-            Warnings = [new TransportServerIsNotInitializedWarning()]
-        };
+            return Result.Success<None, TransportError, TransportWarning>(None.New(), [new TransportServerIsNotInitializedWarning()]);
+        }
 
         try
         {
@@ -142,6 +128,6 @@ public sealed class TransportServer : ITransportServer
         }
         catch { }
 
-        return new Success<None, TransportError, TransportWarning>(new None());
+        return Result.Success<None, TransportError, TransportWarning>(None.New());
     }
 }
