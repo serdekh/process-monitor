@@ -43,19 +43,20 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
     {
         var initializationResult = _transport.TryInitialize(TransportServerOptions.CreateDefaultTelemetryPipe());
 
-        if (initializationResult is Failure<None, TransportError, TransportWarning> initializationFailure)
+        if (initializationResult.IsFailure())
         {
-            _logger.LogError("[Publishing]: Failed to initialize a telemetry server stream: {}",
-                initializationFailure.Chain.Error.ToString());
+            initializationResult.AsFailure()
+                .ForEachError(x => _logger.LogError("[Publishing][Error]: {}", x.ToString()));
             return;
         }
 
         var connectionResult = await _transport.TryConnectAsync(ct);
 
-        if (connectionResult is Failure<None, TransportError, TransportWarning> connectionFailure)
+        if (connectionResult.IsFailure())
         {
-            _logger.LogError("[Publishing]: Failed to connect via the telemetry pipe: {}",
-                connectionFailure.Chain.Error.ToString());
+            connectionResult.AsFailure()
+                .ForEachError(x => _logger.LogError("[Publishing][Error]: {}", x.ToString()));
+            return;
         }
     }
 
@@ -80,20 +81,22 @@ public sealed class IPCMetricsPublisher : IMetricsPublisher, IDisposable
 
         var serializationResult = _serializer.TrySerialize(envelope);
 
-        if (serializationResult is Failure<byte[], SerializationError, SerializationWarning> failure)
+        if (serializationResult.IsFailure())
         {
-            _logger.LogError("[Publishing]: Could not serialize a message envelope: {}.", failure.Chain.Error.ToString());
+            serializationResult.AsFailure()
+                .ForEachError(x => _logger.LogError("[Publishing][Error]: {}", x.ToString()));
             return;
         }
 
-        var messageBytes = ((Success<byte[], SerializationError, SerializationWarning>)serializationResult).Value;
+        var messageBytes = serializationResult.AsSuccess().Value;
 
         var writingResult = await _transport.TryWriteAsync(messageBytes, ct);
 
-        if (writingResult is Failure<None, TransportError, TransportWarning> writingFailure)
+        if (writingResult.IsFailure())
         {
-            _logger.LogError("[Publishing]: Could not write a message envelope: {}.",
-                writingFailure.Chain.Error.ToString());
+            writingResult.AsFailure()
+                .ForEachError(x => _logger.LogError("[Publishing][Error]: {}", x.ToString()));
+            return;
         }
     }
 }
