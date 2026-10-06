@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Parsers.Kernel;
 
 using ProcessMonitor.Backend.Models;
@@ -37,16 +36,16 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 
     public Result<None, CollectionError, CollectionWarning> DispatchEvent(ITraceEvent e)
     {
-        if (_ctx.TryUpdateTargetProcess() is Failure<None, CollectionError, CollectionWarning> failure)
+        var updateResult = _ctx.TryUpdateTargetProcess();
+
+        if (updateResult.IsFailure())
         {
-            return new Failure<None, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new EventDispatchingFailed(), failure.Chain));
+            return Result.Failure<None, CollectionError, CollectionWarning>(new EventDispatchingFailed(), updateResult.AsFailure().Chain);
         }
 
         if (!_ctx.HasProcessId)
         {
-            return new Success<None, CollectionError, CollectionWarning>(new None());
+            return Result.Success<None, CollectionError, CollectionWarning>(None.New());
         }
 
         var kind = e.GetRawEventKind();
@@ -55,22 +54,20 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
         {
             var result = value(e);
 
-            if (result is Failure<None, CollectionError, CollectionWarning> handlingFailure)
+            if (result.IsFailure())
             {
-                return new Failure<None, CollectionError, CollectionWarning>(
-                    new ErrorChain<CollectionError>(
-                        new EventDispatchingFailed(), handlingFailure.Chain));
+                return Result.Failure<None, CollectionError, CollectionWarning>(new EventDispatchingFailed(), result.AsFailure().Chain);
             }
         }
 
-        return new Success<None, CollectionError, CollectionWarning>(new None());
+        return Result.Success<None, CollectionError, CollectionWarning>(None.New());
     }
 
     public Result<None, CollectionError, CollectionWarning> HandleEvent(Func<bool> isRelevant, Action handler, ITraceEvent e)
     {
         if (!isRelevant())
         {
-            return new Success<None, CollectionError, CollectionWarning>(new None());
+            return Result.Success<None, CollectionError, CollectionWarning>(None.New());
         }
 
         handler();
@@ -79,14 +76,12 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 
         var writeEventResult = _ctx.TryWriteRawEvent(e);
 
-        if (writeEventResult is Failure<None, CollectionError, CollectionWarning> failure)
+        return writeEventResult switch
         {
-            return new Failure<None, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new EventHandlingError(kind), failure.Chain));
-        }
-
-        return new Success<None, CollectionError, CollectionWarning>(new None());
+            Failure<None, CollectionError, CollectionWarning> failure => Result.Failure<None, CollectionError, CollectionWarning>(new EventHandlingError(kind), failure.Chain),
+            Success<None, CollectionError, CollectionWarning> => Result.Success<None, CollectionError, CollectionWarning>(None.New()),
+            _ => throw new InvalidOperationException()
+        };
     }
 
     public Result<None, CollectionError, CollectionWarning> HandleThreadStart(ITraceEvent e)
@@ -152,6 +147,6 @@ public sealed class EventHandlerDispatcher : IEventHandlerDispatcher
 
     public Result<None, CollectionError, CollectionWarning> HandleUndefined(ITraceEvent e)
     {
-        return new Success<None, CollectionError, CollectionWarning>(new None());
+        return Result.Success<None, CollectionError, CollectionWarning>(None.New());
     }
 }

@@ -10,7 +10,6 @@ using ProcessMonitor.Backend.Models.Warnings.Collection;
 using ProcessMonitor.Backend.State;
 using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Shared.Models.Results;
-using ProcessMonitor.Shared.Snapshots;
 
 namespace ProcessMonitor.Backend.Collection;
 
@@ -51,21 +50,13 @@ public sealed class EventCollectorContext(
         {
             var rawEvent = e.CloneAsRawEvent();
 
-            if (_writer.TryWrite(rawEvent))
-            {
-                return new Success<None, CollectionError, CollectionWarning>(new None());
-            }
-
-            return new Success<None, CollectionError, CollectionWarning>(new None())
-            {
-                Warnings = [new EventWriteRejected(kind)]
-            };
+            return _writer.TryWrite(rawEvent)
+                ? Result.Success<None, CollectionError, CollectionWarning>(None.New())
+                : Result.Success<None, CollectionError, CollectionWarning>(None.New(), [new EventWriteRejected(kind)]);
         }
         catch (Exception ex)
         {
-            return new Failure<None, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new EventWriteFailed(ex, kind)));
+            return Result.Failure<None, CollectionError, CollectionWarning>(new EventWriteFailed(ex, kind));
         }
     }
 
@@ -75,7 +66,7 @@ public sealed class EventCollectorContext(
 
         if (processId == ProcessId)
         {
-            return new Success<None, CollectionError, CollectionWarning>(new None());
+            return Result.Success<None, CollectionError, CollectionWarning>(None.New());
         }
 
         ProcessId = processId;
@@ -83,44 +74,32 @@ public sealed class EventCollectorContext(
 
         if (processId is null)
         {
-            return new Success<None, CollectionError, CollectionWarning>(new None())
-            {
-                Warnings = [new NoTargetProcessConfigured()]
-            };
+            return Result.Success<None, CollectionError, CollectionWarning>(None.New(), [new NoTargetProcessConfigured()]);
         }
 
-        if (TrySeedExistingThreads(processId.Value) is Failure<int, CollectionError, CollectionWarning> failure)
-        {
-            return new Failure<None, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new ProcessIdUpdateFailed(), failure.Chain));
-        }
+        var seedingResult = TrySeedExistingThreads(processId.Value);
 
-        return new Success<None, CollectionError, CollectionWarning>(new None());
+        return seedingResult.IsFailure()
+            ? Result.Failure<None, CollectionError, CollectionWarning>(new ProcessIdUpdateFailed(), seedingResult.AsFailure().Chain)
+            : Result.Success<None, CollectionError, CollectionWarning>(None.New());
     }
 
     public Result<Process, CollectionError, CollectionWarning> TryGetProcessById(int processId)
     {
         if (processId < 0)
         {
-            return new Failure<Process, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new InvalidProcessId(processId)));
+            return Result.Failure<Process, CollectionError, CollectionWarning>(new InvalidProcessId(processId));
         }
 
         try
         {
             var process = Process.GetProcessById(processId);
 
-            return new Success<Process, CollectionError, CollectionWarning>(process);
+            return Result.Success<Process, CollectionError, CollectionWarning>(process);
         }
         catch (Exception)
         {
-            return new Failure<Process, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(new InvalidProcessId(processId)))
-            {
-                Warnings = [new ProcessDoesNotExist(processId)]
-            };
+            return Result.Failure<Process, CollectionError, CollectionWarning>(new InvalidProcessId(processId), [new ProcessDoesNotExist(processId)]);
         }
     }
 
@@ -133,7 +112,7 @@ public sealed class EventCollectorContext(
 
         process.Dispose();
 
-        return new Success<None, CollectionError, CollectionWarning>(new None());
+        return Result.Success<None, CollectionError, CollectionWarning>(None.New());
     }
 
     public Result<int, CollectionError, CollectionWarning> TrySeedExistingThreads(int processId)
@@ -141,15 +120,8 @@ public sealed class EventCollectorContext(
         var result = TryGetProcessById(processId)
             .Bind(AddThreadIdsAndDispose);
 
-        if (result is Failure<None, CollectionError, CollectionWarning> failure)
-        {
-            return new Failure<int, CollectionError, CollectionWarning>(
-                new ErrorChain<CollectionError>(
-                    new ThreadEnumerationFailed(
-                        processId,
-                        new ArgumentException($"Invalid process id: {processId}")), failure.Chain));
-        }
-
-        return new Success<int, CollectionError, CollectionWarning>(ProcessThreadIds.Count);
+        return result.IsFailure()
+            ? Result.Failure<int, CollectionError, CollectionWarning>(new ThreadEnumerationFailed(processId, new ArgumentException($"Invalid process id: {processId}")), result.AsFailure().Chain)
+            : Result.Success<int, CollectionError, CollectionWarning>(ProcessThreadIds.Count);
     }
 }

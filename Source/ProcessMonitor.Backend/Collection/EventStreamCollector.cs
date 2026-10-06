@@ -46,20 +46,13 @@ public sealed class EventStreamCollector : IEventCollector
 
         oldSession.Stop();
 
-        return new Success<None, CollectionError, CollectionWarning>(new None());
+        return Result.Success<None, CollectionError, CollectionWarning>(None.New());
     }
 
-    private Result<None, CollectionError, CollectionWarning> IsElevated()
-    {
-        if (TraceEventSession.IsElevated() == true)
-        {
-            return new Success<None, CollectionError, CollectionWarning>(new None());
-        }
-
-        return new Failure<None, CollectionError, CollectionWarning>(
-            new ErrorChain<CollectionError>(
-                new CouldOnlyRunAsAdministrator()));
-    }
+    private Result<None, CollectionError, CollectionWarning> IsElevated() =>
+        TraceEventSession.IsElevated() == true
+            ? Result.Success<None, CollectionError, CollectionWarning>(None.New())
+            : Result.Failure<None, CollectionError, CollectionWarning>(new CouldOnlyRunAsAdministrator());
 
     private TraceEventSession InitializeSession()
     {
@@ -77,12 +70,9 @@ public sealed class EventStreamCollector : IEventCollector
         {
             var dispatchingResult = _dispatcher.DispatchEvent(new TraceEventWrapper(data));
 
-            if (dispatchingResult is Failure<None, CollectionError, CollectionWarning> failure)
+            if (dispatchingResult.IsFailure())
             {
-                _initializationFailed = new Failure<None, CollectionError, CollectionWarning>(
-                    new ErrorChain<CollectionError>(
-                        new InitializationError(), failure.Chain));
-
+                _initializationFailed = Result.Failure<None, CollectionError, CollectionWarning>(new InitializationError(), dispatchingResult.AsFailure().Chain);
                 session.Stop();
             }
         };
@@ -111,12 +101,9 @@ public sealed class EventStreamCollector : IEventCollector
                 _ctx.TryCompleteWriting();
             }
 
-            if (_initializationFailed is not null)
-            {
-                return _initializationFailed;
-            }
-
-            return new Success<None, CollectionError, CollectionWarning>(new None());
+            return _initializationFailed is not null
+                ? _initializationFailed
+                : Result.Success<None, CollectionError, CollectionWarning>(None.New());
         }
     }
 
@@ -124,7 +111,9 @@ public sealed class EventStreamCollector : IEventCollector
     {
         StopOldSession();
 
-        if (IsElevated() is Failure<None, CollectionError, CollectionWarning> failure) return failure;
+        var isElevated = IsElevated();
+
+        if (isElevated.IsFailure()) return isElevated.AsFailure();
 
         var session = InitializeSession();
 
