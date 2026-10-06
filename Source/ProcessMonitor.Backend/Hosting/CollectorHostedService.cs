@@ -5,9 +5,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using ProcessMonitor.Backend.Collection;
-using ProcessMonitor.Backend.Models.Errors.Collection;
-using ProcessMonitor.Backend.Models.Warnings.Collection;
-using ProcessMonitor.Shared.Models;
 using ProcessMonitor.Shared.Models.Results;
 
 namespace ProcessMonitor.Backend.Hosting;
@@ -38,17 +35,11 @@ public sealed class CollectorHostedService : BackgroundService
 
         var collectionResult = await _collector.RunAsync(ct);
 
-        foreach (var warning in collectionResult.Warnings)
-        {
-            _logger.LogWarning("[Host][Collection]: {}", warning.ToString());
-        }
+        collectionResult.ForEachWarning(x => _logger.LogWarning("[Host][Collection]: {}", x.ToString()));
 
-        if (collectionResult is Failure<None, CollectionError, CollectionWarning> failure)
+        if (collectionResult.IsFailure())
         {
-            for (var it = failure.Chain; it is not null; it = it.Inner)
-            {
-                _logger.LogError("[Host][Collection]: {}", it.Error);
-            }
+            collectionResult.AsFailure().ForEachError(x => _logger.LogError("[Host][Collection]: {}", x));
         }
 
         _logger.LogInformation("[Host][Collection]: Terminated");
