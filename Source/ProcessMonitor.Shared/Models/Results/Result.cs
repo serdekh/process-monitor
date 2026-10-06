@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using ProcessMonitor.Shared.Models.Errors;
+
 namespace ProcessMonitor.Shared.Models.Results;
 
 public abstract record Result<T, TError, TWarning>
@@ -8,6 +10,64 @@ public abstract record Result<T, TError, TWarning>
     where TWarning : Warning
 {
     public IReadOnlyList<TWarning> Warnings { get; init; } = [];
+}
+
+public static class Result
+{
+    public static Success<T, TError, TWarning> Success<T, TError, TWarning>(T value, IReadOnlyList<TWarning>? warnings = null)
+        where TError : Error
+        where TWarning : Warning
+            => new(value) { Warnings = warnings ?? [] };
+
+    public static Failure<T, TError, TWarning> Failure<T, TError, TWarning>(TError error, IReadOnlyList<TWarning>? warnings = null)
+        where TError : Error
+        where TWarning : Warning
+            => new(new ErrorChain<TError>(error)) { Warnings = warnings ?? [] };
+
+    public static Failure<T, TError, TWarning> Failure<T, TError, TWarning>(TError error, ErrorChain<TError> inner, IReadOnlyList<TWarning>? warnings = null)
+        where TError : Error
+        where TWarning : Warning
+            => new(new ErrorChain<TError>(error, inner)) { Warnings = warnings ?? [] };
+
+    public static Success<T, TError, TWarning> AsSuccess<T, TError, TWarning>(this Result<T, TError, TWarning> result)
+        where TError : Error
+        where TWarning : Warning
+            => (Success<T, TError, TWarning>)result;
+
+    public static Failure<T, TError, TWarning> AsFailure<T, TError, TWarning>(this Result<T, TError, TWarning> result)
+        where TError : Error
+        where TWarning : Warning
+            => (Failure<T, TError, TWarning>)result;
+
+    public static bool IsSuccess<T, TError, TWarning>(this Result<T, TError, TWarning> result)
+        where TError : Error
+        where TWarning : Warning
+            => result is Success<T, TError, TWarning>;
+
+    public static bool IsFailure<T, TError, TWarning>(this Result<T, TError, TWarning> result)
+        where TError : Error
+        where TWarning : Warning
+            => result is Failure<T, TError, TWarning>;
+
+    public static void ForEachWarning<T, TError, TWarning>(this Result<T, TError, TWarning> result, Action<TWarning> predicate)
+        where TError : Error
+        where TWarning : Warning
+    {
+        foreach (var warning in result.Warnings)
+        {
+            predicate(warning);
+        }
+    }
+
+    public static void ForEachError<T, TError, TWarning>(this Failure<T, TError, TWarning> result, Action<TError> predicate)
+        where TError : Error
+        where TWarning : Warning
+    {
+        for (var it = result.Chain; it is not null; it = it.Inner)
+        {
+            predicate(it.Error);
+        }
+    }
 }
 
 public static class ResultExtensions
