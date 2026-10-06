@@ -7,15 +7,12 @@ using ProcessMonitor.Backend.Models.Errors.Transport;
 using ProcessMonitor.Backend.Models.Warnings.Transport;
 using ProcessMonitor.Backend.Transport;
 using ProcessMonitor.Shared.Models;
-using ProcessMonitor.Shared.Models.Errors.Serialization;
 using ProcessMonitor.Shared.Models.Results;
-using ProcessMonitor.Shared.Models.Warnings.Serialization;
 using ProcessMonitor.Shared.Protocol;
 using ProcessMonitor.Shared.Serialization;
 
 namespace ProcessMonitor.Backend.Commands;
 
-// TODO: Replace immediate logs with custom exception? return values
 public sealed class CommandController(ILogger<CommandController> logger,
                          ITransportServer transport,
                          IMessageSerializer serializer,
@@ -56,25 +53,25 @@ public sealed class CommandController(ILogger<CommandController> logger,
         {
             var readingResult = await _transport.TryReadAsync(ct);
 
-            if (readingResult is Failure<byte[], TransportError, TransportWarning> readingFailure)
+            if (readingResult.IsFailure())
             {
                 _logger.LogError("Command listening: Could not read from the client: {}. Stop.",
-                    readingFailure.Chain.Error.ToString());
+                    readingResult.AsFailure().Chain.Error.ToString());
                 break;
             }
 
-            var bytes = ((Success<byte[], TransportError, TransportWarning>)readingResult).Value;
+            var bytes = readingResult.AsSuccess().Value;
 
             var deserializingResult = _serializer.TryDeserialize<MessageEnvelope<CommandRequest>>(bytes);
 
-            if (deserializingResult is Failure<MessageEnvelope<CommandRequest>?, SerializationError, SerializationWarning> deserializingFailure)
+            if (deserializingResult.IsFailure())
             {
                 _logger.LogError("Command listening: Failed to deserialize request: {}. Stop.",
-                    deserializingFailure.Chain.Error.ToString());
+                    deserializingResult.AsFailure().Chain.Error.ToString());
                 break;
             }
 
-            var request = ((Success<MessageEnvelope<CommandRequest>?, SerializationError, SerializationWarning>)deserializingResult).Value;
+            var request = deserializingResult.AsSuccess().Value;
 
             if (request is null)
             {
@@ -90,21 +87,21 @@ public sealed class CommandController(ILogger<CommandController> logger,
 
             var serializingResult = _serializer.TrySerialize(response);
 
-            if (serializingResult is Failure<byte[], SerializationError, SerializationWarning> serializngFailure)
+            if (serializingResult.IsFailure())
             {
                 _logger.LogError("Command listening: Failed to serialize a response object: {}. Stop.",
-                    serializngFailure.Chain.Error.ToString());
+                    serializingResult.AsFailure().Chain.Error.ToString());
                 break;
             }
 
-            var responseBytes = ((Success<byte[], SerializationError, SerializationWarning>)serializingResult).Value;
+            var responseBytes = serializingResult.AsSuccess().Value;
 
             var writingResult = await _transport.TryWriteAsync(responseBytes, ct);
 
-            if (writingResult is Failure<None, TransportError, TransportWarning> writingFailure)
+            if (writingResult.IsFailure())
             {
                 _logger.LogError("Command listening: Failed to write a message: {}. Stop.",
-                    writingFailure.Chain.Error.ToString());
+                    writingResult.AsFailure().Chain.Error.ToString());
                 break;
             }
         }
@@ -113,10 +110,7 @@ public sealed class CommandController(ILogger<CommandController> logger,
 
         var deinitializationResult = await _transport.DeinitializeAsync();
 
-        foreach (var warning in deinitializationResult.Warnings)
-        {
-            _logger.LogWarning("Command listening: {}", warning.ToString());
-        }
+        deinitializationResult.ForEachWarning(x => _logger.LogWarning("Command listening: {}", x.ToString()));
 
         _logger.LogInformation("Command listening: Terminated.");
     }
