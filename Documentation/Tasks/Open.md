@@ -12,6 +12,11 @@ All the open tasks can be subdivided into the following groups:
 <hr>
 
 `Fix`
+- Finish refactoring the Framing layer
+  - Finish the frame reader api
+  - Add a similar thing for writing
+
+`Fix`
 - Continue integrating the Result type into the backend's ecosystem
   - After transitioning in the Shared\Serialization layer, it became ovious that such change has to be done in the other layers which depend directly on Serialization. Those include:
     - ProcessMonitor.Backend.Commands
