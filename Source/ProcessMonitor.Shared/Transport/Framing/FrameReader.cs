@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace ProcessMonitor.Shared.Transport.Framing;
 
-public sealed class FrameReader : IFrameReader
+public sealed class FrameReader : IFrameReaderInternal
 {
-    private static async Task<Exception?> TryReadExactAsync(Stream stream, byte[] buffer, int totalBytesToRead, CancellationToken ct)
+    public async Task<Exception?> TryReadExactAsync(Stream stream, byte[] buffer, int totalBytesToRead, CancellationToken ct)
     {
         if (ct.IsCancellationRequested) return new OperationCanceledException("Cancellation requested");
 
