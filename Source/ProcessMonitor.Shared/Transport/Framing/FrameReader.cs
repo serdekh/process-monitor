@@ -3,74 +3,138 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ProcessMonitor.Shared.Models.Errors.Transport.Framing;
+using ProcessMonitor.Shared.Models.Results;
+using ProcessMonitor.Shared.Models.Warnings.Transport.Framing;
+
 namespace ProcessMonitor.Shared.Transport.Framing;
 
 public sealed class FrameReader : IFrameReaderInternal
 {
-    public async Task<Exception?> TryReadExactAsync(Stream stream, byte[] buffer, int totalBytesToRead, CancellationToken ct)
+    public Result<ExactFrameReadingState, FramingError, FramingWarning> IsExactFrameReadingCanceled(ExactFrameReadingState state) =>
+        state.Ct.IsCancellationRequested
+            ? Result.Failure<ExactFrameReadingState, FramingError, FramingWarning>(new FramingCanceledError())
+            : Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(state);
+
+    public Result<ExactFrameReadingState, FramingError, FramingWarning> IsExactFrameReadingStreamInitialized(ExactFrameReadingState state) =>
+        state.Stream is null
+            ? Result.Failure<ExactFrameReadingState, FramingError, FramingWarning>(new FramingStreamIsNotInitializedError())
+            : Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(state);
+
+    public Result<ExactFrameReadingState, FramingError, FramingWarning> IsExactFrameReadingStreamReadable(ExactFrameReadingState state) =>
+        !state.Stream.CanRead
+            ? Result.Failure<ExactFrameReadingState, FramingError, FramingWarning>(new FramingStreamDoesNotSupportReadingError())
+            : Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(state);
+
+    public Result<FrameReadingState, FramingError, FramingWarning> IsFrameReadingCanceled(FrameReadingState state) =>
+        state.Ct.IsCancellationRequested
+            ? Result.Failure<FrameReadingState, FramingError, FramingWarning>(new FramingCanceledError())
+            : Result.Success<FrameReadingState, FramingError, FramingWarning>(state);
+
+    public Result<FrameReadingState, FramingError, FramingWarning> IsFrameReadingStreamInitialized(FrameReadingState state) =>
+        state.Stream is null
+            ? Result.Failure<FrameReadingState, FramingError, FramingWarning>(new FramingStreamIsNotInitializedError())
+            : Result.Success<FrameReadingState, FramingError, FramingWarning>(state);
+
+    public Result<FrameReadingState, FramingError, FramingWarning> IsFrameReadingStreamReadable(FrameReadingState state) =>
+        !state.Stream.CanRead
+            ? Result.Failure<FrameReadingState, FramingError, FramingWarning>(new FramingStreamDoesNotSupportReadingError())
+            : Result.Success<FrameReadingState, FramingError, FramingWarning>(state);
+
+    public async Task<Result<ExactFrameReadingState, FramingError, FramingWarning>> TryReadExactBytes(ExactFrameReadingState state)
     {
-        if (ct.IsCancellationRequested) return new OperationCanceledException("Cancellation requested");
-
-        if (stream is null) return new OperationCanceledException("No stream instance was initialized");
-
-        if (!stream.CanRead) return new InvalidOperationException("Stream does not support reading");
-
         int totalBytesRead = 0;
 
-        while (totalBytesRead < totalBytesToRead)
+        while (totalBytesRead < state.TotalBytesToRead)
         {
-            int bytesLeft = totalBytesToRead - totalBytesRead;
+            int bytesLeft = state.TotalBytesToRead - totalBytesRead;
 
             try
             {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesLeft), ct);
+                int bytesRead = await state.Stream.ReadAsync(state.Buffer.AsMemory(totalBytesRead, bytesLeft), state.Ct);
 
-                if (bytesRead == 0) return null;
+                if (bytesRead == 0)
+                {
+                    return Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(state);
+                }
 
                 totalBytesRead += bytesRead;
             }
             catch (Exception ex)
             {
-                return ex;
+                return Result.Failure<ExactFrameReadingState, FramingError, FramingWarning>(new FramingReadingFailedError(ex));
             }
         }
 
-        return null;
+        return Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(state);
     }
 
-    public async Task<(byte[], Exception?)> TryReadFrameAsync(Stream stream, CancellationToken ct)
+    public async Task<Result<ExactFrameReadingState, FramingError, FramingWarning>> TryReadExactAsync(ExactFrameReadingState state)
     {
-        if (ct.IsCancellationRequested) return ([], new OperationCanceledException("Cancellation requested"));
+        var exactFrameReadingResult = await IsExactFrameReadingCanceled(state)
+            .Bind(IsExactFrameReadingStreamInitialized)
+            .Bind(IsExactFrameReadingStreamReadable)
+            .BindAsync(TryReadExactBytes);
 
-        if (stream is null) return ([], new OperationCanceledException("No stream instance was initialized"));
+        return exactFrameReadingResult.IsSuccess()
+            ? Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(state)
+            : Result.Failure<ExactFrameReadingState, FramingError, FramingWarning>(exactFrameReadingResult.AsFailure().Chain.Error);
+    }
 
-        if (!stream.CanRead) return ([], new InvalidOperationException("The stream does not support reading"));
+    private async Task<Result<ExactFrameReadingState, FramingError, FramingWarning>> TryReadPrefix(FrameReadingState state)
+    {
+        var prefixReadingState = new ExactFrameReadingState(state.Stream, state.Ct, 4);
 
-        var lengthBuffer = new byte[4];
+        var prefixReadingResult = await TryReadExactAsync(prefixReadingState);
 
-        var prefixReadingException = await TryReadExactAsync(stream, lengthBuffer, 4, ct);
+        return prefixReadingResult.IsFailure()
+            ? Result.Failure<ExactFrameReadingState, FramingError, FramingWarning>(prefixReadingResult.AsFailure().Chain.Error)
+            : Result.Success<ExactFrameReadingState, FramingError, FramingWarning>(prefixReadingState);
+    }
 
-        if (prefixReadingException is not null) return ([], prefixReadingException);
+    // TODO: Finish moving the implementation towards being functional
+    public async Task<Result<byte[], FramingError, FramingWarning>> TryReadFrameAsync(Stream stream, CancellationToken ct)
+    {
+        var frameReadingData = new FrameReadingState(stream, ct);
+
+        var frameReadingResult = IsFrameReadingCanceled(frameReadingData)
+            .Bind(IsFrameReadingStreamInitialized)
+            .Bind(IsFrameReadingStreamReadable);
+
+        if (frameReadingResult.IsFailure())
+        {
+            return Result.Failure<byte[], FramingError, FramingWarning>(frameReadingResult.AsFailure().Chain.Error);
+        }
+
+        var prefixReadingResult = await TryReadPrefix(frameReadingData);
+
+        if (prefixReadingResult.IsFailure())
+        {
+            return Result.Failure<byte[], FramingError, FramingWarning>(prefixReadingResult.AsFailure().Chain.Error);
+        }
+
+        var prefixBuffer = prefixReadingResult.AsSuccess().Value.Buffer;
 
         int length;
 
         try
         {
-            length = BitConverter.ToInt32(lengthBuffer, startIndex: 0);
+            length = BitConverter.ToInt32(prefixBuffer, startIndex: 0);
         }
         catch
         {
-            return (Array.Empty<byte>(), new ArgumentException("Message length prefix is corrupted"));
+            return Result.Failure<byte[], FramingError, FramingWarning>(new FramingCorruptedMessagePrefixError(prefixBuffer));
         }
 
-        if (length <= 0) return (Array.Empty<byte>(), new ArgumentException("Value of message length prefix is less than zero"));
+        if (length <= 0) return Result.Failure<byte[], FramingError, FramingWarning>(new FramingInvalidMessagePrefixError(length));
 
         var message = new byte[length];
+        var messageReadingState = new ExactFrameReadingState(stream, ct, length, message);
 
-        var messageReadingException = await TryReadExactAsync(stream, message, length, ct);
+        var messageReadingResult = await TryReadExactAsync(messageReadingState);
 
-        if (messageReadingException is not null) return ([], messageReadingException);
-
-        return (message, null);
+        return messageReadingResult.IsFailure()
+            ? Result.Failure<byte[], FramingError, FramingWarning>(messageReadingResult.AsFailure().Chain.Error)
+            : Result.Success<byte[], FramingError, FramingWarning>(message);
     }
 }
