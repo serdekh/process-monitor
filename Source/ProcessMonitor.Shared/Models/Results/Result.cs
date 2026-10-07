@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 using ProcessMonitor.Shared.Models.Errors;
 
@@ -118,6 +119,30 @@ public static class ResultExtensions
             _ => throw new InvalidOperationException()
         };
     }
+
+    public static async Task<Result<U, E, W>> BindAsync<T, U, E, W>(
+        this Result<T, E, W> result,
+        Func<T, Task<Result<U, E, W>>> next) // Accepts an async function
+        where E : Error
+        where W : Warning
+    {
+        return result switch
+        {
+            Success<T, E, W> success =>
+                MergeWarnings(
+                    success.Warnings,
+                    await next(success.Value)),
+
+            Failure<T, E, W> failure =>
+                new Failure<U, E, W>(failure.Chain)
+                {
+                    Warnings = failure.Warnings
+                },
+
+            _ => throw new InvalidOperationException()
+        };
+    }
+
 
     private static Result<T, E, W> MergeWarnings<T, E, W>(
         IReadOnlyList<W> previous,
