@@ -102,11 +102,11 @@ public sealed class TransportServer : ITransportServer
             return Result.Failure<byte[], TransportError, TransportWarning>(new TransportServerIsNotInitializedError());
         }
 
-        var (bytes, frameReadingException) = await _frameReader.TryReadFrameAsync(_server, ct);
+        var frameReadingResult = await _frameReader.TryReadFrameAsync(_server, ct);
 
-        return frameReadingException is null
-            ? Result.Success<byte[], TransportError, TransportWarning>(bytes)
-            : Result.Failure<byte[], TransportError, TransportWarning>(new TransportWritingError(frameReadingException));
+        return frameReadingResult.IsSuccess()
+            ? Result.Success<byte[], TransportError, TransportWarning>(frameReadingResult.AsSuccess().Value)
+            : Result.Failure<byte[], TransportError, TransportWarning>(new TransportReadingError(new Exception($"{frameReadingResult.AsFailure().Chain.Error}")));
     }
 
     public async Task<Success<None, TransportError, TransportWarning>> DeinitializeAsync()

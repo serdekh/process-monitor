@@ -125,13 +125,11 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
 
         if (_pipeDirection == PipeDirection.Out) return (new MessageEnvelope<T>(), new InvalidOperationException("Client stream only supports writing"));
 
-        byte[] payload;
+        var frameReadingResult = await _frameReader.TryReadFrameAsync(_client, ct);
 
-        (payload, var frameReadingException) = await _frameReader.TryReadFrameAsync(_client, ct);
+        if (frameReadingResult.IsFailure()) return (new MessageEnvelope<T>(), new Exception($"{frameReadingResult.AsFailure().Chain.Error}"));
 
-        if (frameReadingException is not null) return (new MessageEnvelope<T>(), frameReadingException);
-
-        var deserializationResult = _serializer.TryDeserialize<MessageEnvelope<T>>(payload);
+        var deserializationResult = _serializer.TryDeserialize<MessageEnvelope<T>>(frameReadingResult.AsSuccess().Value);
 
         if (deserializationResult is Failure<MessageEnvelope<T>?, SerializationError, SerializationWarning> failure)
         {
