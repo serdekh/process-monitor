@@ -12,21 +12,21 @@ namespace ProcessMonitor.Shared.Transport.Framing;
 
 public sealed class FrameWriter : IFrameWriterInternal
 {
-    public Result<FrameWritingContext, FramingError, FramingWarning> IsWritingCanceled(FrameWritingContext context) => 
+    public Result<FrameWritingContext, FramingError, FramingWarning> IsWritingCanceled(FrameWritingContext context) =>
         context.Ct.IsCancellationRequested
             ? Result.Failure<FrameWritingContext, FramingError, FramingWarning>(new FramingCanceledError())
             : Result.Success<FrameWritingContext, FramingError, FramingWarning>(context);
 
-    public Result<FrameWritingContext, FramingError, FramingWarning> IsStreamInitialized(FrameWritingContext context) => 
+    public Result<FrameWritingContext, FramingError, FramingWarning> IsStreamInitialized(FrameWritingContext context) =>
         context.Stream is null
             ? Result.Failure<FrameWritingContext, FramingError, FramingWarning>(new FramingStreamIsNotInitializedError())
             : Result.Success<FrameWritingContext, FramingError, FramingWarning>(context);
 
-    public Result<FrameWritingContext, FramingError, FramingWarning> IsStreamWriteable(FrameWritingContext context) => 
+    public Result<FrameWritingContext, FramingError, FramingWarning> IsStreamWriteable(FrameWritingContext context) =>
         !context.Stream.CanWrite
             ? Result.Failure<FrameWritingContext, FramingError, FramingWarning>(new FramingReadonlyStreamError())
             : Result.Success<FrameWritingContext, FramingError, FramingWarning>(context);
-    
+
     public async Task<Result<None, FramingError, FramingWarning>> TryWriteBytesAsync(FrameWritingContext context)
     {
         try

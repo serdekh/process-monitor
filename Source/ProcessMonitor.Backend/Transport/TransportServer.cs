@@ -88,11 +88,11 @@ public sealed class TransportServer : ITransportServer
             return Result.Failure<None, TransportError, TransportWarning>(new TransportServerIsNotInitializedError());
         }
 
-        var frameWritingException = await _frameWriter.TryWriteFrameAsync(_server, message, ct);
+        var frameWritingResult = await _frameWriter.TryWriteFrameAsync(_server, message, ct);
 
-        return frameWritingException is null
+        return frameWritingResult.IsSuccess()
             ? Result.Success<None, TransportError, TransportWarning>(None.New())
-            : Result.Failure<None, TransportError, TransportWarning>(new TransportWritingError(frameWritingException));
+            : Result.Failure<None, TransportError, TransportWarning>(new TransportWritingError(frameWritingResult.AsFailure().Chain.Error));
     }
 
     public async Task<Result<byte[], TransportError, TransportWarning>> TryReadAsync(CancellationToken ct)

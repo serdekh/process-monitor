@@ -107,12 +107,14 @@ public sealed class TransportClient : ITransportClient, IAsyncDisposable
         var serializationResult = _serializer.TrySerialize(message);
 
         // TODO: Fix this clunky error once everything gets migrated towards a new Result-based handling
-        return serializationResult switch
+        if (serializationResult.IsFailure())
         {
-            Failure<byte[], SerializationError, SerializationWarning> failure => new ArgumentException(failure.Chain.Error.ToString()),
-            Success<byte[], SerializationError, SerializationWarning> success => await _frameWriter.TryWriteFrameAsync(_client, success.Value, ct),
-            _ => throw new UnreachableException("Result type only supports failure and success values"),
-        };
+            return new ArgumentException(serializationResult.AsFailure().Chain.Error.ToString());
+        }
+
+        var framingResult = await _frameWriter.TryWriteFrameAsync(_client, serializationResult.AsSuccess().Value, ct);
+
+        return framingResult.IsSuccess() ? null : new Exception(framingResult.AsFailure().Chain.Error.ToString());
     }
 
     public async Task<(MessageEnvelope<T>, Exception?)> TryReadAsync<T>(CancellationToken ct)
