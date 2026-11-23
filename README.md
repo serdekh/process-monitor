@@ -15,6 +15,8 @@
    ![Static Badge](https://img.shields.io/badge/C%23-239120) ![Static Badge](https://img.shields.io/badge/.NET-512BD4) ![Static Badge](https://img.shields.io/badge/PowerShell-5391FE)
 </div>
 
+> [!WARNING]
+> This branch has become deprecated and is no longer being supported. To find more about the reasonings, check out this [file](./Documentation/README.md)
 ## Description
 
 A desktop application which allows you gather metrics related to a given [process](https://en.wikipedia.org/wiki/Process_(computing)).
