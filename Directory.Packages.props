@@ -5,17 +5,14 @@
   
   <ItemGroup>
     <!-- Shared -->
-    <PackageReference Include="Google.Protobuf" Version="3.36.2" />
-    <PackageReference Include="Grpc.Tools" Version="2.85.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageVersion Include="Google.Protobuf" Version="3.36.2" />
+    <PackageVersion Include="Grpc.Tools" Version="2.85.0"/>
 
     <!-- Server -->
-    <PackageReference Include="Grpc.AspNetCore" Version="2.85.0" />
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.85.0" />
 
     <!-- Client -->
-    <PackageReference Include="Grpc.Net.Client" Version="2.85.0" />
-    <PackageReference Include="Grpc.Net.ClientFactory" Version="2.85.0" />
+    <PackageVersion Include="Grpc.Net.Client" Version="2.85.0" />
+    <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.85.0" />
   </ItemGroup>
 </Project>
