@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <Protobuf Include="Protos\**\*.proto" GrpcServices="None" />
+    <Protobuf Include="Protos\**\*.proto" GrpcServices="Both" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" />
     <PackageReference Include="Grpc.Tools" PrivateAssets="All" />
+    <PackageReference Include="Grpc.Core.Api" />
   </ItemGroup>
 
 </Project>

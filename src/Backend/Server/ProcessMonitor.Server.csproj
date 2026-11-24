@@ -4,12 +4,7 @@
     <ProjectReference Include="..\Domain\ProcessMonitor.Domain.csproj" />
     <ProjectReference Include="..\Application\ProcessMonitor.Application.csproj" />
     <ProjectReference Include="..\Infrastructure\ProcessMonitor.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="..\..\ProcessMonitor.Contracts\Protos\**\*.proto"
-              GrpcServices="Server"
-              ProtoRoot="..\..\Contracts" />
+    <ProjectReference Include="..\..\Contracts\ProcessMonitor.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

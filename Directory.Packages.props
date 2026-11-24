@@ -4,9 +4,10 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <!-- Shared -->
+    <!-- Contracts -->
     <PackageVersion Include="Google.Protobuf" Version="3.36.2" />
     <PackageVersion Include="Grpc.Tools" Version="2.85.0"/>
+    <PackageVersion Include="Grpc.Core.Api" Version="2.85.0" />
 
     <!-- Server -->
     <PackageVersion Include="Grpc.AspNetCore" Version="2.85.0" />
